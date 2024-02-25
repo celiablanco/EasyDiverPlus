@@ -25,6 +25,21 @@ class MainMenu(QWidget):
         self.setLayout(layout)
         self.show()
 
+    def run_all(self):
+        pass
+
+    def easy_diver(self):
+        pass
+
+    def calculate_enrichment_statistics(self):
+        pass
+
+    def display_figures(self):
+        pass
+
+    def help(self):
+        pass
+
     def exit_application(self):
         QApplication.quit()
 

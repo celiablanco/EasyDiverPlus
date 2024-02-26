@@ -4,6 +4,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt5.QtGui import QFont
 
+from easy_diver import EasyDiver
+
 class MainMenu(QWidget):
     def __init__(self):
         super().__init__()
@@ -34,7 +36,8 @@ class MainMenu(QWidget):
         pass
 
     def easy_diver(self):
-        pass
+        self.button2_widget = EasyDiver()
+        self.button2_widget.show()
 
     def calculate_enrichment_statistics(self):
         pass

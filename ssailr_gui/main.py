@@ -1,8 +1,5 @@
 import sys
-import os
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QFileDialog, QMessageBox
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QMessageBox
 
 from easy_diver import EasyDiver
 
@@ -21,6 +18,9 @@ class MainMenu(QWidget):
         options = ["Run All", "Use EasyDIVER", "Calculate Enrichment Statistics", "Figures and Misc.", "Help", "Quit"]
         for option in options:
             button = QPushButton(option, self)
+            if option == "Use EasyDIVER":
+                button.clicked.connect(self.easy_diver)
+
             if option == "Help":
                 button.clicked.connect(self.display_help_message) 
 

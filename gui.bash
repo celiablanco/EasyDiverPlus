@@ -42,7 +42,7 @@ function diveAndSail {
       counts_type="counts"
     fi
     input_dir=""
-    outdir=""
+    output_dir=""
     if [ ! -z "$options" ]; then
         selected_options="Selected options:\n$options"
         whiptail --title "Options Selected" --msgbox "$selected_options" 20 60
@@ -55,10 +55,10 @@ function diveAndSail {
             command+=" -i \"$input_dir\""
         fi
           if [[ $options == *"Output Directory"* ]]; then
-            outdir=$(whiptail --inputbox "Enter output directory filepath:" 10 60 3>&1 1>&2 2>&3)
+            output_dir=$(whiptail --inputbox "Enter output directory filepath:" 10 60 3>&1 1>&2 2>&3)
             command+=" -o \"$output_dir\""
           else
-            outdir="pipeline.output" # Default output directory
+            output_dir="pipeline.output" # Default output directory
         fi
 
         if [[ $options == *"Forward Primer Sequence"* ]]; then
@@ -95,8 +95,8 @@ function diveAndSail {
     fi
 
     #======================================= Enrichments calculation section ==================================================
-      outdir="$input_dir/$outdir"
-      counts_dir="$outdir/$counts_type"
+      output_dir="$input_dir/$output_dir"
+      counts_dir="$output_dir/$counts_type"
       echo "###########################################################################################################################################################"
       echo "Hello! This is a script that computes enrichment statistics for an in-vitro selection experiment."
       echo "You must include an out/post-sel file."
@@ -129,7 +129,7 @@ function diveAndSail {
               if [ ! -n "$(find "$counts_dir" -name "$neg_format" -print -quit)" ]; then
                 python3 ./modified_counts.py -out "$counts_dir/$i-out"*"_$counts_type.txt" -res "modified_counts/$i-res.txt"
               else
-                python3 ./modified_counts.py -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$(($i + 1))-neg"*"_$counts_type.txt" -res "$outdir/modified_counts/$i-res.txt"
+                python3 ./modified_counts.py -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$(($i + 1))-neg"*"_$counts_type.txt" -res "$output_dir/modified_counts/$i-res.txt"
               fi
 
               # Calculate progress
@@ -143,7 +143,7 @@ function diveAndSail {
               if [ ! -n "$(find "$counts_dir" -name "$neg_format" -print -quit)" ]; then
                 python3 ./modified_counts.py -in "$counts_dir/$i-in*_$counts_type.txt" -out "$counts_dir/$i-out"*"_$counts_type.txt" -res "modified_counts/$i-res.txt"
               else
-                python3 ./modified_counts.py -in "$counts_dir/$i-in"*"_$counts_type.txt" -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$i-neg"*"_$counts_type.txt" -res "$outdir/modified_counts/$i-res.txt"
+                python3 ./modified_counts.py -in "$counts_dir/$i-in"*"_$counts_type.txt" -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$i-neg"*"_$counts_type.txt" -res "$output_dir/modified_counts/$i-res.txt"
               fi
 
               # Calculate progress
@@ -233,8 +233,8 @@ function findEnrichments {
     # Get the EasyDIVER output directory path
     dir=$(whiptail --inputbox "Enter the filepath for the EasyDIVER output directory:" 10 60 3>&1 1>&2 2>&3)
     {
-      outdir="$dir"
-      counts_dir="$outdir/$counts_type"
+      output_dir="$dir"
+      counts_dir="$output_dir/$counts_type"
       echo "###########################################################################################################################################################"
       echo "Hello! This is a script that computes enrichment statistics for an in-vitro selection experiment."
       echo "You must include an out/post-sel file."
@@ -268,7 +268,7 @@ function findEnrichments {
               if [ ! -n "$(find "$counts_dir" -name "$neg_format" -print -quit)" ]; then
                 python3 ./modified_counts.py -out "$counts_dir/$i-out"*"_$counts_type.txt" -res "modified_counts/$i-res.txt"
               else
-                python3 ./modified_counts.py -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$(($i + 1))-neg"*"_$counts_type.txt" -res "$outdir/modified_counts/$i-res.txt"
+                python3 ./modified_counts.py -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$(($i + 1))-neg"*"_$counts_type.txt" -res "$output_dir/modified_counts/$i-res.txt"
               fi
 
               # Calculate progress
@@ -282,7 +282,7 @@ function findEnrichments {
               if [ ! -n "$(find "$counts_dir" -name "$neg_format" -print -quit)" ]; then
                 python3 ./modified_counts.py -in "$counts_dir/$i-in*_$counts_type.txt" -out "$counts_dir/$i-out"*"_$counts_type.txt" -res "modified_counts/$i-res.txt"
               else
-                python3 ./modified_counts.py -in "$counts_dir/$i-in"*"_$counts_type.txt" -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$i-neg"*"_$counts_type.txt" -res "$outdir/modified_counts/$i-res.txt"
+                python3 ./modified_counts.py -in "$counts_dir/$i-in"*"_$counts_type.txt" -out "$counts_dir/$i-out"*"_$counts_type.txt" -neg "$counts_dir/$i-neg"*"_$counts_type.txt" -res "$output_dir/modified_counts/$i-res.txt"
               fi
 
               # Calculate progress

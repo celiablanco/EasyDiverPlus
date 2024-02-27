@@ -1,4 +1,5 @@
 import os
+import subprocess
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox
 
 class EasyDiver(QWidget):
@@ -29,9 +30,9 @@ class EasyDiver(QWidget):
         layout.addWidget(optional_label)
 
         # Option -o
-        self.output_label = QLabel('Output Directory Filepath:')
+        self.output_dir_label = QLabel('Output Directory Filepath:')
         self.output_dir_edit = QLineEdit()
-        layout.addWidget(self.output_label)
+        layout.addWidget(self.output_dir_label)
         layout.addWidget(self.output_dir_edit)
 
         # Option -p
@@ -78,10 +79,40 @@ class EasyDiver(QWidget):
         file_dialog = QFileDialog()
         file_path, _ = file_dialog.getOpenFileName(self, 'Select Input File')
         if file_path:
-            relative_path = os.path.relpath(file_path, os.getcwd())
-            self.input_dir_edit.setText(relative_path)
+            # relative_path = os.path.relpath(file_path, os.getcwd())
+            self.input_dir_edit.setText(file_path)
 
     def submit(self):
+        print(os.listdir())
+        run_script = f"bash easydiver.sh "
         if not self.input_dir_edit.text():
             QMessageBox.critical(self, "Error", "Please enter the required input.")
             return
+        else:
+            run_script += f"-i {self.input_dir_edit.text()} "
+        
+        if self.output_dir_edit.text():
+            run_script += f"-o {self.output_dir_edit.text()} "
+
+        if self.forward_primer_edit.text():
+            run_script += f"-p {self.forward_primer_edit.text()} "
+
+        if self.reverse_primer_edit.text():
+            run_script += f"-q {self.reverse_primer_edit.text()} "
+
+        if self.threads_edit.text():
+            run_script += f"-T {self.threads_edit.text()} "
+
+        if self.translate_check:
+            run_script += "-a "
+
+        if self.retain_check:
+            run_script += "-r "
+
+        if self.extra_flags_edit.text():
+            run_script += f"-e \"{self.extra_flags_edit.text()}\""
+
+        res = subprocess.run(run_script.split(" "))
+
+        if res.returncode == 0:
+            self.close()

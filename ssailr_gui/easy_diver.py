@@ -1,5 +1,5 @@
 import os
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QCheckBox, QFileDialog, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox
 
 class EasyDiver(QWidget):
     def __init__(self):
@@ -66,6 +66,11 @@ class EasyDiver(QWidget):
         layout.addWidget(self.extra_flags_label)
         layout.addWidget(self.extra_flags_edit)
 
+        # Submit
+        submit_button = QPushButton("Submit", self)
+        submit_button.clicked.connect(self.submit)
+        layout.addWidget(submit_button)
+
         self.setLayout(layout)
     
     def browse_input(self):
@@ -75,3 +80,8 @@ class EasyDiver(QWidget):
         if file_path:
             relative_path = os.path.relpath(file_path, os.getcwd())
             self.input_dir_edit.setText(relative_path)
+
+    def submit(self):
+        if not self.input_dir_edit.text():
+            QMessageBox.critical(self, "Error", "Please enter the required input.")
+            return

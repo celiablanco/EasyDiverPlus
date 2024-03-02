@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QMessageBox
 
 from easy_diver import EasyDiver
+from enrichment_stats import EnrichmentStats
 
 class MainMenu(QWidget):
     def __init__(self):
@@ -20,6 +21,9 @@ class MainMenu(QWidget):
             button = QPushButton(option, self)
             if option == "Use EasyDIVER":
                 button.clicked.connect(self.easy_diver)
+                
+            if option == "Calculate Enrichment Statistics":
+                button.clicked.connect(self.calculate_enrichment_statistics)
 
             if option == "Help":
                 button.clicked.connect(self.display_help_message) 
@@ -36,11 +40,12 @@ class MainMenu(QWidget):
         pass
 
     def easy_diver(self):
-        self.button2_widget = EasyDiver()
-        self.button2_widget.show()
+        self.easy_diver_widget = EasyDiver()
+        self.easy_diver_widget.show()
 
     def calculate_enrichment_statistics(self):
-        pass
+        self.enrichment_stats_widget = EnrichmentStats()
+        self.enrichment_stats_widget.show()
 
     def display_figures(self):
         pass

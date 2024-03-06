@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QCheckBox, 
 class EasyDiver(QWidget):
     def __init__(self):
         super().__init__()
-
         self.initUI()
     
     def initUI(self):
@@ -83,8 +82,8 @@ class EasyDiver(QWidget):
             self.input_dir_edit.setText(file_path)
 
     def submit(self):
+        run_script = "bash easydiver.sh "
         print(os.listdir())
-        run_script = f"bash easydiver.sh "
         if not self.input_dir_edit.text():
             QMessageBox.critical(self, "Error", "Please enter the required input.")
             return

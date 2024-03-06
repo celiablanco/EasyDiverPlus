@@ -4,7 +4,6 @@
 from time import time
 import sys
 import os
-import my_sequences
 import re
 
 from bootstrap import bootstrap
@@ -205,12 +204,7 @@ for seq in all_dict[-1]: # Originally 2. Calculate each sequence's a_in, f_in, a
     c_neg_boot = None
     f_neg_boot = None
 
-    # Write data to file
-    if seq in my_sequences.seq_nicknames:
-        print(str(my_sequences.seq_nicknames[seq]).ljust(max_len), end='\t', file=out)
-        print("Found \"" + my_sequences.seq_nicknames[seq] + "\" " + format_bootstrap(c_post_boot, 'a') + " times with " + format_bootstrap(f_post_boot, 'f') + " frequency.")
-    else:
-        print(str(seq).ljust(max_len), end='\t', file=out)
+    print(str(seq).ljust(max_len), end='\t', file=out)
     print(str(c_in_boot[0]).ljust(10), end='\t', file=out)
     print(format_bootstrap(c_in_boot, 'a').ljust(15), end='\t', file=out)
     print(str(f"{f_in_boot[0]:.6f}").ljust(10), end='\t', file=out)

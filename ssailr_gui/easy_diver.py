@@ -1,7 +1,7 @@
 import os
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QCheckBox, QFileDialog, QPushButton, QMessageBox
-from clickable_line_edit import ClickableLineEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox
+from clickable_line_edit import ClickableDirectoryEdit
 
 class EasyDiver(QWidget):
     def __init__(self):
@@ -17,8 +17,8 @@ class EasyDiver(QWidget):
         layout.addWidget(required_label)
 
         # Option -i
-        self.input_label = QLabel('Input Directory Filepath:')
-        self.input_dir_edit = ClickableLineEdit()
+        self.input_label = QLabel('Input Directory Path:')
+        self.input_dir_edit = ClickableDirectoryEdit()
         self.input_dir_edit.clicked.connect(lambda: self.browse_input('input'))
         layout.addWidget(self.input_label)
         layout.addWidget(self.input_dir_edit)
@@ -28,23 +28,20 @@ class EasyDiver(QWidget):
         layout.addWidget(optional_label)
 
         # Option -o
-        self.output_dir_label = QLabel('Output Directory Filepath:')
-        self.output_dir_edit = ClickableLineEdit()
-        self.output_dir_edit.clicked.connect(lambda: self.browse_input('out'))
-        layout.addWidget(self.output_dir_label)
+        self.output_label = QLabel('Output Directory Filepath:')
+        self.output_dir_edit = QLineEdit()
+        layout.addWidget(self.output_label)
         layout.addWidget(self.output_dir_edit)
 
         # Option -p
         self.forward_primer_label = QLabel('Forward Primer Sequence Extraction:')
-        self.forward_primer_edit = ClickableLineEdit()
-        self.forward_primer_edit.clicked.connect(lambda: self.browse_input('forward'))
+        self.forward_primer_edit = QLineEdit()
         layout.addWidget(self.forward_primer_label)
         layout.addWidget(self.forward_primer_edit)
 
         # Option -q
         self.reverse_primer_label = QLabel('Reverse Primer Sequence Extraction:')
-        self.reverse_primer_edit = ClickableLineEdit()
-        self.reverse_primer_edit.clicked.connect(lambda: self.browse_input('reverse'))
+        self.reverse_primer_edit = QLineEdit()
         layout.addWidget(self.reverse_primer_label)
         layout.addWidget(self.reverse_primer_edit)
 
@@ -58,17 +55,16 @@ class EasyDiver(QWidget):
 
         # Option -T
         self.threads_label = QLabel('Number of Threads:')
-        self.threads_edit = ClickableLineEdit()
-        self.threads_edit.clicked.connect(lambda: self.browse_input("threads"))
+        self.threads_edit = QLineEdit()
         layout.addWidget(self.threads_label)
         layout.addWidget(self.threads_edit)
 
         # Option -e
         self.extra_flags_label = QLabel('Extra Flags for PANDASeq (use quotes, e.g. \"-L 50\"):')
-        self.extra_flags_edit = ClickableLineEdit()
-        self.extra_flags_edit.clicked.connect(lambda: self.browse_input("extra"))
+        self.extra_flags_edit = QLineEdit()
         layout.addWidget(self.extra_flags_label)
         layout.addWidget(self.extra_flags_edit)
+
 
         # Submit
         submit_button = QPushButton("Submit", self)

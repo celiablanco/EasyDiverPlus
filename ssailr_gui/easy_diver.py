@@ -19,7 +19,7 @@ class EasyDiver(QWidget):
         # Option -i
         self.input_label = QLabel('Input Directory Path:')
         self.input_dir_edit = ClickableDirectoryEdit()
-        self.input_dir_edit.clicked.connect(lambda: self.browse_input('input'))
+        self.input_dir_edit.clicked.connect(self.browse_input)
         layout.addWidget(self.input_label)
         layout.addWidget(self.input_dir_edit)
 
@@ -73,10 +73,9 @@ class EasyDiver(QWidget):
         self.setLayout(layout)
     
     def browse_input(self):
-        file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getOpenFileName(self, 'Select Input File')
-        if file_path:
-            self.input_dir_edit.setText(file_path)
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory')
+        if directory:
+            self.input_dir_edit.setText(directory)
 
     def submit(self):
         run_script = "bash easydiver.sh "

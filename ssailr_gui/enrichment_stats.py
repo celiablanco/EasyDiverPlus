@@ -1,7 +1,6 @@
 import os
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QFileDialog, QPushButton, QLabel
-from clickable_line_edit import ClickableLineEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton
 
 class EnrichmentStats(QWidget):
     def __init__(self):
@@ -16,29 +15,25 @@ class EnrichmentStats(QWidget):
 
         # -out
         self.out_file_label = QLabel('File name for out/post-selection file (.txt):')
-        self.out_file_edit = ClickableLineEdit()
-        self.out_file_edit.clicked.connect(lambda: self.browse_input("out"))
+        self.out_file_edit = QLineEdit()
         layout.addWidget(self.out_file_label)
         layout.addWidget(self.out_file_edit)
 
         # -in
         self.in_file_label = QLabel('File name for the input file (.txt):')
-        self.in_file_edit = ClickableLineEdit()
-        self.in_file_edit.clicked.connect(lambda: self.browse_input("in"))
+        self.in_file_edit = QLineEdit()
         layout.addWidget(self.in_file_label)
         layout.addWidget(self.in_file_edit)
 
         # -neg
         self.neg_file_label = QLabel('File name for negative control file (.txt):')
-        self.neg_file_edit = ClickableLineEdit()
-        self.neg_file_edit.clicked.connect(lambda: self.browse_input("neg"))
+        self.neg_file_edit = QLineEdit()
         layout.addWidget(self.neg_file_label)
         layout.addWidget(self.neg_file_edit)
 
         # -res
         self.res_file_label = QLabel('File name for results file (.txt):')
-        self.res_file_edit = ClickableLineEdit()
-        self.res_file_edit.clicked.connect(lambda: self.browse_input("res"))
+        self.res_file_edit = QLineEdit()
         layout.addWidget(self.res_file_label)
         layout.addWidget(self.res_file_edit)
 
@@ -63,19 +58,6 @@ class EnrichmentStats(QWidget):
         output_dir = QFileDialog.getExistingDirectory(self, "Select Output Directory")
         if output_dir:
             print(output_dir)
-
-    def browse_input(self, btn_edit_type):
-        file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getOpenFileName(self, 'Select Input File')
-        if file_path:
-            if btn_edit_type == "out":
-                self.out_file_edit.setText(file_path)
-            elif btn_edit_type == "in":
-                self.in_file_edit.setText(file_path)
-            elif btn_edit_type == "neg":
-                self.neg_file_edit.setText(file_path)
-            else:
-                self.res_file_edit.setText(file_path)
         
     def calculate(self):
         run_script = "python3 modified_counts.py "

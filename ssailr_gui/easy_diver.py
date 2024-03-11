@@ -1,7 +1,7 @@
 import os
 import subprocess
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox
-from clickable_line_edit import ClickableDirectoryEdit
+from directory_edit import ClickableDirectoryEdit
 
 class EasyDiver(QWidget):
     def __init__(self):
@@ -65,7 +65,6 @@ class EasyDiver(QWidget):
         layout.addWidget(self.extra_flags_label)
         layout.addWidget(self.extra_flags_edit)
 
-
         # Submit
         submit_button = QPushButton("Submit", self)
         submit_button.clicked.connect(self.submit)
@@ -73,23 +72,11 @@ class EasyDiver(QWidget):
 
         self.setLayout(layout)
     
-    def browse_input(self, btn_edit_type):
+    def browse_input(self):
         file_dialog = QFileDialog()
         file_path, _ = file_dialog.getOpenFileName(self, 'Select Input File')
         if file_path:
-            # relative_path = os.path.relpath(file_path, os.getcwd())
-            if btn_edit_type == "input":
-                self.input_dir_edit.setText(file_path)
-            elif btn_edit_type == "out":
-                self.output_dir_edit.setText(file_path)
-            elif btn_edit_type == "forward":
-                self.forward_primer_edit.setText(file_path)
-            elif btn_edit_type == "reverse":
-                self.reverse_primer_edit.setText(file_path)
-            elif btn_edit_type == "threads":
-                self.threads_edit.setText(file_path)
-            else:
-                self.extra_flags_edit.setText(file_path)
+            self.input_dir_edit.setText(file_path)
 
     def submit(self):
         run_script = "bash easydiver.sh "

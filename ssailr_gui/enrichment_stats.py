@@ -68,13 +68,15 @@ class EnrichmentStats(QWidget):
             run_script += f"-out {self.out_file_edit.text()} "
 
         if self.in_file_edit.text():
-            run_script += f"-in {self.in_file_edit.text} "
+            run_script += f"-in {self.in_file_edit.text()} "
 
         if self.neg_file_edit.text():
-            run_script += f"-neg {self.neg_file_edit.text} "
+            run_script += f"-neg {self.neg_file_edit.text()} "
 
         if self.res_file_edit.text():
-            run_script += f"-res {self.res_file_edit.text}"
+            run_script += f"-res {self.res_file_edit.text()}"
+
+        print(run_script)
 
         res = subprocess.run(run_script.split(" "))
 

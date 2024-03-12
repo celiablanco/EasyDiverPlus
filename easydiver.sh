@@ -560,3 +560,5 @@ end=`date +%s`
 runtime=$((end-start))
 echo ""
 echo "Run time:" $runtime
+
+exit

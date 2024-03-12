@@ -5,7 +5,6 @@ from time import time
 import sys
 import os
 import re
-import subprocess
 
 from bootstrap import bootstrap
 
@@ -243,6 +242,8 @@ def run_enrichment_analysis(out_file, in_file, res_file, neg_file):
 
 def find_enrichments():
     # Parse command-line arguments
+    print("Parsing arguments\n")
+    print(sys.argv)
     i = 1
     while i < len(sys.argv):
         if sys.argv[i] == "-in" and i + 1 < len(sys.argv):
@@ -263,6 +264,10 @@ def find_enrichments():
             print("Invalid arguments provided.")
             sys.exit(1)
 
+    if dir_path is None:
+        print("Directory path not provided.")
+        sys.exit(1)
+
     counts_type = ""
     answer = input("Calculate enrichment statistics for amino acid counts? (Yes- AA, No- Nucleotide) [Y/N]: ")
     if answer.lower() == "y":
@@ -273,6 +278,8 @@ def find_enrichments():
     # Set directory path
     outdir = dir_path
     counts_dir = os.path.join(outdir, counts_type)
+
+    print(f"Current directory path: {counts_dir}")
 
     # Get the maximum round
     max_round = 0
@@ -293,22 +300,17 @@ def find_enrichments():
             if i < max_round:
                 if not any(file.endswith(neg_format) for file in os.listdir(counts_dir)):
                     run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), res_file="modified_counts/" + str(i) + "-res.txt")
-                    # subprocess.run(["python3", "./modified_counts.py", "-out", os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), "-res", "modified_counts/" + str(i) + "-res.txt"])
                 else:
                     run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), neg_file=os.path.join(counts_dir, str(i + 1) + "-neg*" + "_" + counts_type + ".txt"), res=os.path.join(outdir, "modified_counts", str(i) + "-res.txt"))
-                    # subprocess.run(["python3", "./modified_counts.py", "-out", os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), "-neg", os.path.join(counts_dir, str(i + 1) + "-neg*" + "_" + counts_type + ".txt"), "-res", os.path.join(outdir, "modified_counts", str(i) + "-res.txt")])
         else:
             # Case 2A and 2B: Loop up to max_round
             if not any(file.endswith(neg_format) for file in os.listdir(counts_dir)):
                 run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), in_file=os.path.join(counts_dir, str(i) + "-in*" + "_" + counts_type + ".txt"), res_file="modified_counts/" + str(i) + "-res.txt")
-                # subprocess.run(["python3", "./modified_counts.py", "-in", os.path.join(counts_dir, str(i) + "-in*" + "_" + counts_type + ".txt"), "-out", os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), "-res", "modified_counts/" + str(i) + "-res.txt"])
             else:
                 run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), in_file=os.path.join(counts_dir, str(i) + "-in*" + "_" + counts_type + ".txt"), neg_file=os.path.join(counts_dir, str(i) + "-neg*" + "_" + counts_type + ".txt"))
-                # subprocess.run(["python3", "./modified_counts.py", "-in", os.path.join(counts_dir, str(i) + "-in*" + "_" + counts_type + ".txt"), "-out", os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), "-neg", os.path.join(counts_dir, str(i) + "-neg*" + "_" + counts_type + ".txt"), "-res", os.path.join(outdir, "modified_counts", str(i) + "-res.txt")])
         progress = i * 100 / max_round
         print("(Approx.) Progress:", progress, "%")
 
 
 if __name__ == '__main__':
     find_enrichments()
-

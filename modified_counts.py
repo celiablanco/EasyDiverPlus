@@ -5,6 +5,7 @@ from time import time
 import sys
 import os
 import re
+import glob
 
 from bootstrap import bootstrap
 
@@ -296,21 +297,20 @@ def find_enrichments():
     neg_format = "*-neg*_" + counts_type + ".txt"
 
     for i in range(1, max_round + 1):
-        if not any(file.endswith(in_format) for file in os.listdir(counts_dir)):
-            # Cases 1A and 1B: Loop up to max_round - 1
-            if i < max_round:
-                if not any(file.endswith(neg_format) for file in os.listdir(counts_dir)):
-                    print(f"Out File: {os.path.join(counts_dir, str(i) + '-out*' + '_' + counts_type + '.txt')}")
-                    print(f"Res File: {'modified_counts/' + str(i) + '-res.txt'}")
-                    run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), res_file="modified_counts/" + str(i) + "-res.txt")
-                else:
-                    run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), neg_file=os.path.join(counts_dir, str(i + 1) + "-neg*" + "_" + counts_type + ".txt"), res=os.path.join(outdir, "modified_counts", str(i) + "-res.txt"))
-        else:
-            # Case 2A and 2B: Loop up to max_round
-            if not any(file.endswith(neg_format) for file in os.listdir(counts_dir)):
-                run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), in_file=os.path.join(counts_dir, str(i) + "-in*" + "_" + counts_type + ".txt"), res_file="modified_counts/" + str(i) + "-res.txt")
+        in_files = glob.glob(os.path.join(counts_dir, f"{i}-in*_{counts_type}.txt"))
+        neg_files = glob.glob(os.path.join(counts_dir, f"{i}-neg*_{counts_type}.txt"))
+
+        if not in_files:
+            if i < max_round and not neg_files:
+                run_enrichment_analysis(out_file=glob.glob(os.path.join(counts_dir, f"{i}-out*_{counts_type}.txt"))[0], res_file=f"modified_counts/{i}-res.txt")
             else:
-                run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), in_file=os.path.join(counts_dir, str(i) + "-in*" + "_" + counts_type + ".txt"), neg_file=os.path.join(counts_dir, str(i) + "-neg*" + "_" + counts_type + ".txt"))
+                run_enrichment_analysis(out_file=glob.glob(os.path.join(counts_dir, f"{i}-out*_{counts_type}.txt"))[0], neg_file=glob.glob(os.path.join(counts_dir, f"{i + 1}-neg*_{counts_type}.txt"))[0], res=os.path.join(outdir, "modified_counts", f"{i}-res.txt"))
+        else:
+            if not neg_files:
+                run_enrichment_analysis(out_file=glob.glob(os.path.join(counts_dir, f"{i}-out*_{counts_type}.txt"))[0], in_file=in_files[0], res_file=f"modified_counts/{i}-res.txt")
+            else:
+                run_enrichment_analysis(out_file=glob.glob(os.path.join(counts_dir, f"{i}-out*_{counts_type}.txt"))[0], in_file=in_files[0], neg_file=neg_files[0])
+
         progress = i * 100 / max_round
         print("(Approx.) Progress:", progress, "%")
 

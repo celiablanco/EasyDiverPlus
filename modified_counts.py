@@ -47,7 +47,7 @@ def next_round_file(input_str):
             return os.path.join(directory, file) # directory + input_str[last_slash_index + 1:].replace(match.group(0), file)
     return None
 
-def run_enrichment_analysis(out_file, in_file, res_file, neg_file):
+def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None):
     start = time()
 
     # Check if at least out_file is provided

@@ -300,8 +300,8 @@ def find_enrichments():
             # Cases 1A and 1B: Loop up to max_round - 1
             if i < max_round:
                 if not any(file.endswith(neg_format) for file in os.listdir(counts_dir)):
-                    print(f"Out File: {os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt")}")
-                    print(f"Res File: {"modified_counts/" + str(i) + "-res.txt"}")
+                    print(f"Out File: {os.path.join(counts_dir, str(i) + '-out*' + '_' + counts_type + '.txt')}")
+                    print(f"Res File: {'modified_counts/' + str(i) + '-res.txt'}")
                     run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), res_file="modified_counts/" + str(i) + "-res.txt")
                 else:
                     run_enrichment_analysis(out_file=os.path.join(counts_dir, str(i) + "-out*" + "_" + counts_type + ".txt"), neg_file=os.path.join(counts_dir, str(i + 1) + "-neg*" + "_" + counts_type + ".txt"), res=os.path.join(outdir, "modified_counts", str(i) + "-res.txt"))

@@ -1,6 +1,6 @@
 import os
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox
 from directory_edit import ClickableDirectoryEdit
 
 class EasyDiver(QWidget):
@@ -65,10 +65,20 @@ class EasyDiver(QWidget):
         layout.addWidget(self.extra_flags_label)
         layout.addWidget(self.extra_flags_edit)
 
+        # Horizontal layout
+        button_layout = QHBoxLayout()
+
+        # Cancel
+        self.cancel_button = QPushButton('Cancel')
+        self.cancel_button.clicked.connect(self.close)
+        button_layout.addWidget(self.cancel_button)
+
         # Submit
         submit_button = QPushButton("Submit", self)
         submit_button.clicked.connect(self.submit)
-        layout.addWidget(submit_button)
+        button_layout.addWidget(submit_button)
+
+        layout.addLayout(button_layout)
 
         self.setLayout(layout)
     

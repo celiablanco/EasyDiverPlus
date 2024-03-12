@@ -1,6 +1,7 @@
 import os
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton
+from directory_edit import ClickableDirectoryEdit
 
 class EnrichmentStats(QWidget):
     def __init__(self):
@@ -11,13 +12,28 @@ class EnrichmentStats(QWidget):
         self.setWindowTitle("Enrichment Statistics")
         layout = QVBoxLayout()
 
-        self.enichment_type = self.show_enrichment_type()
+        self.enrichment_type = self.show_enrichment_type()
+
+        # Required parameters
+        required_label = QLabel("REQUIRED")
+        layout.addWidget(required_label)
+
+        # -dir
+        self.easy_diver_dir_label = QLabel('Enter the filepath for the EasyDIVER output directory:')
+        self.easy_diver_dir_edit = ClickableDirectoryEdit()
+        self.easy_diver_dir_edit.clicked.connect(self.browse_input)
+        layout.addWidget(self.easy_diver_dir_label)
+        layout.addWidget(self.easy_diver_dir_edit)
 
         # -out
         self.out_file_label = QLabel('File name for out/post-selection file (.txt):')
         self.out_file_edit = QLineEdit()
         layout.addWidget(self.out_file_label)
         layout.addWidget(self.out_file_edit)
+
+        # Optional parameters
+        optional_label = QLabel("OPTIONAL")
+        layout.addWidget(optional_label)
 
         # -in
         self.in_file_label = QLabel('File name for the input file (.txt):')
@@ -37,10 +53,20 @@ class EnrichmentStats(QWidget):
         layout.addWidget(self.res_file_label)
         layout.addWidget(self.res_file_edit)
 
+        # Horizontal layout
+        button_layout = QHBoxLayout()
+
+        # Cancel
+        self.cancel_button = QPushButton('Cancel')
+        self.cancel_button.clicked.connect(self.close)
+        button_layout.addWidget(self.cancel_button)
+
         # Calculate
         calculate_button = QPushButton("Calculate", self)
         calculate_button.clicked.connect(self.calculate)
-        layout.addWidget(calculate_button)
+        button_layout.addWidget(calculate_button)
+
+        layout.addLayout(button_layout)
 
         self.setLayout(layout)
 
@@ -48,16 +74,16 @@ class EnrichmentStats(QWidget):
         calculate_enrichment = QMessageBox.question(self, "Find Enrichments", "Calculate enrichment statistics for amino acid counts? (Yes - AA, No - Nucleotide)", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
         
         if calculate_enrichment == QMessageBox.Yes:
-            enrichment_type = "AA"
+            counts_type = "counts.aa"
         else:
-            enrichment_type = "Nucleotides"
+            counts_type = "counts"
 
-        return enrichment_type
-               
-    def select_output_directory(self):
-        output_dir = QFileDialog.getExistingDirectory(self, "Select Output Directory")
-        if output_dir:
-            print(output_dir)
+        return counts_type
+    
+    def browse_input(self):
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory')
+        if directory:
+            self.easy_diver_dir_edit.setText(directory)
         
     def calculate(self):
         run_script = "python3 modified_counts.py "
@@ -66,6 +92,9 @@ class EnrichmentStats(QWidget):
             return
         else:
             run_script += f"-out {self.out_file_edit.text()} "
+
+        if self.easy_diver_dir_edit.text():
+            run_script += f"-dir {self.easy_diver_dir_edit.text()} "
 
         if self.in_file_edit.text():
             run_script += f"-in {self.in_file_edit.text()} "

@@ -260,6 +260,7 @@ def find_enrichments():
             i += 2
         elif sys.argv[i] == "-dir" and i + 1 < len(sys.argv):
             dir_path = sys.argv[i + 1]
+            i += 2
         else:
             print("Invalid arguments provided.")
             sys.exit(1)

@@ -94,7 +94,7 @@ class EnrichmentStats(QWidget):
             run_script += f"-out {self.out_file_edit.text()} "
 
         if self.easy_diver_dir_edit.text():
-            run_script += f"-dir {self.easy_diver_dir_edit.text()} "
+            run_script += f"-dir {self.easy_diver_dir_edit.text()}"
 
         if self.in_file_edit.text():
             run_script += f"-in {self.in_file_edit.text()} "

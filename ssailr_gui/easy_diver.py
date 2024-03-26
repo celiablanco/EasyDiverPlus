@@ -1,14 +1,14 @@
 import os
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox, QProgressBar
 from directory_edit import ClickableDirectoryEdit
 
 class EasyDiver(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
+        self.init_ui()
     
-    def initUI(self):
+    def init_ui(self):
         self.setWindowTitle("Easy Diver")
         layout = QVBoxLayout()
 
@@ -65,6 +65,10 @@ class EasyDiver(QWidget):
         layout.addWidget(self.extra_flags_label)
         layout.addWidget(self.extra_flags_edit)
 
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        layout.addWidget(self.progress_bar)
+
         # Horizontal layout
         button_layout = QHBoxLayout()
 
@@ -89,35 +93,58 @@ class EasyDiver(QWidget):
 
     def submit(self):
         run_script = "bash easydiver.sh "
-        print(os.listdir())
         if not self.input_dir_edit.text():
             QMessageBox.critical(self, "Error", "Please enter the required input.")
             return
         else:
-            run_script += f"-i {self.input_dir_edit.text()} "
+            run_script += f"-i {self.input_dir_edit.text()}"
         
         if self.output_dir_edit.text():
-            run_script += f"-o {self.output_dir_edit.text()} "
+            run_script += f" -o {self.output_dir_edit.text()}"
 
         if self.forward_primer_edit.text():
-            run_script += f"-p {self.forward_primer_edit.text()} "
+            run_script += f" -p {self.forward_primer_edit.text()}"
 
         if self.reverse_primer_edit.text():
-            run_script += f"-q {self.reverse_primer_edit.text()} "
+            run_script += f" -q {self.reverse_primer_edit.text()}"
 
         if self.threads_edit.text():
-            run_script += f"-T {self.threads_edit.text()} "
+            run_script += f" -T {self.threads_edit.text()}"
 
         if self.translate_check:
-            run_script += "-a "
+            run_script += " -a"
 
         if self.retain_check:
-            run_script += "-r "
+            run_script += " -r"
 
         if self.extra_flags_edit.text():
-            run_script += f"-e \"{self.extra_flags_edit.text()}\""
+            run_script += f" -e \"{self.extra_flags_edit.text()}\""
 
-        res = subprocess.run(run_script.split(" "))
+        self.progress_bar.setValue(0)
+        
+        try:
+            res = subprocess.Popen(run_script.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            
+            while True:
+                output = res.stdout.readline()
+                print(output)
+                if output == '' and res.poll() is not None:
+                    break
+                if output:
+                    try:
+                        progress = int(output.strip())
+                        self.progress_bar.setValue(progress)
+                    except ValueError:
+                        pass
 
-        if res.returncode == 0:
-            self.close()
+            if res.returncode == 0:
+                QMessageBox.information(self, "Success", "Task completed successfully.")
+                self.close()
+            else:
+                error_message = res.stderr.read()
+                QMessageBox.critical(self, "Error", f"An error occurred: {error_message}")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+        self.progress_bar.setValue(0)

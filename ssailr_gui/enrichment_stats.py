@@ -1,14 +1,13 @@
-import os
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton, QProgressBar
 from directory_edit import ClickableDirectoryEdit
 
 class EnrichmentStats(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
+        self.init_ui()
     
-    def initUI(self):
+    def init_ui(self):
         self.setWindowTitle("Enrichment Statistics")
         layout = QVBoxLayout()
 
@@ -25,15 +24,15 @@ class EnrichmentStats(QWidget):
         layout.addWidget(self.easy_diver_dir_label)
         layout.addWidget(self.easy_diver_dir_edit)
 
+        # Optional parameters
+        optional_label = QLabel("OPTIONAL")
+        layout.addWidget(optional_label)
+
         # -out
         self.out_file_label = QLabel('File name for out/post-selection file (.txt):')
         self.out_file_edit = QLineEdit()
         layout.addWidget(self.out_file_label)
         layout.addWidget(self.out_file_edit)
-
-        # Optional parameters
-        optional_label = QLabel("OPTIONAL")
-        layout.addWidget(optional_label)
 
         # -in
         self.in_file_label = QLabel('File name for the input file (.txt):')
@@ -52,6 +51,10 @@ class EnrichmentStats(QWidget):
         self.res_file_edit = QLineEdit()
         layout.addWidget(self.res_file_label)
         layout.addWidget(self.res_file_edit)
+
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        layout.addWidget(self.progress_bar)
 
         # Horizontal layout
         button_layout = QHBoxLayout()
@@ -87,27 +90,49 @@ class EnrichmentStats(QWidget):
         
     def calculate(self):
         run_script = "python3 modified_counts.py "
-        if not self.out_file_edit.text():
+        if not self.easy_diver_dir_edit.text():
             QMessageBox.critical(self, "Error", "Please enter the required input.")
             return
         else:
-            run_script += f"-out {self.out_file_edit.text()} "
-
-        if self.easy_diver_dir_edit.text():
             run_script += f"-dir {self.easy_diver_dir_edit.text()}"
 
+        if self.out_file_edit.text():
+            run_script += f" -out {self.out_file_edit.text()}"
+
         if self.in_file_edit.text():
-            run_script += f"-in {self.in_file_edit.text()} "
+            run_script += f" -in {self.in_file_edit.text()}"
 
         if self.neg_file_edit.text():
-            run_script += f"-neg {self.neg_file_edit.text()} "
+            run_script += f" -neg {self.neg_file_edit.text()}"
 
         if self.res_file_edit.text():
-            run_script += f"-res {self.res_file_edit.text()}"
+            run_script += f" -res {self.res_file_edit.text()}"
+        
+        self.progress_bar.setValue(0)
 
-        print(run_script)
+        try:
+            res = subprocess.Popen(run_script.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            
+            while True:
+                output = res.stdout.readline()
+                print(output)
+                if output == '' and res.poll() is not None:
+                    break
+                if output:
+                    try:
+                        progress = int(output.strip())
+                        self.progress_bar.setValue(progress)
+                    except ValueError:
+                        pass
 
-        res = subprocess.run(run_script.split(" "))
+            if res.returncode == 0:
+                QMessageBox.information(self, "Success", "Task completed successfully.")
+                self.close()
+            else:
+                error_message = res.stderr.read()
+                QMessageBox.critical(self, "Error", f"An error occurred: {error_message}")
 
-        if res.returncode == 0:
-            self.close()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+        self.progress_bar.setValue(0)

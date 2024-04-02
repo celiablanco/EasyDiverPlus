@@ -121,21 +121,22 @@ class EnrichmentStats(QWidget):
 
         # Execute the script
         try:
+            progress = 0
             res = subprocess.Popen(run_script.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             
             while True:
                 output = res.stdout.readline()
-                if output == '' and res.poll() is not None:
+                print(output)
+
+                if res.poll() is not None:
                     break
-                if output:
-                    try:
-                        progress = int(output.strip())
-                        print(f"Progress: {progress}")
-                        self.progress_bar.setValue(progress)
-                    except ValueError:
-                        pass
+
+                print(f"Progress: {progress}")
+                self.progress_bar.setValue(progress)
+                progress += 1
 
             if res.returncode == 0:
+                self.progress_bar.setValue(100)
                 QMessageBox.information(self, "Success", "Task completed successfully.")
                 self.close()
             else:

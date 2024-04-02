@@ -1,6 +1,5 @@
 import subprocess
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QFileDialog, QPushButton, QMessageBox, QProgressBar
-from PyQt5.QtCore import QTimer
 from directory_edit import ClickableDirectoryEdit
 
 class EasyDiver(QWidget):
@@ -129,12 +128,12 @@ class EasyDiver(QWidget):
             
             while True:
                 output = res.stdout.readline()
-                print(output)
                 if output == '' and res.poll() is not None:
                     break
                 if output:
                     try:
                         progress = int(output.strip())
+                        print(f"Progress: {progress}")
                         self.progress_bar.setValue(progress)
                     except ValueError:
                         pass
@@ -148,5 +147,3 @@ class EasyDiver(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
-
-        self.progress_bar.setValue(0)

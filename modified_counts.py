@@ -244,6 +244,7 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
     print("Time elapsed: " + str(time() - start) + ' s')
 
 def find_enrichments():
+    counts_type = ""
     # Parse command-line arguments
     print("Parsing arguments\n")
     print(sys.argv)
@@ -254,6 +255,9 @@ def find_enrichments():
             i += 2
         elif sys.argv[i] == "-out" and i + 1 < len(sys.argv):
             i += 2
+        elif sys.argv[i] == "-count" and i + 1 < len(sys.argv):
+            counts_type = sys.argv[i + 1]
+            i += 2
         else:
             print("Invalid arguments provided.")
             sys.exit(1)
@@ -262,13 +266,7 @@ def find_enrichments():
         print("Directory path not provided.")
         sys.exit(1)
 
-    counts_type = ""
-    answer = input("Calculate enrichment statistics for amino acid counts? (Yes- AA, No- Nucleotide) [Y/N]: ")
-    if answer.lower() == "y":
-        counts_type = "counts.aa"
-    else:
-        counts_type = "counts"
-
+    print(counts_type)
     # Set directory path
     outdir = dir_path
     counts_dir = os.path.join(outdir, counts_type)

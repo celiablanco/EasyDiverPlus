@@ -91,26 +91,6 @@ class EasyDiver(QWidget):
         if directory:
             self.input_dir_edit.setText(directory)
 
-    def update_progress(self):
-        # Read a line from the subprocess output
-        output = self.process.stdout.readline().strip()
-        if output:
-            try:
-                progress = int(output)
-                self.progress_bar.setValue(progress)
-            except ValueError:
-                pass
-
-        # If the process has finished, stop the timer
-        if self.process.poll() is not None:
-            self.timer.stop()
-            if self.process.returncode == 0:
-                QMessageBox.information(self, "Success", "Task completed successfully.")
-                self.close()
-            else:
-                error_message = self.process.stderr.read()
-                QMessageBox.critical(self, "Error", f"An error occurred: {error_message}")
-
     def submit(self):
         run_script = "bash easydiver.sh "
         if not self.input_dir_edit.text():
@@ -140,10 +120,33 @@ class EasyDiver(QWidget):
         if self.extra_flags_edit.text():
             run_script += f" -e \"{self.extra_flags_edit.text()}\""
 
+        print(run_script)
         self.progress_bar.setValue(0)
-        self.process = subprocess.Popen(run_script.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
-        # Start a timer to update the progress bar periodically
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_progress)
-        self.timer.start(100)
+        # Execute the script
+        try:
+            res = subprocess.Popen(run_script.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            
+            while True:
+                output = res.stdout.readline()
+                print(output)
+                if output == '' and res.poll() is not None:
+                    break
+                if output:
+                    try:
+                        progress = int(output.strip())
+                        self.progress_bar.setValue(progress)
+                    except ValueError:
+                        pass
+
+            if res.returncode == 0:
+                QMessageBox.information(self, "Success", "Task completed successfully.")
+                self.close()
+            else:
+                error_message = res.stderr.read()
+                QMessageBox.critical(self, "Error", f"An error occurred: {error_message}")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+        self.progress_bar.setValue(0)

@@ -1,5 +1,5 @@
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton, QProgressBar
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton, QRadioButton, QGroupBox, QProgressBar
 from PyQt5.QtCore import QTimer
 from directory_edit import ClickableDirectoryEdit
 
@@ -11,8 +11,6 @@ class EnrichmentStats(QWidget):
     def init_ui(self):
         self.setWindowTitle("Enrichment Statistics")
         layout = QVBoxLayout()
-
-        self.enrichment_type = self.show_enrichment_type()
 
         # Required parameters
         required_label = QLabel("REQUIRED")
@@ -53,6 +51,21 @@ class EnrichmentStats(QWidget):
         layout.addWidget(self.res_file_label)
         layout.addWidget(self.res_file_edit)
 
+        # Enrichment Type
+        group_box = QGroupBox("Enrichment Type")
+
+        # - AA and Nucleotide
+        self.radio_aa = QRadioButton("AA")
+        self.radio_nucleotide = QRadioButton("Nucleotide")
+        self.radio_aa.setChecked(True)
+
+        # Add radio buttons to a layout
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.radio_aa)
+        vbox.addWidget(self.radio_nucleotide)
+        group_box.setLayout(vbox)
+        layout.addWidget(group_box)
+
         # Progress bar
         self.progress_bar = QProgressBar()
         layout.addWidget(self.progress_bar)
@@ -73,16 +86,6 @@ class EnrichmentStats(QWidget):
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
-
-    def show_enrichment_type(self):
-        calculate_enrichment = QMessageBox.question(self, "Find Enrichments", "Calculate enrichment statistics for amino acid counts? (Yes - AA, No - Nucleotide)", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
-        
-        if calculate_enrichment == QMessageBox.Yes:
-            counts_type = "counts.aa"
-        else:
-            counts_type = "counts"
-
-        return counts_type
     
     def browse_input(self):
         directory = QFileDialog.getExistingDirectory(self, 'Select Directory')
@@ -92,6 +95,7 @@ class EnrichmentStats(QWidget):
     def update_progress(self):
         # Read a line from the subprocess output
         output = self.process.stdout.readline().strip()
+        print(output)
         if output:
             try:
                 progress = int(output)
@@ -129,8 +133,13 @@ class EnrichmentStats(QWidget):
         if self.res_file_edit.text():
             run_script += f" -res {self.res_file_edit.text()}"
         
-        self.progress_bar.setValue(0)
-        self.process = subprocess.Popen(run_script.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        if self.radio_aa.isChecked():
+            run_script += f" -count counts.aa"
+        else:
+            run_script += f" -count counts"
+        
+        print(run_script)
+        self.process = subprocess.Popen(run_script.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=1, text=True)
 
         # Start a timer to update the progress bar periodically
         self.timer = QTimer(self)

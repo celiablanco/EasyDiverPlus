@@ -1,5 +1,5 @@
 import subprocess
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QFileDialog, QPushButton, QRadioButton, QGroupBox, QProgressBar
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QMessageBox, QFileDialog, QPushButton, QRadioButton, QGroupBox, QProgressBar
 from directory_edit import ClickableDirectoryEdit
 
 class EnrichmentStats(QWidget):
@@ -55,7 +55,6 @@ class EnrichmentStats(QWidget):
         button_layout.addWidget(calculate_button)
 
         layout.addLayout(button_layout)
-
         self.setLayout(layout)
     
     def browse_input(self):

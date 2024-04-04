@@ -3,14 +3,15 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QMe
 
 from easy_diver import EasyDiver
 from enrichment_stats import EnrichmentStats
+from graph_figures import GraphFigures
 
 class MainMenu(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.initUI()
+        self.init_ui()
 
-    def initUI(self):
+    def init_ui(self):
         self.setWindowTitle("Main Menu")
         self.setGeometry(100, 100, 400, 300)
 
@@ -48,7 +49,8 @@ class MainMenu(QWidget):
         self.enrichment_stats_widget.show()
 
     def display_figures(self):
-        pass
+        self.graph_figures_widget = GraphFigures()
+        self.graph_figures_widget.show()
 
     def display_help_message(self):
         help_text = """

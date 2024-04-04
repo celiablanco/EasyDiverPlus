@@ -22,34 +22,6 @@ class EnrichmentStats(QWidget):
         layout.addWidget(self.easy_diver_dir_label)
         layout.addWidget(self.easy_diver_dir_edit)
 
-        # Optional parameters
-        optional_label = QLabel("OPTIONAL")
-        layout.addWidget(optional_label)
-
-        # -out
-        self.out_file_label = QLabel('File name for out/post-selection file (.txt):')
-        self.out_file_edit = QLineEdit()
-        layout.addWidget(self.out_file_label)
-        layout.addWidget(self.out_file_edit)
-
-        # -in
-        self.in_file_label = QLabel('File name for the input file (.txt):')
-        self.in_file_edit = QLineEdit()
-        layout.addWidget(self.in_file_label)
-        layout.addWidget(self.in_file_edit)
-
-        # -neg
-        self.neg_file_label = QLabel('File name for negative control file (.txt):')
-        self.neg_file_edit = QLineEdit()
-        layout.addWidget(self.neg_file_label)
-        layout.addWidget(self.neg_file_edit)
-
-        # -res
-        self.res_file_label = QLabel('File name for results file (.txt):')
-        self.res_file_edit = QLineEdit()
-        layout.addWidget(self.res_file_label)
-        layout.addWidget(self.res_file_edit)
-
         # Enrichment Type
         group_box = QGroupBox("Enrichment Type")
 
@@ -98,18 +70,6 @@ class EnrichmentStats(QWidget):
             return
         else:
             run_script += f"-dir {self.easy_diver_dir_edit.text()}"
-
-        if self.out_file_edit.text():
-            run_script += f" -out {self.out_file_edit.text()}"
-
-        if self.in_file_edit.text():
-            run_script += f" -in {self.in_file_edit.text()}"
-
-        if self.neg_file_edit.text():
-            run_script += f" -neg {self.neg_file_edit.text()}"
-
-        if self.res_file_edit.text():
-            run_script += f" -res {self.res_file_edit.text()}"
         
         if self.radio_aa.isChecked():
             run_script += f" -count counts.aa"

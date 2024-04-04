@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
 from directory_edit import ClickableDirectoryEdit
 
 class GraphFigures(QWidget):
-    def _init_(self):
+    def __init__(self):
         super().__init__()
         self.init_ui()
 

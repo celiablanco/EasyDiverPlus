@@ -43,7 +43,7 @@ class GraphFigures(QWidget):
         calculate_button.clicked.connect(self.submit)
         button_layout.addWidget(calculate_button)
 
-        layout.addWidget(button_layout)
+        layout.addLayout(button_layout)
         self.setLayout(layout)
 
     def get_selected_option(self):

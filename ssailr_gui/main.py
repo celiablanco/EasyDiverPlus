@@ -25,6 +25,9 @@ class MainMenu(QWidget):
                 
             if option == "Calculate Enrichment Statistics":
                 button.clicked.connect(self.calculate_enrichment_statistics)
+            
+            if option == "Figures and Misc.":
+                button.clicked.connect(self.display_figures)
 
             if option == "Help":
                 button.clicked.connect(self.display_help_message) 

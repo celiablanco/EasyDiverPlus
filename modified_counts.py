@@ -7,6 +7,7 @@ import os
 import re
 import glob
 import fnmatch
+import my_sequences
 
 from bootstrap import bootstrap
 
@@ -21,12 +22,12 @@ def format_bootstrap(result, type):
         if result[0] == 0 and result[1] == 0: # We did not observe this
             return "[0, 0]"
         else:
-            return f"[{max(result[0] - result[1], 1)}, {result[0] + result[1]}]" # Min abundance is 1
+            return f"[{result[0]}, {result[1]}]"
     else:
         if result[0] == 0 and result[1] == 0: # We did not observe this
             return "[0.000000, 0.000000]"
         else:
-            return f"[{(max(result[0] - result[1], 0.000001)):.6f}, {(result[0] + result[1]):.6f}]"
+            return f"[{result[0]:.6f}, {result[1]:.6f}]"
 
 # Helper function for multi-round cases (1A + 1B) to find the prefix for the next round and then find the file associated
 def next_round_file(input_str):
@@ -177,36 +178,43 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
 
         # Bootstrap data !!! Changed this part to make freq ranges make more sense according to abundances
         c_post_boot = bootstrap(c_post, totals[2])
-        f_post_boot = [f_post, f_post - (c_post_boot[0] - c_post_boot[1]) / float(totals[2])]
         c_in_boot = bootstrap(c_in, totals[0])
-        f_in_boot = [f_in, f_in - (c_in_boot[0] - c_in_boot[1]) / float(totals[0])]
         c_neg_boot = None
-        f_neg_boot = None
 
-        print(str(seq).ljust(max_len), end='\t', file=out)
-        print(str(c_in_boot[0]).ljust(10), end='\t', file=out)
-        print(format_bootstrap(c_in_boot, 'a').ljust(15), end='\t', file=out)
-        print(str(f"{f_in_boot[0]:.6f}").ljust(10), end='\t', file=out)
-        print(format_bootstrap(f_in_boot, 'f').ljust(15), end='\t', file=out)
-        print(str(c_post_boot[0]).ljust(10), end='\t', file=out)
-        print(format_bootstrap(c_post_boot, 'a').ljust(15), end='\t', file=out)
-        print(str(f"{f_post_boot[0]:.6f}").ljust(10), end='\t', file=out)
-        print(format_bootstrap(f_post_boot, 'f').ljust(15), end='\t', file=out)
+        c_post_range = [0, 0] if c_post == 0 else [max(c_post - c_post_boot[1], 1), c_post + c_post_boot[1]]
+        f_post_range = [(x / float(totals[2])) for x in c_post_range]
+        c_in_range = [0, 0] if c_in == 0 else [max(c_in - c_in_boot[1], 1), c_in + c_in_boot[1]]
+        f_in_range = [(x / float(totals[0])) for x in c_in_range]
+
+    # Write data to file
+    if seq in my_sequences.seq_nicknames:
+        print(str(my_sequences.seq_nicknames[seq]).ljust(max_len), end='\t', file=out)
+        print("Found \"" + my_sequences.seq_nicknames[seq] + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
+    else:
+        print(str(c_in).ljust(10), end='\t', file=out)
+        print(format_bootstrap(c_in_range, 'a').ljust(15), end='\t', file=out)
+        print(str(f"{f_in:.6f}").ljust(10), end='\t', file=out)
+        print(format_bootstrap(f_in_range, 'f').ljust(15), end='\t', file=out)
+        print(str(c_post).ljust(10), end='\t', file=out)
+        print(format_bootstrap(c_post_range, 'a').ljust(15), end='\t', file=out)
+        print(str(f"{f_post:.6f}").ljust(10), end='\t', file=out)
+        print(format_bootstrap(f_post_range, 'f').ljust(15), end='\t', file=out)
 
         if neg_file is not None:
             c_neg_boot = bootstrap(c_neg, totals[1])
-            f_neg_boot = [f_neg, f_neg - (c_neg_boot[0] - c_neg_boot[1]) / float(totals[1])]
-            print(str(c_neg_boot[0]).ljust(10), end='\t', file=out)
-            print(str(format_bootstrap(c_neg_boot, 'a')).ljust(15), end='\t', file=out)
-            print(str(f"{f_neg_boot[0]:.6f}").ljust(10), end='\t', file=out)
-            print(format_bootstrap(f_neg_boot, 'f').ljust(15), end='\t', file=out)
+            c_neg_range = [0, 0] if c_neg == 0 else [max(c_neg - c_neg_boot[1], 1), c_neg + c_neg_boot[1]]
+            f_neg_range = [(x / float(totals[2])) for x in c_neg_range]
+            print(str(c_neg).ljust(10), end='\t', file=out)
+            print(str(format_bootstrap(c_neg_range, 'a')).ljust(15), end='\t', file=out)
+            print(str(f"{f_neg:.6f}").ljust(10), end='\t', file=out)
+            print(format_bootstrap(f_neg_range, 'f').ljust(15), end='\t', file=out)
 
         # !!! Calculate and adjust enrichment in positive and negative pools
-        if f_in_boot[0] + f_in_boot[1] > 0: # If the max is more than 1, we've set the min to more than 1
-            enr_post_min = max(0, (f_post_boot[0] - f_post_boot[1])) / (f_in_boot[0] + f_in_boot[1])  # Min enrichment due to selection - assumes smallest f_out and largest f_in
-            enr_post_max = max(0, (f_post_boot[0] + f_post_boot[1])) / max(f_in_boot[0] - f_in_boot[1], 0.000001)
-            enr_neg_min = max(0, (f_neg_boot[0] - f_neg_boot[1])) / (f_in_boot[0] + f_in_boot[1])
-            enr_neg_max = max(0, (f_neg_boot[0] + f_neg_boot[1])) / max(f_in_boot[0] - f_in_boot[1], 0.000001)
+        if f_in_range[0] > 0: # If the max is more than 1, we've set the min to more than 1
+            enr_post_min = f_post_range[0] / f_in_range[1]  # Min enrichment due to selection - assumes smallest f_out and largest f_in
+            enr_post_max = f_post_range[1] / f_in_range[0]  # Max enrichment due to selection - assumes largest f_out and smallest f_in
+            enr_neg_min = f_neg_range[0] / f_in_range[1]
+            enr_neg_max = f_neg_range[1] / f_in_range[0]
         else: # Not enough data to make an estimate
             enr_post_min = 0
             enr_post_max = 0
@@ -214,7 +222,7 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
             enr_neg_max = 0
 
         if enr_post_max > 0: # Makes sense to print enr_post
-            enr_post = f_post_boot[0] / f_in_boot[0]
+            enr_post = f_post / f_in
             print(str(f"{enr_post:.6f}").ljust(10), end='\t\t', file=out)
             print(str(f"[{enr_post_min:.6f}, {enr_post_max:.6f}]").ljust(15), end='\t\t', file=out)
         else:
@@ -222,17 +230,15 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
 
         if neg_file is not None: # 2A, 2B case check
             if enr_neg_max > 0:
-                enr_neg_min = max(0.000001, enr_neg_min)    # min of 0.000001 To make the enr ratio calculatable
-                enr_neg = f_neg_boot[0] / f_in_boot[0]
+                enr_neg = f_neg / f_in
                 print(str(f"{enr_neg:.6f}").ljust(10), end='\t\t', file=out)
                 print(str(f"[{enr_neg_min:.6f}, {enr_neg_max:.6f}]").ljust(15), end='\t\t', file=out)
             else:
                 print('-'.ljust(15), end='\t\t', file=out)
 
         if enr_neg_max > 0 and enr_neg_min > 0:
-            enr_ratio_min = max(0.000001, enr_post_min / enr_neg_max) # min of 0.000001 just in case
+            enr_ratio_min = enr_post_min / enr_neg_max
             enr_ratio_max = enr_post_max / enr_neg_min
-            # enr_ratio_bootstrap = bootstrap(enr_post_boot, 1)
             print(str(f"{enr_post / enr_neg:.6f}").ljust(10), end='\t\t', file=out)
             print(str(f"[{enr_ratio_min:.6f}, {enr_ratio_max:.6f}]").ljust(15), end='\n', file=out)
         elif neg_file is None:

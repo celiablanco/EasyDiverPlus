@@ -7,7 +7,7 @@ import os
 import re
 import glob
 import fnmatch
-import my_sequences
+import uuid
 
 from bootstrap import bootstrap
 
@@ -187,10 +187,16 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
         f_in_range = [(x / float(totals[0])) for x in c_in_range]
 
     # Write data to file
-    if seq in my_sequences.seq_nicknames:
-        print(str(my_sequences.seq_nicknames[seq]).ljust(max_len), end='\t', file=out)
-        print("Found \"" + my_sequences.seq_nicknames[seq] + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
+    seq_names = {}
+    sequence_names = [str(uuid.uuid4()) for _ in range(totals[-1])]
+    print(sequence_names)
+
+    if seq in seq_names:
+        print(str(seq_names[seq]).ljust(max_len), end='\t', file=out)
+        print("Found \"" + seq_names[seq] + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
     else:
+        seq_name = sequence_names.pop(0)
+        seq_names[seq] = seq_name
         print(str(c_in).ljust(10), end='\t', file=out)
         print(format_bootstrap(c_in_range, 'a').ljust(15), end='\t', file=out)
         print(str(f"{f_in:.6f}").ljust(10), end='\t', file=out)

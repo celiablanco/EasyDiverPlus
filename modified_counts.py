@@ -187,70 +187,71 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
         f_in_range = [(x / float(totals[0])) for x in c_in_range]
 
     # Write data to file
-    seq_names = {}
-    sequence_names = [str(uuid.uuid4()) for _ in range(totals[-1])]
-    print(sequence_names)
+    unique_sequences = {}
+    seq_names = all_dict[-1].keys()
+    sequence_names = [str(uuid.uuid4()) for _ in range(len(seq_names))]
 
-    if seq in seq_names:
-        print(str(seq_names[seq]).ljust(max_len), end='\t', file=out)
-        print("Found \"" + seq_names[seq] + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
-    else:
-        seq_name = sequence_names.pop(0)
-        seq_names[seq] = seq_name
-        print(str(c_in).ljust(10), end='\t', file=out)
-        print(format_bootstrap(c_in_range, 'a').ljust(15), end='\t', file=out)
-        print(str(f"{f_in:.6f}").ljust(10), end='\t', file=out)
-        print(format_bootstrap(f_in_range, 'f').ljust(15), end='\t', file=out)
-        print(str(c_post).ljust(10), end='\t', file=out)
-        print(format_bootstrap(c_post_range, 'a').ljust(15), end='\t', file=out)
-        print(str(f"{f_post:.6f}").ljust(10), end='\t', file=out)
-        print(format_bootstrap(f_post_range, 'f').ljust(15), end='\t', file=out)
-
-        if neg_file is not None:
-            c_neg_boot = bootstrap(c_neg, totals[1])
-            c_neg_range = [0, 0] if c_neg == 0 else [max(c_neg - c_neg_boot[1], 1), c_neg + c_neg_boot[1]]
-            f_neg_range = [(x / float(totals[2])) for x in c_neg_range]
-            print(str(c_neg).ljust(10), end='\t', file=out)
-            print(str(format_bootstrap(c_neg_range, 'a')).ljust(15), end='\t', file=out)
-            print(str(f"{f_neg:.6f}").ljust(10), end='\t', file=out)
-            print(format_bootstrap(f_neg_range, 'f').ljust(15), end='\t', file=out)
-
-        # !!! Calculate and adjust enrichment in positive and negative pools
-        if f_in_range[0] > 0: # If the max is more than 1, we've set the min to more than 1
-            enr_post_min = f_post_range[0] / f_in_range[1]  # Min enrichment due to selection - assumes smallest f_out and largest f_in
-            enr_post_max = f_post_range[1] / f_in_range[0]  # Max enrichment due to selection - assumes largest f_out and smallest f_in
-            enr_neg_min = f_neg_range[0] / f_in_range[1]
-            enr_neg_max = f_neg_range[1] / f_in_range[0]
-        else: # Not enough data to make an estimate
-            enr_post_min = 0
-            enr_post_max = 0
-            enr_neg_min = 0
-            enr_neg_max = 0
-
-        if enr_post_max > 0: # Makes sense to print enr_post
-            enr_post = f_post / f_in
-            print(str(f"{enr_post:.6f}").ljust(10), end='\t\t', file=out)
-            print(str(f"[{enr_post_min:.6f}, {enr_post_max:.6f}]").ljust(15), end='\t\t', file=out)
+    for seq in seq_names:
+        if seq in unique_sequences.keys():
+            print("Found \"" + seq + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
         else:
-            print('-'.ljust(15), end='\t\t', file=out)
+            seq_name = sequence_names.pop(0)
+            unique_sequences[seq] = seq_name
+            print(str(unique_sequences[seq]).ljust(max_len), end='\t', file=out)
+            print(str(c_in).ljust(10), end='\t', file=out)
+            print(format_bootstrap(c_in_range, 'a').ljust(15), end='\t', file=out)
+            print(str(f"{f_in:.6f}").ljust(10), end='\t', file=out)
+            print(format_bootstrap(f_in_range, 'f').ljust(15), end='\t', file=out)
+            print(str(c_post).ljust(10), end='\t', file=out)
+            print(format_bootstrap(c_post_range, 'a').ljust(15), end='\t', file=out)
+            print(str(f"{f_post:.6f}").ljust(10), end='\t', file=out)
+            print(format_bootstrap(f_post_range, 'f').ljust(15), end='\t', file=out)
 
-        if neg_file is not None: # 2A, 2B case check
-            if enr_neg_max > 0:
-                enr_neg = f_neg / f_in
-                print(str(f"{enr_neg:.6f}").ljust(10), end='\t\t', file=out)
-                print(str(f"[{enr_neg_min:.6f}, {enr_neg_max:.6f}]").ljust(15), end='\t\t', file=out)
+            if neg_file is not None:
+                c_neg_boot = bootstrap(c_neg, totals[1])
+                c_neg_range = [0, 0] if c_neg == 0 else [max(c_neg - c_neg_boot[1], 1), c_neg + c_neg_boot[1]]
+                f_neg_range = [(x / float(totals[2])) for x in c_neg_range]
+                print(str(c_neg).ljust(10), end='\t', file=out)
+                print(str(format_bootstrap(c_neg_range, 'a')).ljust(15), end='\t', file=out)
+                print(str(f"{f_neg:.6f}").ljust(10), end='\t', file=out)
+                print(format_bootstrap(f_neg_range, 'f').ljust(15), end='\t', file=out)
+
+            # !!! Calculate and adjust enrichment in positive and negative pools
+            if f_in_range[0] > 0: # If the max is more than 1, we've set the min to more than 1
+                enr_post_min = f_post_range[0] / f_in_range[1]  # Min enrichment due to selection - assumes smallest f_out and largest f_in
+                enr_post_max = f_post_range[1] / f_in_range[0]  # Max enrichment due to selection - assumes largest f_out and smallest f_in
+                enr_neg_min = f_neg_range[0] / f_in_range[1]
+                enr_neg_max = f_neg_range[1] / f_in_range[0]
+            else: # Not enough data to make an estimate
+                enr_post_min = 0
+                enr_post_max = 0
+                enr_neg_min = 0
+                enr_neg_max = 0
+
+            if enr_post_max > 0: # Makes sense to print enr_post
+                enr_post = f_post / f_in
+                print(str(f"{enr_post:.6f}").ljust(10), end='\t\t', file=out)
+                print(str(f"[{enr_post_min:.6f}, {enr_post_max:.6f}]").ljust(15), end='\t\t', file=out)
             else:
                 print('-'.ljust(15), end='\t\t', file=out)
 
-        if enr_neg_max > 0 and enr_neg_min > 0:
-            enr_ratio_min = enr_post_min / enr_neg_max
-            enr_ratio_max = enr_post_max / enr_neg_min
-            print(str(f"{enr_post / enr_neg:.6f}").ljust(10), end='\t\t', file=out)
-            print(str(f"[{enr_ratio_min:.6f}, {enr_ratio_max:.6f}]").ljust(15), end='\n', file=out)
-        elif neg_file is None:
-            print(' '.ljust(15), file=out)
-        else:
-            print('-'.ljust(15), file=out)
+            if neg_file is not None: # 2A, 2B case check
+                if enr_neg_max > 0:
+                    enr_neg = f_neg / f_in
+                    print(str(f"{enr_neg:.6f}").ljust(10), end='\t\t', file=out)
+                    print(str(f"[{enr_neg_min:.6f}, {enr_neg_max:.6f}]").ljust(15), end='\t\t', file=out)
+                else:
+                    print('-'.ljust(15), end='\t\t', file=out)
+
+            if enr_neg_max > 0 and enr_neg_min > 0:
+                enr_ratio_min = enr_post_min / enr_neg_max
+                enr_ratio_max = enr_post_max / enr_neg_min
+                print(str(f"{enr_post / enr_neg:.6f}").ljust(10), end='\t\t', file=out)
+                print(str(f"[{enr_ratio_min:.6f}, {enr_ratio_max:.6f}]").ljust(15), end='\n', file=out)
+            elif neg_file is None:
+                print(' '.ljust(15), file=out)
+            else:
+                print('-'.ljust(15), file=out)
 
     out.close()
     print("Time elapsed: " + str(time() - start) + ' s')

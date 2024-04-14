@@ -8,6 +8,7 @@ import re
 import glob
 import fnmatch
 import uuid
+import base64
 
 from bootstrap import bootstrap
 
@@ -189,14 +190,16 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
     # Write data to file
     unique_sequences = {}
     seq_names = all_dict[-1].keys()
-    sequence_names = [str(uuid.uuid4()) for _ in range(len(seq_names))]
+    sequence_number = 1
 
     for seq in seq_names:
         if seq in unique_sequences.keys():
             print("Found \"" + seq + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
         else:
-            seq_name = sequence_names.pop(0)
-            unique_sequences[seq] = seq_name
+            seq_num_bytes = sequence_number.to_bytes(4, byteorder='big')
+            seq_name_base64 = base64.b64encode(seq_num_bytes).decode()
+            unique_sequences[seq] = seq_name_base64
+            sequence_number += 1
             print(str(unique_sequences[seq]).ljust(max_len), end='\t', file=out)
             print(str(c_in).ljust(10), end='\t', file=out)
             print(format_bootstrap(c_in_range, 'a').ljust(15), end='\t', file=out)

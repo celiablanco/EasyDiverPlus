@@ -16,3 +16,4 @@ scripts_enrichments/bootstrapped_res.txt
 output/
 result
 test.py
+**/*.pyc

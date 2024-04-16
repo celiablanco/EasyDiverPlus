@@ -143,7 +143,7 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
             writer.writerow(['Total Number of Molecules (Neg Control)', totals[1]])
 
         # Write column headers
-        writer.writerow(['seq', 'a_in', 'a_in (95 CI)', 'f_in', 'f_in (95 CI)', 'a_out', 'a_out (95 CI)', 'f_out', 'f_out (95 CI)', 'a_neg', 'a_neg (95 CI)', 'f_neg', 'f_neg (95 CI)', 'e_out', 'e_out (interval)', 'e_n', 'e_n (interval)', 'e_out/e_n', 'e_out/e_n (interval)'])
+        writer.writerow(['unique_name', 'seq', 'a_in', 'a_in (95 CI)', 'f_in', 'f_in (95 CI)', 'a_out', 'a_out (95 CI)', 'f_out', 'f_out (95 CI)', 'a_neg', 'a_neg (95 CI)', 'f_neg', 'f_neg (95 CI)', 'e_out', 'e_out (interval)', 'e_n', 'e_n (interval)', 'e_out/e_n', 'e_out/e_n (interval)'])
 
         for seq in all_dict[-1]: # Originally 2. Calculate each sequence's a_in, f_in, a_out, etc. stats
             f_post = all_dict[-1][seq][1]
@@ -180,7 +180,7 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
     # Write data to the CSV file
         unique_sequences = {}
         seq_names = all_dict[-1].keys()
-        sequence_number = 1
+        sequence_number = 0
         chars58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
         for seq in seq_names:
@@ -191,7 +191,8 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
                 seq_name_base58 = base_encode(sequence_number, chars58)
                 unique_sequences[seq] = seq_name_base58
                 sequence_number += 1
-                row.append(unique_sequences[seq])
+                row.append(f"seq_{unique_sequences[seq]}")
+                row.append(seq)
                 row.append(str(c_in))
                 row.append(format_bootstrap(c_in_range, 'a'))
                 row.append(str(f"{f_in:.6f}"))
@@ -274,7 +275,6 @@ def find_enrichments():
         print("Directory path not provided.")
         sys.exit(1)
 
-    print(counts_type)
     # Set directory path
     outdir = dir_path
     counts_dir = os.path.join(outdir, counts_type)

@@ -7,8 +7,6 @@ import os
 import re
 import glob
 import fnmatch
-import uuid
-import base64
 
 from bootstrap import bootstrap
 
@@ -50,6 +48,15 @@ def next_round_file(input_str):
         if file.startswith(file_pre) and file.endswith('.txt'):
             return os.path.join(directory, file) # directory + input_str[last_slash_index + 1:].replace(match.group(0), file)
     return None
+
+def base_encode(num, chars):
+    if num == 0:
+        return chars[0]
+    encoded = []
+    while num > 0:
+        num, rem = divmod(num, len(chars))
+        encoded.insert(0, chars[rem])
+    return ''.join(encoded)
 
 def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None):
     start = time()
@@ -191,14 +198,14 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
     unique_sequences = {}
     seq_names = all_dict[-1].keys()
     sequence_number = 1
+    chars58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
     for seq in seq_names:
         if seq in unique_sequences.keys():
             print("Found \"" + seq + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
         else:
-            seq_num_bytes = sequence_number.to_bytes(4, byteorder='big')
-            seq_name_base64 = base64.b64encode(seq_num_bytes).decode()
-            unique_sequences[seq] = seq_name_base64
+            seq_name_base58 = base_encode(sequence_number, chars58)
+            unique_sequences[seq] = seq_name_base58
             sequence_number += 1
             print(str(unique_sequences[seq]).ljust(max_len), end='\t', file=out)
             print(str(c_in).ljust(10), end='\t', file=out)

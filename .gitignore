@@ -16,4 +16,7 @@ scripts_enrichments/bootstrapped_res.txt
 output/
 result
 test.py
+__pycache__/easy_diver.cpython-311.pyc
+__pycache__/enrichment_stats.cpython-311.pyc
+__pycache__/graph_figures.cpython-311.pyc
 **/*.pyc

@@ -261,6 +261,9 @@ def find_enrichments():
             i += 2
         elif sys.argv[i] == "-out" and i + 1 < len(sys.argv):
             i += 2
+        elif sys.argv[i] == "-count" and i + 1 < len(sys.argv):
+            counts_type = sys.argv[i + 1]
+            i += 2
         else:
             print("Invalid arguments provided.")
             sys.exit(1)
@@ -271,7 +274,6 @@ def find_enrichments():
 
     # Set directory path
     outdir = dir_path
-    counts_type = 'counts'
     counts_dir = os.path.join(outdir, counts_type)
 
     print(f"Current directory path: {counts_dir}")

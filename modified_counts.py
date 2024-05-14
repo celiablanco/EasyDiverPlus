@@ -144,6 +144,9 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
 
         # Write column headers
         writer.writerow(['unique_name', 'seq', 'a_in', 'a_in (95 CI)', 'f_in', 'f_in (95 CI)', 'a_out', 'a_out (95 CI)', 'f_out', 'f_out (95 CI)', 'a_neg', 'a_neg (95 CI)', 'f_neg', 'f_neg (95 CI)', 'e_out', 'e_out (interval)', 'e_n', 'e_n (interval)', 'e_out/e_n', 'e_out/e_n (interval)'])
+        unique_sequences = {}
+        sequence_number = 0
+        chars58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
         for seq in all_dict[-1]: # Originally 2. Calculate each sequence's a_in, f_in, a_out, etc. stats
             f_post = all_dict[-1][seq][1]
@@ -177,13 +180,7 @@ def run_enrichment_analysis(out_file, in_file=None, res_file=None, neg_file=None
             c_in_range = [0, 0] if c_in == 0 else [max(c_in - c_in_boot[1], 1), c_in + c_in_boot[1]]
             f_in_range = [(x / float(totals[0])) for x in c_in_range]
 
-    # Write data to the CSV file
-        unique_sequences = {}
-        seq_names = all_dict[-1].keys()
-        sequence_number = 0
-        chars58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-
-        for seq in seq_names:
+            # Write data to the CSV file
             row = []
             if seq in unique_sequences.keys():
                 print("Found \"" + seq + "\" " + format_bootstrap(c_post_range, 'a') + " times with " + format_bootstrap(f_post_range, 'f') + " frequency.")
@@ -264,9 +261,6 @@ def find_enrichments():
             i += 2
         elif sys.argv[i] == "-out" and i + 1 < len(sys.argv):
             i += 2
-        elif sys.argv[i] == "-count" and i + 1 < len(sys.argv):
-            counts_type = sys.argv[i + 1]
-            i += 2
         else:
             print("Invalid arguments provided.")
             sys.exit(1)
@@ -277,6 +271,7 @@ def find_enrichments():
 
     # Set directory path
     outdir = dir_path
+    counts_type = 'counts'
     counts_dir = os.path.join(outdir, counts_type)
 
     print(f"Current directory path: {counts_dir}")
@@ -320,7 +315,7 @@ def find_enrichments():
 
         progress = i * 100 / max_round
         print("(Approx.) Progress:", progress, "%")
-
+    
 
 if __name__ == '__main__':
     find_enrichments()

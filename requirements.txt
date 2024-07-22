@@ -1,5 +1,4 @@
-matplotlib
+plotly
 numpy
-openpyxl
 pandas
-seaborn
+PyQt5

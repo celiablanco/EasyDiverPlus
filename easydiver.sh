@@ -97,7 +97,7 @@ fi
 # Argument report
 # Check arguments, print, exit if necessary w/ message
 
-if [ -z "$inopt" ] && [ -z "$outopt" ] && [ -z $fwd ] && [ -z $rev] && [ -z $threads ] && [ -z $extra ] && [ -z $prot ] && [ -z $slanes ];
+if [ -z "$inopt" ] && [ -z "$outopt" ] && [ -z $fwd ] && [ -z $rev ] && [ -z $threads ] && [ -z $extra ] && [ -z $prot ] && [ -z $slanes ];
 	then
 		echo ""
 		echo "${bold}NO FLAGS PROVIDED. ENTERING PROMPTED INPUT VERSION${normal}"

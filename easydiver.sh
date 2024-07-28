@@ -553,6 +553,31 @@ if [ -z $prot ];
 		rm $outdir/log_temp2.txt
 fi
 
+dir1="${outdir}/counts.aa"
+dir2="${outdir}/counts"
+
+# Loop through the directories
+for directory in "$dir1" "$dir2"; do
+  # Check if the directory exists
+  if [ -d "$directory" ]; then
+    # Create or clear the seq_dict.json file in each directory
+    echo "{}" > "$directory/seq_dict.json"
+
+    # Loop through the files in the directory
+    for file in "$directory"/*; do
+      # Check if the file is a regular file and is not seq_dict.json
+      if [ -f "$file" ] && [ "$(basename "$file")" != "seq_dict.json" ]; then
+        # Do something with the file
+        python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json"
+		rm "$file"
+      fi
+    done
+	rm "$directory/seq_dict.json"
+  else
+    echo "Directory $directory does not exist."
+  fi
+done
+
 # Record end time in seconds to calculate run time at the end
 end=`date +%s`
 

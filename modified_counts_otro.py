@@ -153,7 +153,7 @@ def get_first_matching_file(
     if len(filenames) == 0:
         return None
     path_pattern = os.path.join(counts_dir, filenames[0])
-    matches = glob.glob(path_pattern+'*.txt')
+    matches = glob.glob(path_pattern+'*.csv')
     return matches[0] if matches else None
 
 def safe_divide(a: float, b: float, default: float = 0.0) -> float:
@@ -175,149 +175,6 @@ def safe_divide(a: float, b: float, default: float = 0.0) -> float:
     except ZeroDivisionError:
         return default
 
-def base_encode(sequence_number: int) -> str:
-    """
-    Encodes an integer sequence number into a Base58 string.
-
-    The Base58 encoding uses the characters:
-    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".
-    This excludes characters that can be easily confused, such as '0', 'O', 'I', and 'l'.
-
-    Parameters:
-    sequence_number (int): The integer sequence number to encode.
-
-    Returns:
-    str: The Base58 encoded string representation of the sequence number.
-
-    Example:
-    >>> base_encode(12345)
-    '4ER'
-    """
-    chars58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-    if sequence_number == 0:
-        return "seq_"+chars58[0]
-    encoded = []
-    while sequence_number > 0:
-        sequence_number, rem = divmod(sequence_number, len(chars58))
-        encoded.insert(0, chars58[rem])
-    return "seq_"+"".join(encoded)
-
-def unique_sequence_name_generator(row: pd.Series, sequence_dict: dict) -> str:
-    """
-    Generates a unique sequence name for a given row in a pandas DataFrame.
-
-    If the sequence name already exists in the provided dictionary, it returns the existing name.
-    Otherwise, it encodes the row's index into a Base58 string, stores it in the dictionary,
-    and returns the new unique sequence name.
-
-    Parameters:
-    row (pd.Series): A row from a pandas DataFrame containing the 'Sequence' column.
-    sequence_dict (dict): A dictionary mapping sequence names to their unique encoded names.
-
-    Returns:
-    str: The unique sequence name for the given row.
-
-    Example:
-    >>> import pandas as pd
-    >>> df = pd.DataFrame({'Sequence': ['A', 'B', 'A']})
-    >>> sequence_dict = {}
-    >>> df['UniqueSequenceName'] = df.apply(
-            unique_sequence_name_generator, 
-            axis=1, 
-            sequence_dict=sequence_dict
-        )
-    >>> df
-      Sequence UniqueSequenceName
-    0        A                  1
-    1        B                  2
-    2        A                  1
-    """
-    if row['Sequence'] in sequence_dict.keys():
-        return sequence_dict[row['Sequence']]
-    else:
-        encoded_name = base_encode(int(row.name))
-        sequence_dict[row['Sequence']] = encoded_name
-        return encoded_name
-
-def bootstrap_counts_resampling(
-        total_counts: int,
-        count_seq: int,
-        sequence: str,
-        bootstrap_depth: int = 1000,
-        seed: int = 42
-    ) -> tuple[str,List[float]]:
-    """
-    Performs bootstrap resampling on counts data. 
-    Can be used instead of 'binomial' approach.
-    Binomial approach is currently used for this script, 
-    but leaving this here for potential use in future.
-
-    Parameters:
-    total_counts (int): Total number of counts.
-    count_seq (int): Number of sequences.
-    sequence (str): Sequence identifier.
-    bootstrap_depth (int): Number of bootstrap samples to generate. Default is 1000.
-    seed (int): Random seed for reproducibility. Default is 42.
-
-    Returns:
-    tuple: A tuple containing the sequence identifier 
-        and the 95% confidence interval of the bootstrapped counts as [lower, upper].
-    """
-    if seed is not None:
-        np.random.seed(seed)
-    # Sample with 1 representing seq A and 0 representing other seqs
-    sample = np.array(
-        [1 for _ in range(count_seq)] + [0 for _ in range(total_counts - count_seq)]
-    )
-    bootstrapped_counts = [
-        np.sum(
-            np.random.choice(sample, size=len(sample), replace=True)
-        ) for _ in range(bootstrap_depth)
-    ]
-    # Some related statistics
-    # bootstrapped_mean = np.mean(bootstrapped_counts)
-    # bootstrapped_sd = np.std(bootstrapped_counts, ddof=1)
-    # bootstrapped_median = np.percentile(bootstrapped_counts, 50)
-    bootstrapped_95_confidence_interval = [
-        np.percentile(bootstrapped_counts, 2.5),
-        np.percentile(bootstrapped_counts, 97.5)
-    ]
-
-    return sequence, list(np.around(np.array(bootstrapped_95_confidence_interval),2))
-
-def bootstrap_counts_binomial(
-        total_counts: int,
-        count_seq: int,
-        sequence: str,
-        bootstrap_depth: int = 1000,
-        seed: int = 42
-    ) -> tuple[str,List[float]]:
-    """
-    Performs bootstrap binomial sampling on counts data.
-
-    Parameters:
-    total_counts (int): Total number of counts.
-    count_seq (int): Number of sequences.
-    sequence (str): Sequence identifier.
-    bootstrap_depth (int): Number of bootstrap samples to generate. Default is 1000.
-    seed (int): Random seed for reproducibility. Default is 42.
-
-    Returns:
-    tuple: A tuple containing the sequence identifier 
-        and the 95% confidence interval of the bootstrapped counts as [lower, upper].
-    """
-    if seed is not None:
-        np.random.seed(seed)
-    bootstrapped_counts = np.random.binomial(
-        total_counts, count_seq / total_counts, size = bootstrap_depth
-    )
-    # Calculate the 95% confidence interval
-    bootstrapped_95_confidence_interval = [
-        np.percentile(bootstrapped_counts, 2.5),
-        np.percentile(bootstrapped_counts, 97.5)
-    ]
-    return sequence, list(np.around(np.array(bootstrapped_95_confidence_interval), 2))
-
 def easy_diver_parse_file_header(file_path: str, encoding: str = 'utf-8') -> tuple[int, int]:
     """
     Parses the header of an Easy Diver counts file 
@@ -336,8 +193,8 @@ def easy_diver_parse_file_header(file_path: str, encoding: str = 'utf-8') -> tup
         lines = [next(file).strip() for _ in range(3)]
 
     # Extract the values using string manipulation
-    num_unique_sequences = int(lines[0].split('=')[1].strip())
-    total_num_molecules = int(lines[1].split('=')[1].strip())
+    num_unique_sequences = int(lines[0].split(',')[1].strip())
+    total_num_molecules = int(lines[1].split(',')[1].strip())
 
     return num_unique_sequences, total_num_molecules
 
@@ -382,40 +239,21 @@ def easy_diver_counts_to_df(filename: str, ed_round: int, ftype: str) -> pd.Data
     num_seqs, total_mols = easy_diver_parse_file_header(filename)
     df = pd.read_csv(
         filename,
-        sep=r'\s+',
-        skiprows=3,
+        skiprows=4,
         header=None
     )
 
-    df.columns = ['Sequence', 'Count', 'Freq']
-    df['Count'] = df['Count'].astype(int)
-    df['Freq'] = df['Count']/total_mols
+    df.columns = [
+        'Unique_Sequence_Name','Sequence','Count',
+        'Count_Lower','Count_Upper','Freq','Freq_Lower','Freq_Upper'
+    ]
     df['Total_Unique_Sequences'] = num_seqs
     df['Total_Molecules'] = total_mols
     df['Round'] = ed_round
     df['Type'] = ftype
-    
-    results = parallel_apply(df, bootstrap_counts_binomial, 'Count', 'Sequence', total_mols, 1000)
-    results_df = pd.DataFrame(
-        results,
-        columns = ['Sequence','Bootstrapped_95CI']
-    )
-    results_df[['Count_Lower', 'Count_Upper']] = pd.DataFrame(
-        results_df['Bootstrapped_95CI'].tolist(),
-        index = results_df.index
-    )
-    df = pd.merge(
-        df,
-        results_df[['Sequence', 'Count_Lower', 'Count_Upper']],
-        on='Sequence',
-        how='inner'
-    )
-
-    df['Count_Lower'] = df['Count_Lower'].replace(0, 1)
-
-    df['Freq_Lower'] = df['Count_Lower']/df['Total_Molecules']
-    df['Freq_Upper'] = df['Count_Upper']/df['Total_Molecules']
-
+    for coln in df.columns:
+        if coln.lower().startswith('freq'):
+            df[coln] = df[coln].str.rstrip('%').astype('float')
     return df
 
 def process_enrichments(row: pd.Series) -> dict:
@@ -486,7 +324,6 @@ def process_enrichments(row: pd.Series) -> dict:
 
 def merge_data_for_rounds(
         out_df: pd.DataFrame,
-        sequence_dict: dict,
         in_df: Optional[pd.DataFrame] = None,
         neg_df: Optional[pd.DataFrame] = None
     ) -> pd.DataFrame:
@@ -508,7 +345,8 @@ def merge_data_for_rounds(
     """
     # Merge the first two DataFrames on 'Sequence' with a full join
     columns_to_keep = [
-        'Sequence', 'Count', 'Count_Lower', 'Count_Upper',
+        'Unique_Sequence_Name', 'Sequence',
+        'Count', 'Count_Lower', 'Count_Upper',
         'Freq', 'Freq_Lower', 'Freq_Upper',
         'Total_Unique_Sequences', 'Total_Molecules'
     ]
@@ -517,7 +355,7 @@ def merge_data_for_rounds(
         merged_df = pd.merge(
             out_df[columns_to_keep],
             in_df[columns_to_keep],
-            on='Sequence',
+            on=['Unique_Sequence_Name','Sequence'],
             how='left',
             suffixes=(f"_{out_df['Type'][0]}", f"_{in_df['Type'][0]}")
         )
@@ -525,7 +363,7 @@ def merge_data_for_rounds(
         merged_df = pd.merge(
             out_df[columns_to_keep],
             neg_df[columns_to_keep],
-            on='Sequence',
+            on=['Unique_Sequence_Name','Sequence'],
             how='left',
             suffixes=(f"_{out_df['Type'][0]}", f"_{neg_df['Type'][0]}")
         )
@@ -534,14 +372,14 @@ def merge_data_for_rounds(
         merged_df = pd.merge(
             merged_df,
             neg_df[columns_to_keep],
-            on='Sequence',
+            on=['Unique_Sequence_Name','Sequence'],
             how='left',
             suffixes=('', f"_{neg_df['Type'][0]}")
         )
         # ensure the remaining columns have '_neg' suffix
         merged_df.columns = [
             col+'_neg'
-            if col != 'Sequence' and col in out_df.columns
+            if col not in ('Sequence','Unique_Sequence_Name') and col in out_df.columns
             else col
             for col in merged_df.columns
         ]
@@ -549,17 +387,12 @@ def merge_data_for_rounds(
         merged_df = out_df[columns_to_keep]
         # ensure the columns of the single df have '_out' suffix
         merged_df.columns = [
-            col+'_out' if col != 'Sequence' and col in out_df.columns
+            col+'_out' if col not in ('Sequence','Unique_Sequence_Name') and col in out_df.columns
             else col
             for col in merged_df.columns
         ]
 
     sorted_df = merged_df.sort_values(by = 'Count_out', ascending = False)
-    sorted_df['Unique_Sequence_Name'] = sorted_df.apply(
-        unique_sequence_name_generator,
-        axis=1,
-        sequence_dict=sequence_dict
-    )
 
     # Move the 'Unique_Sequence_Name' column to the first position
     other_cols = [
@@ -655,6 +488,7 @@ Total Number of Molecules (Neg Control),{extras.get('mol_neg')}"""
             final_df[col] = final_df[col].astype(int)
         elif col.startswith('Freq'):
             final_df[col] = final_df[col].fillna(0)
+            final_df[col] = final_df[col].apply(lambda x: f"{x:.{precision}f}%")
     try:
         final_df[final_columns].to_csv(
             file_prefix + 'temp.csv',
@@ -774,6 +608,10 @@ def write_enrichments_final_output(
         file_name = f"all_rounds_{expand_name}_results.csv"
         final_output = merged_df[final_cols_to_keep]
         final_output_sorted = final_output.sort_values(by=final_output.columns[-1], ascending=False)
+        for coln in final_output.columns:
+            if coln.lower().startswith('freq'):
+                final_output[coln] = final_output[coln].apply(lambda x: f"{x:.{precision}f}%")
+
         final_output_sorted.to_csv(
             f"{directory}/{file_name}",
             index = False,
@@ -791,7 +629,6 @@ def find_enrichments():
     and writing the enriched results to an output directory. 
     Progress is printed at each step.
     """
-    unique_sequence_dict = {}
     counts_type = ""
     # Parse command-line arguments
     print("SSAILR <=> Processing enrichments for the 'counts' and 'counts.aa' output folders")
@@ -830,14 +667,14 @@ def find_enrichments():
 
     # Set directory path
     for ind, counts_type in enumerate(
-        tqdm(['counts', 'counts.aa'], desc = 'Processing each counts output folder')
+        tqdm(['counts','counts.aa'], desc = 'Processing each counts output folder')
         ):
         counts_dir = os.path.join(outdir, counts_type)
         if not os.path.isdir(counts_dir):
             continue
 
         modified_counts_location = f"modified_{counts_type}"
-        files = os.listdir(counts_dir)
+        # files = os.listdir(counts_dir)
 
         # # Extract round numbers for files matching the criteria
         # round_numbers = [
@@ -871,8 +708,9 @@ def find_enrichments():
             neg_df = easy_diver_counts_to_df(neg_file, i, 'neg')
 
             merged_data = merge_data_for_rounds(
-                out_df = out_df, sequence_dict = unique_sequence_dict,
-                in_df = in_df, neg_df = neg_df
+                out_df = out_df,
+                in_df = in_df,
+                neg_df = neg_df
             )
 
             enrich_and_write(

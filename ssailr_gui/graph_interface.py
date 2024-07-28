@@ -18,22 +18,28 @@ class Graphs_Window(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
         if self.rounds_path is None:
+            self.input_layout = QHBoxLayout()
             self.input_label = QLabel("Input Path for Parent Directory:")
             self.input_dir_edit = ClickableDirectoryEdit()
             self.input_dir_edit.clicked.connect(self.browse_input)
-            input_tooltip_icon = QLabel()
-            input_tooltip_icon.setPixmap(
+            self.input_tooltip_icon = QLabel()
+            self.input_tooltip_icon.setPixmap(
                 QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
             )
-            input_tooltip_icon.setToolTip(
+            self.input_tooltip_icon.setToolTip(
                 "Select the directory containing the modified_counts folder(s)."
             )
+            self.input_layout.addWidget(self.input_label)
+            self.input_layout.addWidget(self.input_dir_edit)
+            self.input_layout.addWidget(self.input_tooltip_icon)
+            layout.addLayout(self.input_layout)
         # Select Round
         self.dna_or_aa_layout = QHBoxLayout()
         self.dna_or_aa_label = QLabel("Select Data Type:")
         self.dna_or_aa_combo = QComboBox()
         self.dna_or_aa_combo.addItem('DNA')
         self.dna_or_aa_combo.addItem('AA')
+        self.dna_or_aa_combo.setCurrentIndex(-1)
         self.dna_or_aa_layout.addWidget(self.dna_or_aa_label)
         self.dna_or_aa_layout.addWidget(self.dna_or_aa_combo)
         self.dna_or_aa_combo.currentIndexChanged.connect(self.populate_rounds)
@@ -89,10 +95,11 @@ class Graphs_Window(QWidget):
         mod_counts = 'modified_counts'
         if self.dna_or_aa_combo.currentText() == 'AA':
             mod_counts = mod_counts+'.aa'
-        rounds_directory = f"{self.rounds_path}/{mod_counts}"
-        rounds = sorted([f for f in os.listdir(rounds_directory) if f.startswith('round_')])
-        for round_name in rounds:
-            self.round_combo.addItem(round_name.split('_')[1])
+        if self.rounds_path is not None:
+            rounds_directory = f"{self.rounds_path}/{mod_counts}"
+            rounds = sorted([f for f in os.listdir(rounds_directory) if f.startswith('round_')])
+            for round_name in rounds:
+                self.round_combo.addItem(round_name.split('_')[1])
     
     def create_input_field(self, label_text, default_value, layout, is_float=False):
         input_layout = QHBoxLayout()
@@ -176,5 +183,10 @@ class Graphs_Window(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Graphs_Window(parent=None, rounds_path=sys.argv[1])
+    rounds_path = None
+    try:
+        rounds_path = sys.argv[1]
+    except Exception as e:
+        print("no input given")
+    window = Graphs_Window(parent = None, rounds_path = rounds_path)
     sys.exit(app.exec_())

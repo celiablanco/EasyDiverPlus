@@ -23,6 +23,9 @@ def main():
     print(args.round_file)
     df = pd.read_csv(f"{args.round_file}", skiprows=6)
     df = df.fillna(0)
+    for coln in df.columns:
+        if coln.lower().startswith('freq'):
+            df[coln] = df[coln].str.rstrip('%').astype('float')
     if 'Enr_neg_upper' in df.columns:
         df['Enr_neg_error_pos'] = df['Enr_neg_upper'] - df['Enr_neg']
         df['Enr_neg_error_neg'] = df['Enr_neg'] - df['Enr_neg_lower']

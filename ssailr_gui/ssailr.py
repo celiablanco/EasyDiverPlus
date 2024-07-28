@@ -41,7 +41,7 @@ class SSAILR(QWidget):
     def calculate(
         self, output_dir, precision, output_text: QTextEdit, finished_callback
     ):
-        run_script = "python3 modified_counts.py"
+        run_script = "python3 modified_counts_otro.py"
 
         if not os.path.exists(output_dir):
             QMessageBox.critical(self, "Error", "Output directory doesn't exist.")

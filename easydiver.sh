@@ -479,8 +479,8 @@ if [ -z $prot ];
 	then
 		:
 	else
-		mkdir counts.aa
-		mv counts/*aa.txt counts.aa/
+		mkdir counts_aa
+		mv counts/*aa.txt counts_aa/
 		mv counts/*aa_histo.txt histos/
 fi
 progress=$((90))
@@ -540,8 +540,8 @@ if [ -z $prot ];
 			$(cat $R2 | zcat | awk 'END {print NR/4}')  \
 			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
 			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
-			$(cat ${outdir}/counts.aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
-			$(cat ${outdir}/counts.aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
+			$(cat ${outdir}/counts_aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
+			$(cat ${outdir}/counts_aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
 			| column -t >> $outdir/log_temp2.txt
 
 		done
@@ -552,6 +552,32 @@ if [ -z $prot ];
 		rm $outdir/log_temp1.txt
 		rm $outdir/log_temp2.txt
 fi
+
+dir1="${outdir}/counts_aa"
+dir2="${outdir}/counts"
+
+# Loop through the directories
+for directory in "$dir1" "$dir2"; do
+  # Check if the directory exists
+  if [ -d "$directory" ]; then
+    # Create or clear the seq_dict.json file in each directory
+    echo "{}" > "$directory/seq_dict.json"
+
+    # Loop through the files in the directory
+    for file in "$directory"/*; do
+      # Check if the file is a regular file and is not seq_dict.json
+      if [ -f "$file" ] && [ "$(basename "$file")" != "seq_dict.json" ]; then
+        # Do something with the file
+		echo python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json"
+        python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json"
+		rm "$file"
+      fi
+    done
+	rm "$directory/seq_dict.json"
+  else
+    echo "Directory $directory does not exist."
+  fi
+done
 
 # Record end time in seconds to calculate run time at the end
 end=`date +%s`

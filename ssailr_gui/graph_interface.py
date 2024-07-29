@@ -5,10 +5,13 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
 from PyQt5.QtGui import QDoubleValidator, QIntValidator, QPixmap, QCloseEvent
 from PyQt5.QtCore import Qt, QEvent # type: ignore # pylint: disable=import-error
 from directory_edit import ClickableDirectoryEdit
+from graphs_generator import main as gg_main
 
 class Graphs_Window(QWidget):
     def __init__(self, parent = None, rounds_path = None):
         super().__init__(parent)
+        if parent.__class__.__name__ == 'MainApp':
+            parent.close()
         self.rounds_path = rounds_path
         self.inputs = {}
         self.worker = None
@@ -18,22 +21,28 @@ class Graphs_Window(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
         if self.rounds_path is None:
+            self.input_layout = QHBoxLayout()
             self.input_label = QLabel("Input Path for Parent Directory:")
             self.input_dir_edit = ClickableDirectoryEdit()
             self.input_dir_edit.clicked.connect(self.browse_input)
-            input_tooltip_icon = QLabel()
-            input_tooltip_icon.setPixmap(
+            self.input_tooltip_icon = QLabel()
+            self.input_tooltip_icon.setPixmap(
                 QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
             )
-            input_tooltip_icon.setToolTip(
+            self.input_tooltip_icon.setToolTip(
                 "Select the directory containing the modified_counts folder(s)."
             )
+            self.input_layout.addWidget(self.input_label)
+            self.input_layout.addWidget(self.input_dir_edit)
+            self.input_layout.addWidget(self.input_tooltip_icon)
+            layout.addLayout(self.input_layout)
         # Select Round
         self.dna_or_aa_layout = QHBoxLayout()
         self.dna_or_aa_label = QLabel("Select Data Type:")
         self.dna_or_aa_combo = QComboBox()
         self.dna_or_aa_combo.addItem('DNA')
         self.dna_or_aa_combo.addItem('AA')
+        self.dna_or_aa_combo.setCurrentIndex(-1)
         self.dna_or_aa_layout.addWidget(self.dna_or_aa_label)
         self.dna_or_aa_layout.addWidget(self.dna_or_aa_combo)
         self.dna_or_aa_combo.currentIndexChanged.connect(self.populate_rounds)
@@ -79,20 +88,21 @@ class Graphs_Window(QWidget):
 
         self.setLayout(layout)
         self.setWindowTitle("Graph Generator")
-        self.center_window()
         self.setWindowFlags(Qt.Window)
         self.show()
+        self.center_window()
     
     def populate_rounds(self):
         # Assuming the directory containing rounds is pre-defined in the code
         self.round_combo.clear()
         mod_counts = 'modified_counts'
         if self.dna_or_aa_combo.currentText() == 'AA':
-            mod_counts = mod_counts+'.aa'
-        rounds_directory = f"{self.rounds_path}/{mod_counts}"
-        rounds = sorted([f for f in os.listdir(rounds_directory) if f.startswith('round_')])
-        for round_name in rounds:
-            self.round_combo.addItem(round_name.split('_')[1])
+            mod_counts = mod_counts+'_aa'
+        if self.rounds_path is not None:
+            rounds_directory = f"{self.rounds_path}/{mod_counts}"
+            rounds = sorted([f for f in os.listdir(rounds_directory) if f.startswith('round_')])
+            for round_name in rounds:
+                self.round_combo.addItem(round_name.split('_')[1])
     
     def create_input_field(self, label_text, default_value, layout, is_float=False):
         input_layout = QHBoxLayout()
@@ -112,25 +122,13 @@ class Graphs_Window(QWidget):
         # Implement the graph generation logic here
         mod_counts = 'modified_counts'
         if self.dna_or_aa_combo.currentText() == 'AA':
-            mod_counts = mod_counts+'.aa'
+            mod_counts = mod_counts+'_aa'
         input_values = {label: field.text() for label, field in self.inputs.items()}
-        run_script = f'python "ssailr_gui/graphs_generator.py" --round_file {self.rounds_path}/{mod_counts}/round_{self.round_combo.currentText()}_enrichment_analysis.csv '
-        for input_val in input_values:
-            arg_label = input_val.lower().replace(' cutoff threshold:','')
-            arg_value = input_values.get(input_val)
-            run_script +=f'--{arg_label} {arg_value} '
-
+        rounds_file = f"{self.rounds_path}/{mod_counts}/round_{self.round_combo.currentText()}_enrichment_analysis.csv"
         try:
-            result = subprocess.run(run_script, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output = result.stdout.decode('utf-8')
-            error = result.stderr.decode('utf-8')
-            
-            if output:
-                print("Output:", output)
-            if error:
-                print("Error:", error)
-            
-            QMessageBox.information(self, "Graphs Generated", "The graphs have been generated successfully.")
+            grapher = gg_main(rounds_file, input_values)
+            if grapher is True:
+                QMessageBox.information(self, "Graphs Generated", "The graphs have been generated successfully.")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode('utf-8') if e.stderr else str(e)
             print("An error occurred:", error_msg)
@@ -168,13 +166,10 @@ class Graphs_Window(QWidget):
         """
         # Ensure the parent exists and the button exists before trying to disable it
         if (self.parent() is not None):
-            QMessageBox.information(
-                self, "Success", "All tasks completed successfully."
-            )
             self.parent().close()
         event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Graphs_Window(parent=None, rounds_path=sys.argv[1])
+    window = Graphs_Window(parent = None, rounds_path = None)
     sys.exit(app.exec_())

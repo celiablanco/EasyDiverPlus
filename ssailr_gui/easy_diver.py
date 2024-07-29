@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import subprocess
 import sys
+import os
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -16,24 +17,41 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QSplitter
 )
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QCloseEvent
 from PyQt5.QtCore import Qt
 
 from directory_edit import ClickableDirectoryEdit
-from ssailr import SSAILR
 from file_sorter import SortingApp
 from graph_interface import Graphs_Window
+from modified_counts import find_enrichments as mod_counts_main
 
+def path_constructor(path: str, parent_path: str) -> str:
+
+    # Determine if we are running in a bundled mode
+    if hasattr(sys, '_MEIPASS'):
+        # We are running in a bundled mode, use sys._MEIPASS
+        base_path = sys._MEIPASS
+    else:
+        # We are running in normal mode, use the script directory
+        base_path = os.path.abspath(".")
+
+    # Construct the path to the image file
+    if parent_path == '.':
+        adjusted_path = os.path.join(base_path, path)
+    else:
+        adjusted_path = os.path.join(base_path, parent_path, path)
+    return adjusted_path
 class EasyDiver(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.ssailr = SSAILR()
+    def __init__(self, parent = None):
+        super().__init__(parent)
         self.init_ui()
         self.graphi = None
         self.dash_thread = None
         self.output_dir = ""
 
     def init_ui(self):
+        if (self.parent() is not None):
+            self.parent().close()
         self.setWindowTitle("Easy Diver 2.0")
         layout = QVBoxLayout()
 
@@ -45,27 +63,26 @@ class EasyDiver(QWidget):
         self.image_layout = QVBoxLayout()
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap("ssailr_gui/assets/logo.png").scaledToWidth(15000)
+        self.image_pixmap = QPixmap(path_constructor("logo.png","ssailr_gui/assets/")).scaledToWidth(15000)
         self.image_label.setPixmap(self.image_pixmap)
         self.image_layout.addWidget(self.image_label)
         self.image_widget.setLayout(self.image_layout)
 
         splitter.addWidget(self.image_widget)
 
+        # Required parameters
         self.required_widget = QWidget()
         self.required_layout = QVBoxLayout()
-
-        # Required parameters
         self.required_label = QLabel("REQUIRED")
         self.required_layout.addWidget(self.required_label)
-
+        question_path = path_constructor("question_icon.png","ssailr_gui/assets/")
         # Option -i
         self.input_label = QLabel("Input Directory Path:")
         self.input_dir_edit = ClickableDirectoryEdit()
         self.input_dir_edit.clicked.connect(self.browse_input)
         input_tooltip_icon = QLabel()
         input_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         input_tooltip_icon.setToolTip(
             "Select the directory containing the input files."
@@ -93,7 +110,7 @@ class EasyDiver(QWidget):
         self.output_dir_edit = QLineEdit()
         output_tooltip_icon = QLabel()
         output_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         output_tooltip_icon.setToolTip(
             "Specify the directory to save output files. If not provided, it defaults to the input directory with '/pipeline.output' appended."
@@ -110,7 +127,7 @@ class EasyDiver(QWidget):
         self.forward_primer_edit = QLineEdit()
         forward_primer_tooltip_icon = QLabel()
         forward_primer_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         forward_primer_tooltip_icon.setToolTip(
             "Enter the forward primer sequence for extraction."
@@ -127,7 +144,7 @@ class EasyDiver(QWidget):
         self.reverse_primer_edit = QLineEdit()
         reverse_primer_tooltip_icon = QLabel()
         reverse_primer_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         reverse_primer_tooltip_icon.setToolTip(
             "Enter the reverse primer sequence for extraction."
@@ -144,7 +161,7 @@ class EasyDiver(QWidget):
         self.threads_edit = QLineEdit()
         threads_tooltip_icon = QLabel()
         threads_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         threads_tooltip_icon.setToolTip(
             "Specify the number of threads to use for processing."
@@ -163,7 +180,7 @@ class EasyDiver(QWidget):
         self.extra_flags_edit = QLineEdit()
         extra_flags_tooltip_icon = QLabel()
         extra_flags_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         extra_flags_tooltip_icon.setToolTip(
             'Enter any extra flags for PANDASeq, enclosed in quotes (e.g., "-L 50").'
@@ -179,7 +196,7 @@ class EasyDiver(QWidget):
         self.translate_check = QCheckBox("Translate to Amino Acids")
         translate_tooltip_icon = QLabel()
         translate_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         translate_tooltip_icon.setToolTip(
             "Check this box to translate nucleotide sequences to amino acids."
@@ -195,7 +212,7 @@ class EasyDiver(QWidget):
         self.retain_check = QCheckBox("Retain Individual Lane Outputs")
         retain_tooltip_icon = QLabel()
         retain_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         retain_tooltip_icon.setToolTip(
             "Check this box to retain outputs for individual lanes."
@@ -212,7 +229,7 @@ class EasyDiver(QWidget):
         self.run_ssailr.stateChanged.connect(self.toggle_precision_option)
         ssailr_tooltip_icon = QLabel()
         ssailr_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         ssailr_tooltip_icon.setToolTip(
             "Check this box to run SSAILR for enrichment analysis."
@@ -230,7 +247,7 @@ class EasyDiver(QWidget):
         self.precision_input = QSpinBox()
         self.precision_input_tooltip_icon = QLabel()
         self.precision_input_tooltip_icon.setPixmap(
-            QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+            QPixmap(question_path).scaled(20, 20)
         )
         self.precision_input_tooltip_icon.setToolTip(
             "Enter an integer value for the precision of decimal numbers that will be printed in the enrichment output files. Default is 6, max is 10."
@@ -258,7 +275,7 @@ class EasyDiver(QWidget):
         # self.generate_plots = QCheckBox("Generate Plots")
         # generate_plots_tooltip_icon = QLabel()
         # generate_plots_tooltip_icon.setPixmap(
-        #     QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+        #     QPixmap(question_path).scaled(20, 20)
         # )
         # generate_plots_tooltip_icon.setToolTip("Check to generate plots from the data.")
 
@@ -286,13 +303,11 @@ class EasyDiver(QWidget):
             "Click to access additional help information."
         )
         self.help_button.clicked.connect(self.display_help_message)
-        # button_layout.addWidget(self.help_button)
 
         # Cancel
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.setToolTip("Click to cancel and close the application.")
         self.cancel_button.clicked.connect(self.close)
-        button_layout.addWidget(self.cancel_button)
 
         # Submit
         self.submit_button = QPushButton("Submit", self)
@@ -301,8 +316,10 @@ class EasyDiver(QWidget):
         )
         self.submit_button.clicked.connect(self.submit)
         self.submit_button.setDisabled(True)
-        button_layout.addWidget(self.submit_button)
 
+        button_layout.addWidget(self.submit_button)
+        button_layout.addWidget(self.help_button)
+        button_layout.addWidget(self.cancel_button)
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
@@ -357,7 +374,8 @@ class EasyDiver(QWidget):
             self.run_ssailr.setChecked(False)
 
     def submit(self):
-        run_script = "bash easydiver.sh "
+        easy_diver_path = path_constructor("easydiver.sh", ".")
+        run_script = f"bash {easy_diver_path} "
         if not self.input_dir_edit.text():
             QMessageBox.critical(self, "Error", "Please enter the required input.")
             return
@@ -424,12 +442,11 @@ class EasyDiver(QWidget):
 
     def run_ssailr_steps(self, output_dir, precision):
         if self.run_ssailr.isChecked():
-            self.ssailr.calculate(
-                output_dir,
-                precision,
-                self.output_text,
-                lambda returncode: self.on_calculate_finish(returncode, output_dir),
-            )
+            mod_counts = mod_counts_main(output_dir, precision)
+            if mod_counts is True:
+                self.on_calculate_finish(0, output_dir)
+            else:
+                self.on_calculate_finish(1, output_dir)
         else:
             self.on_calculate_finish(0, output_dir)
 
@@ -493,6 +510,18 @@ class EasyDiver(QWidget):
         """
 
         QMessageBox.information(self, "Help", help_text)
+
+    def closeEvent(self, event: QCloseEvent) -> None: # pylint: disable=invalid-name
+        """
+        Handle the event when the application window is closed,
+        ensuring the interaction button is disabled in the main window
+        and the submit button is enabled in the main window, if and only if
+        the saved choices was successful, meaning the sorting is completed.
+        """
+        # Ensure the parent exists and the button exists before trying to disable it
+        if (self.parent() is not None):
+            self.parent().close()
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

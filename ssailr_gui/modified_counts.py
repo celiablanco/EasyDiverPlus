@@ -101,6 +101,7 @@ import os
 import sys
 import argparse
 import glob
+from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 from typing import Optional, List, Callable, Any, Tuple
 from tqdm import tqdm
@@ -155,6 +156,13 @@ def get_first_matching_file(
     path_pattern = os.path.join(counts_dir, filenames[0])
     matches = glob.glob(path_pattern+'*.csv')
     return matches[0] if matches else None
+
+def check_rounds_file(rounds_df: pd.DataFrame, counts_dir: str) -> bool:
+    filenames = rounds_df['filename'].tolist()
+    files = [file.split('_counts')[0] for file in os.listdir(counts_dir)]
+    if Counter(filenames) == Counter(files):
+        return True
+    return False
 
 def safe_divide(a: float, b: float, default: float = 0.0) -> float:
     """
@@ -620,7 +628,7 @@ def write_enrichments_final_output(
         )
     return True
 
-def find_enrichments():
+def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
     """
     Main function to find enrichments in modified counts data.
 
@@ -632,30 +640,9 @@ def find_enrichments():
     counts_type = ""
     # Parse command-line arguments
     print("SSAILR <=> Processing enrichments for the 'counts' and 'counts.aa' output folders")
-    # Create the parser
-    parser = argparse.ArgumentParser(description="Process flags for enrichment.")
 
-    # Add the -dir flag (required argument)
-    parser.add_argument(
-        '-dir',
-        type=str,
-        required=True,
-        help='The directory path.'
-    )
-
-    # Add the -precision flag (optional argument)
-    parser.add_argument(
-        '-precision',
-        type=str,
-        required=False,
-        help='The precision for the decimal numbers. Default is 6'
-    )
-
-    # Parse the arguments
-    args = parser.parse_args()
-
-    dir_path = args.dir
-    precision = 6 if args.precision is None else args.precision
+    dir_path = output_dir
+    precision = 6 if precision_input is None else precision_input
 
     if dir_path is None:
         print("Directory path not provided.")
@@ -667,28 +654,22 @@ def find_enrichments():
 
     # Set directory path
     for ind, counts_type in enumerate(
-        tqdm(['counts','counts.aa'], desc = 'Processing each counts output folder')
+        tqdm(['counts','counts_aa'], desc = 'Processing each counts output folder')
         ):
         counts_dir = os.path.join(outdir, counts_type)
         if not os.path.isdir(counts_dir):
             continue
 
         modified_counts_location = f"modified_{counts_type}"
-        # files = os.listdir(counts_dir)
-
-        # # Extract round numbers for files matching the criteria
-        # round_numbers = [
-        #     int(file.split("-out")[0])
-        #     for file in files
-        #     if "-out" in file and counts_type in file
-        # ]
+        matching_check = check_rounds_file(rounds_data, counts_dir)
+        if matching_check is False:
+            print('data in enrichment_analysis_file_sorting_logic.csv file incorrect '+
+                f'does not match the files found in the directory: {counts_dir}'
+            )
+            continue
 
         # Get the maximum round
         max_round = rounds_data['round_number'].max()
-
-        # if rounds_data['round_number'].max() != max_round:
-        #     print("number of rounds in sorting map does not match rounds in output")
-        #     exit(1)
 
         # Check if there are any negative controls
         neg_files_exist = any(rounds_data['file_type'] == 'negative')
@@ -730,6 +711,4 @@ def find_enrichments():
             in_files_exist,
             precision
         )
-
-if __name__ == "__main__":
-    find_enrichments()
+    return True

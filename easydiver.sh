@@ -479,8 +479,8 @@ if [ -z $prot ];
 	then
 		:
 	else
-		mkdir counts.aa
-		mv counts/*aa.txt counts.aa/
+		mkdir counts_aa
+		mv counts/*aa.txt counts_aa/
 		mv counts/*aa_histo.txt histos/
 fi
 progress=$((90))
@@ -540,8 +540,8 @@ if [ -z $prot ];
 			$(cat $R2 | zcat | awk 'END {print NR/4}')  \
 			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
 			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
-			$(cat ${outdir}/counts.aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
-			$(cat ${outdir}/counts.aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
+			$(cat ${outdir}/counts_aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
+			$(cat ${outdir}/counts_aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
 			| column -t >> $outdir/log_temp2.txt
 
 		done
@@ -553,7 +553,7 @@ if [ -z $prot ];
 		rm $outdir/log_temp2.txt
 fi
 
-dir1="${outdir}/counts.aa"
+dir1="${outdir}/counts_aa"
 dir2="${outdir}/counts"
 
 # Loop through the directories
@@ -568,6 +568,7 @@ for directory in "$dir1" "$dir2"; do
       # Check if the file is a regular file and is not seq_dict.json
       if [ -f "$file" ] && [ "$(basename "$file")" != "seq_dict.json" ]; then
         # Do something with the file
+		echo python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json"
         python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json"
 		rm "$file"
       fi

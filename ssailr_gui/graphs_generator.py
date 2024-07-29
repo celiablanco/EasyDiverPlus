@@ -1,27 +1,25 @@
 #!/usr/bin/python
 import argparse
 import plotly.graph_objects as go
+import plotly.io as pio
 from plotly.subplots import make_subplots
 import pandas as pd
 
-def main():
-    # Set up argument parser
-    parser = argparse.ArgumentParser(description='Generate static Plotly graphs.')
-    parser.add_argument('--round_file', type=str, required=True, help='Round dropdown file name')
-    parser.add_argument('--count_out_input', type=int, default=0, help='Count out input')
-    parser.add_argument('--freq_out_input', type=float, default=0.0, help='Freq out input')
-    parser.add_argument('--count_in_input', type=int, default=0, help='Count in input')
-    parser.add_argument('--freq_in_input', type=float, default=0.0, help='Freq in input')
-    parser.add_argument('--count_neg_input', type=int, default=0, help='Count neg input')
-    parser.add_argument('--freq_neg_input', type=float, default=0.0, help='Freq neg input')
-    parser.add_argument('--enr_neg_input', type=float, default=0, help='Enr neg input')
-    parser.add_argument('--enr_out_input', type=float, default=0, help='Enr out input')
+# Use the 'browser' renderer to open plots in the default web browser
+pio.renderers.default = 'browser'
 
-    args = parser.parse_args()
-
+def main(
+        round_file: str,
+        input_values: dict
+    ):
+    for input_val in input_values:
+        if input_val.lower().startswith('freq'):
+            globals()[input_val.lower().replace(' cutoff threshold:','_input')] = float(input_values.get(input_val))
+        else:
+            globals()[input_val.lower().replace(' cutoff threshold:','_input')] = int(input_values.get(input_val))
     # Load and preprocess data
-    print(args.round_file)
-    df = pd.read_csv(f"{args.round_file}", skiprows=6)
+    print(round_file)
+    df = pd.read_csv(f"{round_file}", skiprows=6)
     df = df.fillna(0)
     for coln in df.columns:
         if coln.lower().startswith('freq'):
@@ -38,22 +36,22 @@ def main():
     
     if 'Enr_neg_upper' in df.columns:
         filtered_df = df[
-            (df['Count_out'] > args.count_out_input) &
-            (df['Freq_out'] > args.freq_out_input) &
-            (df['Count_in'] > args.count_in_input) &
-            (df['Freq_in'] > args.freq_in_input) &
-            (df['Count_neg'] > args.count_neg_input) &
-            (df['Freq_neg'] > args.freq_neg_input) &
-            (df['Enr_neg'] > args.enr_neg_input) &
-            (df['Enr_out'] > args.enr_out_input)
+            (df['Count_out'] > count_out_input) &
+            (df['Freq_out'] > freq_out_input) &
+            (df['Count_in'] > count_in_input) &
+            (df['Freq_in'] > freq_in_input) &
+            (df['Count_neg'] > count_neg_input) &
+            (df['Freq_neg'] > freq_neg_input) &
+            (df['Enr_neg'] > enr_neg_input) &
+            (df['Enr_out'] > enr_out_input)
         ]
     else:
         filtered_df = df[
-            (df['Count_out'] > args.count_out_input) &
-            (df['Freq_out'] > args.freq_out_input) &
-            (df['Count_in'] > args.count_in_input) &
-            (df['Freq_in'] > args.freq_in_input) &
-            (df['Enr_out'] > args.enr_out_input)
+            (df['Count_out'] > count_out_input) &
+            (df['Freq_out'] > freq_out_input) &
+            (df['Count_in'] > count_in_input) &
+            (df['Freq_in'] > freq_in_input) &
+            (df['Enr_out'] > enr_out_input)
         ]
     # Create a subplot layout
     fig = make_subplots(
@@ -145,7 +143,7 @@ def main():
 
     # Update layout for the entire subplot
     fig.update_layout(
-    title_text=f'Round {args.round_file.split("round_")[1].split("_")[0]} Enrichment Results',
+    title_text=f'Round {round_file.split("round_")[1].split("_")[0]} Enrichment Results',
     showlegend=True,
     plot_bgcolor='white',  # Set the plot background color to white
     xaxis=dict(
@@ -188,5 +186,6 @@ def main():
     )
     # Show combined plot
     fig.show()
+    return True
 if __name__ == "__main__":
     main()

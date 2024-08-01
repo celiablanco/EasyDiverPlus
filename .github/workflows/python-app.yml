@@ -32,34 +32,34 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Download PANDAseq source
-        run: wget https://github.com/neufeld/pandaseq/archive/refs/tags/v2.11.zip
+      run: wget https://github.com/neufeld/pandaseq/archive/refs/tags/v2.11.zip
 
-      - name: Extract PANDAseq source
-        run: unzip v2.11.zip
+    - name: Extract PANDAseq source
+      run: unzip v2.11.zip
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libtool automake zlib1g-dev libbz2-dev pkg-config
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libtool automake zlib1g-dev libbz2-dev pkg-config
 
-      - name: Build PANDAseq
-        run: |
-          cd pandaseq-2.11
-          ./autogen.sh
-          ./configure
-          make
+    - name: Build PANDAseq
+      run: |
+        cd pandaseq-2.11
+        ./autogen.sh
+        ./configure
+        make
 
-      - name: Install PANDAseq
-        run: sudo make install
+    - name: Install PANDAseq
+      run: sudo make install
 
-      - name: Build application with PyInstaller
-        run: pyinstaller easydiver.spec --noconfirm
+    - name: Build application with PyInstaller
+      run: pyinstaller easydiver.spec --noconfirm
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: easydiver
-          path: dist/  # Adjust this path to where PyInstaller places your output
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: easydiver
+        path: dist/  # Adjust this path to where PyInstaller places your output
 
   release:
     needs: build

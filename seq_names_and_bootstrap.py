@@ -76,6 +76,7 @@ def bootstrap_counts_binomial(
         total_counts: int,
         count_seq: int,
         sequence: str,
+        count_seq_dict: dict,
         bootstrap_depth: int = 1000,
         seed: int = 42
     ) -> tuple[str, List[float]]:
@@ -86,6 +87,7 @@ def bootstrap_counts_binomial(
     total_counts (int): Total number of counts.
     count_seq (int): Number of sequences.
     sequence (str): Sequence identifier.
+    count_seq_dict: Bootstrapping dictionary to hold boostrap data
     bootstrap_depth (int): Number of bootstrap samples to generate. Default is 1000.
     seed (int): Random seed for reproducibility. Default is 42.
 
@@ -95,15 +97,19 @@ def bootstrap_counts_binomial(
     """
     if seed is not None:
         np.random.seed(seed)
-    bootstrapped_counts = np.random.binomial(
-        total_counts, count_seq / total_counts, size = bootstrap_depth
-    )
-    # Calculate the 95% confidence interval
-    bootstrapped_95_confidence_interval = [
-        np.percentile(bootstrapped_counts, 2.5),
-        np.percentile(bootstrapped_counts, 97.5)
-    ]
-    return sequence, list(np.around(np.array(bootstrapped_95_confidence_interval), 2))
+    if count_seq_dict.get(count_seq) is not None:
+        return sequence, count_seq_dict.get(count_seq).get('bootstrap')
+    else:
+        bootstrapped_counts = np.random.binomial(
+            total_counts, count_seq / total_counts, size = bootstrap_depth
+        )
+        # Calculate the 95% confidence interval
+        bootstrapped_95_confidence_interval = [
+            np.percentile(bootstrapped_counts, 2.5),
+            np.percentile(bootstrapped_counts, 97.5)
+        ]
+        count_seq_dict[count_seq]['bootstrap'] = list(np.around(np.array(bootstrapped_95_confidence_interval), 2))
+        return sequence, list(np.around(np.array(bootstrapped_95_confidence_interval), 2))
 
 def easy_diver_parse_file_header(file_path: str, encoding: str = 'utf-8') -> tuple[int, int]:
     """
@@ -129,10 +135,10 @@ def easy_diver_parse_file_header(file_path: str, encoding: str = 'utf-8') -> tup
     return num_unique_sequences, total_num_molecules
 
 def process_row(args: Tuple[int, pd.Series, str, str, int, Callable]) -> Tuple[str, List[float]]:
-    total_counts, row, count_column, sequence_column, bootstrap_depth, func = args
+    total_counts, row, count_column, sequence_column, bootstrap_dict, bootstrap_depth, func = args
     count_seq = row[count_column]
     sequence = row[sequence_column]
-    return func(total_counts, count_seq, sequence, bootstrap_depth)
+    return func(total_counts, count_seq, sequence, bootstrap_dict, bootstrap_depth)
 
 def parallel_apply(
         df: pd.DataFrame,
@@ -140,9 +146,10 @@ def parallel_apply(
         count_column: str,
         sequence_column: str,
         total_counts: int,
+        bootstrap_dict: dict,
         bootstrap_depth: int) -> List[Any]:
     # Prepare arguments for each row
-    args_list = [(total_counts, row, count_column, sequence_column, bootstrap_depth, func) for _, row in df.iterrows()]
+    args_list = [(total_counts, row, count_column, sequence_column, bootstrap_dict, bootstrap_depth, func) for _, row in df.iterrows()]
 
     # Use ProcessPoolExecutor for parallel processing
     with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
@@ -150,15 +157,14 @@ def parallel_apply(
 
     return results
 
-def easy_diver_counts_to_df(filename: str) -> pd.DataFrame:
+def easy_diver_counts_to_df(filename: str, bootstrap_dict: dict) -> pd.DataFrame:
     """
     Converts an Easy Diver counts file to a pandas DataFrame, 
     including bootstrapped confidence intervals.
 
     Parameters:
     filename (str): The path to the counts file.
-    ed_round (int): The round number.
-    ftype (str): The type of the file (e.g., 'out', 'in', 'neg').
+    bootstrap_dict (dict): The bootstrap results holder dictionary
 
     Returns:
     pd.DataFrame: The DataFrame with the counts and calculated confidence intervals.
@@ -181,7 +187,7 @@ def easy_diver_counts_to_df(filename: str) -> pd.DataFrame:
     df['Total_Unique_Sequences'] = num_seqs
     df['Total_Molecules'] = total_mols
     
-    results = parallel_apply(df, bootstrap_counts_binomial, 'Count', 'Sequence', total_mols, 1000)
+    results = parallel_apply(df, bootstrap_counts_binomial, 'Count', 'Sequence', total_mols, bootstrap_dict, 1000)
     results_df = pd.DataFrame(
         results,
         columns = ['Sequence','Bootstrapped_95CI']
@@ -260,19 +266,34 @@ def main():
         help='The file path for the sequence dictionary.'
     )
 
+    parser.add_argument(
+        '-bootdict',
+        type=str,
+        required=True,
+        help='The file path for the boostrapping dictionary.'
+    )
+
     # Parse the arguments
     args = parser.parse_args()
-
+    
     file_path = args.file
     seq_dict_path = args.seqdict
+    boot_dict_path = args.bootdict
+    print(f'working on file {file_path}...converting the .txt file to .csv and ' +
+          'adding in unique sequence name')
     prefix = 'nt'
     if ".aa" in file_path:
         prefix = 'aa'
+
     sequence_dict = {}
     with open(seq_dict_path, "r", encoding='utf-8') as json_file:
         sequence_dict = json.load(json_file)
 
-    num_seq, total_mols, counts_df = easy_diver_counts_to_df(file_path)
+    bootstrap_dict = {}
+    with open(boot_dict_path, "r", encoding='utf-8') as json_file:
+        bootstrap_dict = json.load(json_file)
+
+    num_seq, total_mols, counts_df = easy_diver_counts_to_df(file_path, bootstrap_dict)
 
     counts_df['Unique_Sequence_Name'] = counts_df.apply(
         unique_sequence_name_generator,
@@ -284,8 +305,12 @@ def main():
     print('writing new output file')
     output_filename = write_output_file(file_path, counts_df[final_columns], num_seq, total_mols)
     print(f'output file written: {output_filename}')
+
     with open(seq_dict_path, "w", encoding = 'utf-8') as json_file:
         json.dump(sequence_dict, json_file)
+
+    with open(boot_dict_path, "w", encoding = 'utf-8') as json_file:
+        json.dump(bootstrap_dict, json_file)
 
 if __name__ == "__main__":
     main()

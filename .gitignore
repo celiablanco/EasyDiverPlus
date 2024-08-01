@@ -4,3 +4,5 @@ build/*
 dist/*
 build
 dist
+docs/build
+docs/build/*

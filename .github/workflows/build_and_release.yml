@@ -50,55 +50,53 @@ jobs:
           name: easydiver-${{ matrix.os }}-${{ matrix.architecture }}
           path: EasyDiver-${{ matrix.os }}-${{ matrix.architecture }}.zip
 
-  create_release:
-    runs-on: ubuntu-latest
+  release:
     needs: build
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}  # Use the PAT secret here
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: Release notes for ${{ github.ref }}.
-          draft: false
-          prerelease: false
-
-  upload_release_assets:
-    runs-on: ${{ matrix.os }}
-    needs: create_release
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        architecture: [x86_64, arm64]
-        exclude:
-          - os: windows-latest
-            architecture: arm64
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Download build artifact
+      - name: Download build artifacts (Ubuntu x86_64)
         uses: actions/download-artifact@v2
         with:
-          name: easydiver-${{ matrix.os }}-${{ matrix.architecture }}
+          name: easydiver-ubuntu-latest-x86_64
+          path: ./dist
+
+      - name: Download build artifacts (Ubuntu arm64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-ubuntu-latest-arm64
+          path: ./dist
+
+      - name: Download build artifacts (Windows x86_64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-windows-latest-x86_64
+          path: ./dist
+
+      - name: Download build artifacts (macOS x86_64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-macos-latest-x86_64
+          path: ./dist
+
+      - name: Download build artifacts (macOS arm64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-macos-latest-arm64
           path: ./dist
 
       - name: List directory contents
         run: ls -R ./dist
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}  # Use the PAT secret here
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@
         with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/EasyDiver-${{ matrix.os }}-${{ matrix.architecture }}.zip
-          asset_name: EasyDiver-${{ matrix.os }}-${{ matrix.architecture }}.zip
-          asset_content_type: application/zip
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          body: |
+            Release notes for ${{ github.ref }}.
+          draft: false
+          prerelease: false
+          artifacts: ./dist/*.zip

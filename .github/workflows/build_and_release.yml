@@ -57,10 +57,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Download build artifacts
+      - name: Download build artifacts (Ubuntu x86_64)
         uses: actions/download-artifact@v2
         with:
-          name: easydiver-*
+          name: easydiver-ubuntu-latest-x86_64
+          path: ./dist
+
+      - name: Download build artifacts (Ubuntu arm64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-ubuntu-latest-arm64
+          path: ./dist
+
+      - name: Download build artifacts (Windows x86_64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-windows-latest-x86_64
+          path: ./dist
+
+      - name: Download build artifacts (macOS x86_64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-macos-latest-x86_64
+          path: ./dist
+
+      - name: Download build artifacts (macOS arm64)
+        uses: actions/download-artifact@v2
+        with:
+          name: easydiver-macos-latest-arm64
           path: ./dist
 
       - name: Create GitHub Release

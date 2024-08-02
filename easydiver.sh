@@ -31,8 +31,12 @@ start=`date +%s`
 # Record workking directory
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
+echo "$SCRIPT_DIR/pandaseq"
+
+"$SCRIPT_DIR/pandaseq" -h
+
 # Test to verify pandaseq is installed and can be found
-pandatest=$(which pandaseq)
+pandatest=$(which "$SCRIPT_DIR/pandaseq")
 
 if [ -z "$pandatest" ];
 	then
@@ -40,9 +44,6 @@ if [ -z "$pandatest" ];
 		echo ""
 		exit 1
 fi
-
-# Set home directory
-hdir=$(pwd)
 
 # Parse arguments and set global variables
 while getopts hi:o:p:q:T:e:ra option
@@ -313,7 +314,7 @@ do
 
 	# Join reads & extract insert
 	echo "Joining $lbase reads & extracting primer..."
-	pandaseq -f $R1 -r $R2 -F \
+	"$SCRIPT_DIR/pandaseq" -f $R1 -r $R2 -F \
 	$pval $qval \
 	-w $fqdir/$lbase.joined.fastq $tval -T $threads $extra $lval $dval 2>/dev/null
 
@@ -556,21 +557,29 @@ fi
 dir1="${outdir}/counts_aa"
 dir2="${outdir}/counts"
 
+echo "{}" > "${outdir}/bootstrap_dict.json"
 # Loop through the directories
 for directory in "$dir1" "$dir2"; do
   # Check if the directory exists
   if [ -d "$directory" ]; then
     # Create or clear the seq_dict.json file in each directory
     echo "{}" > "$directory/seq_dict.json"
-
     # Loop through the files in the directory
     for file in "$directory"/*; do
       # Check if the file is a regular file and is not seq_dict.json
       if [ -f "$file" ] && [ "$(basename "$file")" != "seq_dict.json" ]; then
         # Do something with the file
-		echo python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json"
-        python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json"
-		rm "$file"
+		echo python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/bootstrap_dict.json"
+        python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/bootstrap_dict.json"
+		# Construct the expected .csv file name
+		csv_file="${file%.txt}.csv"
+		
+		# Check if the .csv file exists before removing the .txt file
+		if [ -f "$csv_file" ]; then
+			rm "$file"
+		else
+			echo "CSV file $csv_file does not exist. Skipping removal of $file."
+		fi
       fi
     done
 	rm "$directory/seq_dict.json"
@@ -578,6 +587,7 @@ for directory in "$dir1" "$dir2"; do
     echo "Directory $directory does not exist."
   fi
 done
+rm "${outdir}/bootstrap_dict.json"
 
 # Record end time in seconds to calculate run time at the end
 end=`date +%s`

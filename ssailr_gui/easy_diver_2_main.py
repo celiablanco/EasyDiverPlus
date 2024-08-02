@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import os
+import fcntl
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -34,6 +35,15 @@ def path_constructor(path: str, parent_path: str) -> str:
     # Construct the path to the image file
     adjusted_path = os.path.join(base_path, parent_path, path)
     return adjusted_path
+
+def check_single_instance(lockfile):
+    global lock_file
+    lock_file = open(lockfile, 'w')
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except IOError:
+        print("Another instance is already running.")
+        sys.exit(1)
 
 class MainApp(QWidget):
     def __init__(self):
@@ -144,6 +154,7 @@ class MainApp(QWidget):
         QMessageBox.information(self, "Help", help_text)
 
 if __name__ == "__main__":
+    check_single_instance('/tmp/easy_diver2.lock')
     app = QApplication(sys.argv)
     window = MainApp()
     sys.exit(app.exec_())

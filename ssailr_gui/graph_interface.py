@@ -98,12 +98,15 @@ class Graphs_Window(QWidget):
         mod_counts = 'modified_counts'
         if self.dna_or_aa_combo.currentText() == 'AA':
             mod_counts = mod_counts+'_aa'
-        if self.rounds_path is not None:
-            rounds_directory = f"{self.rounds_path}/{mod_counts}"
-            rounds = sorted([f for f in os.listdir(rounds_directory) if f.startswith('round_')])
-            for round_name in rounds:
-                self.round_combo.addItem(round_name.split('_')[1])
-    
+        try:
+            if self.rounds_path is not None:
+                rounds_directory = f"{self.rounds_path}/{mod_counts}"
+                rounds = sorted([f for f in os.listdir(rounds_directory) if f.startswith('round_')])
+                for round_name in rounds:
+                    self.round_combo.addItem(round_name.split('_')[1])
+        except Exception as error:
+            QMessageBox.critical(self, "Error", f"An error occurred:\n{error}")
+            self.close()
     def create_input_field(self, label_text, default_value, layout, is_float=False):
         input_layout = QHBoxLayout()
         label = QLabel(label_text)

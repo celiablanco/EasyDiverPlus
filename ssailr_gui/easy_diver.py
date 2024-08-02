@@ -2,6 +2,7 @@
 import subprocess
 import sys
 import os
+import fcntl
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -41,6 +42,7 @@ def path_constructor(path: str, parent_path: str) -> str:
     else:
         adjusted_path = os.path.join(base_path, parent_path, path)
     return adjusted_path
+
 class EasyDiver(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)

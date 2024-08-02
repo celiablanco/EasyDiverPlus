@@ -91,7 +91,7 @@ jobs:
         run: ls -R ./dist
 
       - name: Create GitHub Release
-        uses: ncipollo/release-action@
+        uses: ncipollo/release-action@v1
         with:
           tag_name: ${{ github.ref }}
           name: Release ${{ github.ref }}

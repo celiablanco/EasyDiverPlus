@@ -34,9 +34,15 @@ jobs:
         run: |
           pyinstaller easydiver.spec --noconfirm
 
-      - name: Zip the output
+      - name: Zip the output (Linux and macOS)
+        if: runner.os != 'Windows'
         run: |
           zip -r EasyDiver-${{ matrix.os }}-${{ matrix.architecture }}.zip dist/EasyDiver
+
+      - name: Zip the output (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Compress-Archive -Path dist/EasyDiver -DestinationPath EasyDiver-${{ matrix.os }}-${{ matrix.architecture }}.zip
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v2

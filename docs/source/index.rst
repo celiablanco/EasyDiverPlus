@@ -11,7 +11,6 @@ Introduction
 =================
 Easy Diver 2.0 is an improved build of the Easy Diver tool [LINK]. This tool can be used to accomplish blah blah blah. 
 Additionally, for v2.0, the authors have created an application with a GUI that can be run quite simply. 
-There is still a dependency on pandaSEQ [LINK], which will need to be installed by the user prior to running the executable.
 
 Easy Diver 2.0 unlocks a new capability, namely the ability to run Enrichment Analysis on the outputs of Easy Diver (the `counts` and `counts_aa` folders).
 Upon completion of the Enrichment Analysis, the user may also choose to create graphical outputs via a GUI that allows for 
@@ -23,4 +22,3 @@ run the enrichment analysis and has the subsequent `modified_counts` and `modifi
 .. toctree::
    :maxdepth: 1
    
-   pandaseq install

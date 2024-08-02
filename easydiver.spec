@@ -6,7 +6,7 @@ a = Analysis(
     ['ssailr_gui/easy_diver_2_main.py'],
     pathex=[],
     binaries=[(
-        '/usr/local/bin/pandaseq', '.'
+        'pandaseq', '.'
     )],
     datas=[
         ('easydiver.sh', '.'),

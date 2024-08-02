@@ -557,7 +557,7 @@ fi
 dir1="${outdir}/counts_aa"
 dir2="${outdir}/counts"
 
-echo "{}" > "${outdir}/boostrap_dict.json"
+echo "{}" > "${outdir}/bootstrap_dict.json"
 # Loop through the directories
 for directory in "$dir1" "$dir2"; do
   # Check if the directory exists
@@ -569,8 +569,8 @@ for directory in "$dir1" "$dir2"; do
       # Check if the file is a regular file and is not seq_dict.json
       if [ -f "$file" ] && [ "$(basename "$file")" != "seq_dict.json" ]; then
         # Do something with the file
-		echo python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/boostrap_dict.json"
-        python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/boostrap_dict.json"
+		echo python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/bootstrap_dict.json"
+        python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/bootstrap_dict.json"
 		# Construct the expected .csv file name
 		csv_file="${file%.txt}.csv"
 		
@@ -587,7 +587,7 @@ for directory in "$dir1" "$dir2"; do
     echo "Directory $directory does not exist."
   fi
 done
-rm "${outdir}/boostrap_dict.json"
+rm "${outdir}/bootstrap_dict.json"
 
 # Record end time in seconds to calculate run time at the end
 end=`date +%s`

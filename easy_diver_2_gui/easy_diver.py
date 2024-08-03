@@ -408,9 +408,6 @@ class EasyDiver(QWidget):
             if self.reverse_primer_edit.text():
                 run_script += f" -q {self.reverse_primer_edit.text()}"
 
-            if self.threads_edit.text():
-                run_script += f" -T {self.threads_edit.text()}"
-
             if self.translate_check.isChecked():
                 run_script += " -a"
 

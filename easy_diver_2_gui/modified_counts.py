@@ -639,7 +639,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
     """
     counts_type = ""
     # Parse command-line arguments
-    print("SSAILR <=> Processing enrichments for the 'counts' and 'counts.aa' output folders")
+    print("enrichment_analysis <=> Processing enrichments for the 'counts' and 'counts.aa' output folders")
 
     dir_path = output_dir
     precision = 6 if precision_input is None else precision_input
@@ -649,6 +649,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
         sys.exit(1)
 
     outdir = dir_path
+    print(outdir)
     # read the enrichment_analysis_file_sorting_logic.csv file
     rounds_data = pd.read_csv(f"{outdir}/enrichment_analysis_file_sorting_logic.csv")
 

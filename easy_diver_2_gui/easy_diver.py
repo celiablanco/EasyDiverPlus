@@ -2,7 +2,6 @@
 import subprocess
 import sys
 import os
-import fcntl
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -43,6 +42,16 @@ def path_constructor(path: str, parent_path: str) -> str:
         adjusted_path = os.path.join(base_path, parent_path, path)
     return adjusted_path
 
+class QTextEditStream:
+    def __init__(self, text_edit: QTextEdit):
+        self.text_edit = text_edit
+
+    def write(self, message):
+        self.text_edit.append(message)
+
+    def flush(self):
+        pass  # Not needed for this implementation
+
 class EasyDiver(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -65,7 +74,7 @@ class EasyDiver(QWidget):
         self.image_layout = QVBoxLayout()
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap(path_constructor("logo.png","ssailr_gui/assets/")).scaledToWidth(15000)
+        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui_gui/assets/")).scaledToWidth(15000)
         self.image_label.setPixmap(self.image_pixmap)
         self.image_layout.addWidget(self.image_label)
         self.image_widget.setLayout(self.image_layout)
@@ -77,7 +86,7 @@ class EasyDiver(QWidget):
         self.required_layout = QVBoxLayout()
         self.required_label = QLabel("REQUIRED")
         self.required_layout.addWidget(self.required_label)
-        question_path = path_constructor("question_icon.png","ssailr_gui/assets/")
+        question_path = path_constructor("question_icon.png","easy_diver_2_gui_gui/assets/")
         # Option -i
         self.input_label = QLabel("Input Directory Path:")
         self.input_dir_edit = ClickableDirectoryEdit()
@@ -158,23 +167,6 @@ class EasyDiver(QWidget):
         reverse_primer_layout.addWidget(reverse_primer_tooltip_icon)
         self.optional_layout.addLayout(reverse_primer_layout)
 
-        # Option -T
-        self.threads_label = QLabel("Number of Threads:")
-        self.threads_edit = QLineEdit()
-        threads_tooltip_icon = QLabel()
-        threads_tooltip_icon.setPixmap(
-            QPixmap(question_path).scaled(20, 20)
-        )
-        threads_tooltip_icon.setToolTip(
-            "Specify the number of threads to use for processing."
-        )
-
-        threads_layout = QHBoxLayout()
-        threads_layout.addWidget(self.threads_label)
-        threads_layout.addWidget(self.threads_edit)
-        threads_layout.addWidget(threads_tooltip_icon)
-        self.optional_layout.addLayout(threads_layout)
-
         # Option -e
         self.extra_flags_label = QLabel(
             'Extra Flags for PANDASeq (use quotes, e.g. "-L 50"):'
@@ -193,6 +185,22 @@ class EasyDiver(QWidget):
         extra_flags_layout.addWidget(self.extra_flags_edit)
         extra_flags_layout.addWidget(extra_flags_tooltip_icon)
         self.optional_layout.addLayout(extra_flags_layout)
+        
+        # Option -a
+        self.skip_processing = QCheckBox("Skip Processing (enrichment analysis only)")
+        skip_processing_icon = QLabel()
+        skip_processing_icon.setPixmap(
+            QPixmap(question_path).scaled(20, 20)
+        )
+        skip_processing_icon.setToolTip(
+            "Check this box to skip processing, use this option only if you have already processed the data and want to only run enrichment analysis."
+        )
+
+        skip_processing_layout = QHBoxLayout()
+        skip_processing_layout.addWidget(self.skip_processing)
+        skip_processing_layout.addStretch()
+        skip_processing_layout.addWidget(skip_processing_icon)
+        self.optional_layout.addLayout(skip_processing_layout)
 
         # Option -a
         self.translate_check = QCheckBox("Translate to Amino Acids")
@@ -226,22 +234,22 @@ class EasyDiver(QWidget):
         retain_layout.addWidget(retain_tooltip_icon)
         self.optional_layout.addLayout(retain_layout)
 
-        # Option for SSAILR
-        self.run_ssailr = QCheckBox("Run Enrichment Analysis")
-        self.run_ssailr.stateChanged.connect(self.toggle_precision_option)
-        ssailr_tooltip_icon = QLabel()
-        ssailr_tooltip_icon.setPixmap(
+        # Option for enrichment_analysis
+        self.run_enrichment_analysis = QCheckBox("Run Enrichment Analysis")
+        self.run_enrichment_analysis.stateChanged.connect(self.toggle_precision_option)
+        enrichment_analysis_tooltip_icon = QLabel()
+        enrichment_analysis_tooltip_icon.setPixmap(
             QPixmap(question_path).scaled(20, 20)
         )
-        ssailr_tooltip_icon.setToolTip(
-            "Check this box to run SSAILR for enrichment analysis."
+        enrichment_analysis_tooltip_icon.setToolTip(
+            "Check this box to run enrichment analysis."
         )
 
-        ssailr_layout = QHBoxLayout()
-        ssailr_layout.addWidget(self.run_ssailr)
-        ssailr_layout.addStretch()
-        ssailr_layout.addWidget(ssailr_tooltip_icon)
-        self.optional_layout.addLayout(ssailr_layout)
+        enrichment_analysis_layout = QHBoxLayout()
+        enrichment_analysis_layout.addWidget(self.run_enrichment_analysis)
+        enrichment_analysis_layout.addStretch()
+        enrichment_analysis_layout.addWidget(enrichment_analysis_tooltip_icon)
+        self.optional_layout.addLayout(enrichment_analysis_layout)
 
         self.enrichment_layout = QVBoxLayout()
         # Additional option for precision
@@ -373,88 +381,100 @@ class EasyDiver(QWidget):
             self.submit_button.setDisabled(False)
             self.toggle_layout(self.optional_layout, True)
             self.toggle_layout(self.enrichment_layout, False)
-            self.run_ssailr.setChecked(False)
+            self.run_enrichment_analysis.setChecked(False)
 
     def submit(self):
-        easy_diver_path = path_constructor("easydiver.sh", ".")
-        run_script = f"bash {easy_diver_path} "
-        if not self.input_dir_edit.text():
-            QMessageBox.critical(self, "Error", "Please enter the required input.")
-            return
-        
-        run_script += f"-i {self.input_dir_edit.text()}"
-
         if self.output_dir_edit.text():
-            run_script += f" -o {self.output_dir_edit.text()}"
             self.output_dir = f"{self.input_dir_edit.text()}/{self.output_dir_edit.text()}"
         else:
             self.output_dir = f"{self.input_dir_edit.text()}/pipeline.output"
+        if self.skip_processing.isChecked():
+            self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
+        else:
+            easy_diver_path = path_constructor("easydiver.sh", ".")
+            run_script = f"bash {easy_diver_path} "
+            if not self.input_dir_edit.text():
+                QMessageBox.critical(self, "Error", "Please enter the required input.")
+                return
+            
+            run_script += f"-i {self.input_dir_edit.text()}"
 
-        if self.forward_primer_edit.text():
-            run_script += f" -p {self.forward_primer_edit.text()}"
+            if self.output_dir_edit.text():
+                run_script += f" -o {self.output_dir_edit.text()}"
 
-        if self.reverse_primer_edit.text():
-            run_script += f" -q {self.reverse_primer_edit.text()}"
+            if self.forward_primer_edit.text():
+                run_script += f" -p {self.forward_primer_edit.text()}"
 
-        if self.threads_edit.text():
-            run_script += f" -T {self.threads_edit.text()}"
+            if self.reverse_primer_edit.text():
+                run_script += f" -q {self.reverse_primer_edit.text()}"
 
-        if self.translate_check.isChecked():
-            run_script += " -a"
+            if self.threads_edit.text():
+                run_script += f" -T {self.threads_edit.text()}"
 
-        if self.retain_check.isChecked():
-            run_script += " -r"
+            if self.translate_check.isChecked():
+                run_script += " -a"
 
-        if self.extra_flags_edit.text():
-            run_script += f' -e "{self.extra_flags_edit.text()}"'
+            if self.retain_check.isChecked():
+                run_script += " -r"
 
-        # Execute the script
-        try:
-            res = subprocess.Popen(
-                run_script.split(" "),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-            )
-
-            while True:
-                output = res.stdout.readline()
-                if output == "" and res.poll() is not None:
-                    break
-                if output:
-                    self.output_text.append(output.strip())
-                    self.output_text.ensureCursorVisible()
-                    QApplication.processEvents()
-                    print(output)
-
-            if res.returncode == 0:
-                self.run_ssailr_steps(self.output_dir, self.precision_input.value())
-            else:
-                error_message = res.stderr.read()
-                self.output_text.append(f"Error: {error_message}")
-                self.output_text.ensureCursorVisible()
-                QMessageBox.critical(
-                    self, "Error", f"An error occurred: {error_message}"
+            if self.extra_flags_edit.text():
+                run_script += f' -e "{self.extra_flags_edit.text()}"'
+            # Execute the script
+            try:
+                res = subprocess.Popen(
+                    run_script.split(" "),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True,
                 )
 
-        except Exception as e:
-            self.output_text.append(f"Error: {str(e)}")
-            self.output_text.ensureCursorVisible()
-            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+                while True:
+                    output = res.stdout.readline()
+                    if output == "" and res.poll() is not None:
+                        break
+                    if output:
+                        self.output_text.append(output.strip())
+                        self.output_text.ensureCursorVisible()
+                        QApplication.processEvents()
+                        print(output)
 
-    def run_ssailr_steps(self, output_dir, precision):
-        if self.run_ssailr.isChecked():
-            mod_counts = mod_counts_main(output_dir, precision)
-            if mod_counts is True:
-                self.on_calculate_finish(0, output_dir)
+                if res.returncode == 0:
+                    self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
+                else:
+                    error_message = res.stderr.read()
+                    self.output_text.append(f"Error: {error_message}")
+                    self.output_text.ensureCursorVisible()
+                    QMessageBox.critical(
+                        self, "Error", f"An error occurred: {error_message}"
+                    )
+
+            except Exception as e:
+                self.output_text.append(f"Error: {str(e)}")
+                self.output_text.ensureCursorVisible()
+                QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def run_enrichment_analysis_steps(self, output_dir, precision):
+        original_stdout = sys.stdout  # Save a reference to the original standard output
+
+        try:
+            # Redirect sys.stdout to the QTextEditStream
+            sys.stdout = QTextEditStream(self.output_text)
+
+            if self.run_enrichment_analysis.isChecked():
+                mod_counts = mod_counts_main(output_dir, precision)
+                if mod_counts is True:
+                    self.on_calculate_finish(0, output_dir)
+                else:
+                    self.on_calculate_finish(1, output_dir)
             else:
-                self.on_calculate_finish(1, output_dir)
-        else:
-            self.on_calculate_finish(0, output_dir)
+                self.on_calculate_finish(0, output_dir)
+        finally:
+            # Restore the original sys.stdout
+            sys.stdout = original_stdout
 
     def on_calculate_finish(self, returncode, output_dir):
         if returncode == 0:
-            print("<===> SSAILR FINISHED <===>")
+            print("<===> enrichment_analysis FINISHED <===>")
             print("<===> Graph interface started <===>")
             graphi = Graphs_Window(self, output_dir)
             graphi.show()
@@ -462,7 +482,7 @@ class EasyDiver(QWidget):
             QMessageBox.critical(
                 self,
                 "Error",
-                "SSAILR calculation failed. Please check the logs for more details.",
+                "enrichment_analysis calculation failed. Please check the logs for more details.",
             )
         
 

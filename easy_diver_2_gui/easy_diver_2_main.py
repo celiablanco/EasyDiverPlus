@@ -2,6 +2,7 @@
 import sys
 import os
 import fcntl
+import signal
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -22,6 +23,28 @@ from PyQt5.QtCore import Qt
 from graph_interface import Graphs_Window
 from easy_diver import EasyDiver
 
+lock_file = None
+
+def release_lockfile(lockfile):
+    global lock_file
+    if lock_file:
+        fcntl.flock(lock_file, fcntl.LOCK_UN)
+        lock_file.close()
+        os.remove(lockfile)
+
+def check_single_instance(lockfile):
+    global lock_file
+    lock_file = open(lockfile, 'w')
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except IOError:
+        print("Another instance is already running.")
+        sys.exit(1)
+
+    # Set up signal handling to release the lockfile on termination
+    signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
+    signal.signal(signal.SIGTERM, lambda signum, frame: sys.exit(0))
+
 def path_constructor(path: str, parent_path: str) -> str:
 
     # Determine if we are running in a bundled mode
@@ -35,15 +58,6 @@ def path_constructor(path: str, parent_path: str) -> str:
     # Construct the path to the image file
     adjusted_path = os.path.join(base_path, parent_path, path)
     return adjusted_path
-
-def check_single_instance(lockfile):
-    global lock_file
-    lock_file = open(lockfile, 'w')
-    try:
-        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except IOError:
-        print("Another instance is already running.")
-        sys.exit(1)
 
 class MainApp(QWidget):
     def __init__(self):
@@ -64,7 +78,7 @@ class MainApp(QWidget):
         self.image_layout = QVBoxLayout()
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap(path_constructor("logo.png","ssailr_gui/assets/")).scaledToWidth(15000)
+        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui_gui/assets/")).scaledToWidth(15000)
         self.image_label.setPixmap(self.image_pixmap)
         self.image_layout.addWidget(self.image_label)
         self.image_widget.setLayout(self.image_layout)
@@ -154,7 +168,11 @@ class MainApp(QWidget):
         QMessageBox.information(self, "Help", help_text)
 
 if __name__ == "__main__":
-    check_single_instance('/tmp/easy_diver2.lock')
-    app = QApplication(sys.argv)
-    window = MainApp()
-    sys.exit(app.exec_())
+    try:
+        lockfile = '/tmp/easy_diver2.lock'
+        check_single_instance('/tmp/easy_diver2.lock')
+        app = QApplication(sys.argv)
+        window = MainApp()
+        sys.exit(app.exec_())
+    finally:
+        release_lockfile(lockfile)

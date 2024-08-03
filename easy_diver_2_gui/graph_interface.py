@@ -27,7 +27,7 @@ class Graphs_Window(QWidget):
             self.input_dir_edit.clicked.connect(self.browse_input)
             self.input_tooltip_icon = QLabel()
             self.input_tooltip_icon.setPixmap(
-                QPixmap("ssailr_gui/assets/question_icon.png").scaled(20, 20)
+                QPixmap("easy_diver_2_gui_gui/assets/question_icon.png").scaled(20, 20)
             )
             self.input_tooltip_icon.setToolTip(
                 "Select the directory containing the modified_counts folder(s)."

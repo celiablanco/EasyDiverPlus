@@ -74,7 +74,7 @@ class EasyDiver(QWidget):
         self.image_layout = QVBoxLayout()
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui_gui/assets/")).scaledToWidth(15000)
+        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui/assets/")).scaledToWidth(15000)
         self.image_label.setPixmap(self.image_pixmap)
         self.image_layout.addWidget(self.image_label)
         self.image_widget.setLayout(self.image_layout)
@@ -86,7 +86,7 @@ class EasyDiver(QWidget):
         self.required_layout = QVBoxLayout()
         self.required_label = QLabel("REQUIRED")
         self.required_layout.addWidget(self.required_label)
-        question_path = path_constructor("question_icon.png","easy_diver_2_gui_gui/assets/")
+        question_path = path_constructor("question_icon.png","easy_diver_2_gui/assets/")
         # Option -i
         self.input_label = QLabel("Input Directory Path:")
         self.input_dir_edit = ClickableDirectoryEdit()

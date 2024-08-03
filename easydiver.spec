@@ -3,7 +3,7 @@
 block_cipher = None
 
 a = Analysis(
-    ['easy_diver_2_gui_gui/easy_diver_2_main.py'],
+    ['easy_diver_2_gui/easy_diver_2_main.py'],
     pathex=[],
     binaries=[
         ('_pandaseq/pandaseq', '.'),
@@ -16,14 +16,14 @@ a = Analysis(
         ('easydiver.sh', '.'),
         ('translator.py', '.'),
         ('seq_names_and_bootstrap.py','.'),
-        ('easy_diver_2_gui_gui/assets/question_icon.png', 'easy_diver_2_gui_gui/assets/'),
-        ('easy_diver_2_gui_gui/easy_diver.py', 'easy_diver_2_gui_gui/'),
-        ('easy_diver_2_gui_gui/modified_counts.py', 'easy_diver_2_gui_gui/'),
-        ('easy_diver_2_gui_gui/assets/logo.png', 'easy_diver_2_gui_gui/assets/'),
-        ('easy_diver_2_gui_gui/directory_edit.py', 'easy_diver_2_gui_gui/'),
-        ('easy_diver_2_gui_gui/file_sorter.py', 'easy_diver_2_gui_gui/'),
-        ('easy_diver_2_gui_gui/graph_interface.py', 'easy_diver_2_gui_gui/'),
-        ('easy_diver_2_gui_gui/graphs_generator.py', 'easy_diver_2_gui_gui/')
+        ('easy_diver_2_gui/assets/question_icon.png', 'easy_diver_2_gui/assets/'),
+        ('easy_diver_2_gui/easy_diver.py', 'easy_diver_2_gui/'),
+        ('easy_diver_2_gui/modified_counts.py', 'easy_diver_2_gui/'),
+        ('easy_diver_2_gui/assets/logo.png', 'easy_diver_2_gui/assets/'),
+        ('easy_diver_2_gui/directory_edit.py', 'easy_diver_2_gui/'),
+        ('easy_diver_2_gui/file_sorter.py', 'easy_diver_2_gui/'),
+        ('easy_diver_2_gui/graph_interface.py', 'easy_diver_2_gui/'),
+        ('easy_diver_2_gui/graphs_generator.py', 'easy_diver_2_gui/')
     ],
     hiddenimports=['plotly','plotly.graph_objs','plotly.subplots','plotly.io.orca', 'plotly.io.kaleido', 'webbrowser'],
     hookspath=[],

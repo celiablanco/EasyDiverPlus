@@ -78,7 +78,7 @@ class MainApp(QWidget):
         self.image_layout = QVBoxLayout()
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui_gui/assets/")).scaledToWidth(15000)
+        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui/assets/")).scaledToWidth(15000)
         self.image_label.setPixmap(self.image_pixmap)
         self.image_layout.addWidget(self.image_label)
         self.image_widget.setLayout(self.image_layout)

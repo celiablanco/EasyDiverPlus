@@ -20,5 +20,99 @@ run the enrichment analysis and has the subsequent `modified_counts` and `modifi
 
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   installation
+   usage
+   modules
+   development
+   contributing
+   license
+
+Installation
+============================
+
+.. toctree::
    :maxdepth: 1
+
+Usage
+============================
+
+When opening the application, the main interface will appear, featuring options for both Easy Diver 2.0 and the Graph Builder.
+
+.. image:: _static/images/img1.png
+   :alt: Easy Diver Logo
+   :align: center
+
+Selecting the “Easy Diver 2.0” option will run the Easy Diver application, which is divided in two sections, corresponding to REQUIRED and OPTIONAL parameters:
+
+.. image:: _static/images/img2.png
+   :alt: Easy Diver 2.0
+   :align: center
+
+Required Parameters:
+   •	**Input Directory Path**: Field to specify the directory containing raw sequencing files. This field is mandatory. 
+   
+Once the required field is filled, the optional parameters will show up.
+
+Optional Parameters:
+	•	**Output Directory Path**: Field for specifying where the output files should be saved. If left blank, default is :/pipeline.output:
+	•	**Forward Primer Sequence**: Input for the forward primer sequence used in extraction.
+	•	**Reverse Primer Sequence**: Input for the reverse primer sequence used in extraction.
+	•	**Extra Flags for PANDASeq**: Allows additional parameters for PANDASeq to be entered, enclosed in quotes.
+	•	**Translate to Amino Acids**: Checkbox option to translate nucleotide sequences into amino acids.
+	•	**Retain Individual Lane Outputs**: Checkbox to retain output files for each sequencing lane.
+
+	•	**Run Enrichment Analysis**: Checkbox to enable enrichment analysis. 
+   
+   If selected, two options for the analysis show up:
+	   •	**Output Decimal Precision**: Spin box to set the precision of decimal numbers in the enrichment output files (default is 6, max is 10).
+	   •	**Sort Files into Rounds and Types**: A button to open a sorting interface where users can categorize files.
+
+The interface has three Control Buttons:
+	•	**Help**: Opens a dialog with detailed information about the application.
+	•	**Cancel**: Closes the application.
+	•	**Submit**: Starts the data processing and analysis pipeline with the specified parameters.
+
+There is also an a text box at the bottom of the interface displaying the real-time output of the processing script, including progress and any errors.
+
+Each field box displays an icon providing additional information.
+
+
+
+
+.. toctree::
+   :maxdepth: 1
+
+Modules
+============================
+
+.. toctree::
+   :maxdepth: 1
+
+Development
+============================
+
+.. toctree::
+   :maxdepth: 1
+
+Contributing
+============================
+
+.. toctree::
+   :maxdepth: 1
+
+License
+============================
+
+.. toctree::
+   :maxdepth: 1
+
+Indices and tables
+============================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
    

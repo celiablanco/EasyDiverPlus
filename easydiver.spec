@@ -5,9 +5,13 @@ block_cipher = None
 a = Analysis(
     ['easy_diver_2_gui_gui/easy_diver_2_main.py'],
     pathex=[],
-    binaries=[(
-        'pandaseq', '.'
-    )],
+    binaries=[
+        ('_pandaseq/pandaseq', '.'),
+        ('_pandaseq/libpandaseq-url.0.dylib', '.'),
+        ('_pandaseq/libpandaseq-url.dylib', '.'),
+        ('_pandaseq/libpandaseq.7.dylib', '.'),
+        ('_pandaseq/libpandaseq.dylib', '.')
+    ],
     datas=[
         ('easydiver.sh', '.'),
         ('translator.py', '.'),

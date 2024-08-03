@@ -521,10 +521,10 @@ class EasyDiver(QWidget):
         - Output directory filepath
         - Forward primer sequence for extraction
         - Reverse primer sequence for extraction
+        - Skip processing (Y/N)
         - Translating to amino acids (Y/N)
         - Retaining individual lane outputs (Y/N)
-        - Number of threads
-        - Extra flags for PANDASeq (use quotes, e.g. "-L 50")
+        - Extra flags for PANDASeq (use quotes, e.g. "-L 50" "-T 14")
         - Run Enrichment Analysis (Y/N)
         """
 

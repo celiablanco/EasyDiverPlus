@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
 import os
-import fcntl
+import atexit
 import signal
 from PyQt5.QtWidgets import (
     QApplication,
@@ -23,12 +23,20 @@ from PyQt5.QtCore import Qt
 from graph_interface import Graphs_Window
 from easy_diver import EasyDiver
 
+if os.name == 'nt':
+    import msvcrt
+else:
+    import fcntl
+
 lock_file = None
 
 def release_lockfile(lockfile):
     global lock_file
     if lock_file:
-        fcntl.flock(lock_file, fcntl.LOCK_UN)
+        if os.name == 'nt':
+            msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
         lock_file.close()
         os.remove(lockfile)
 
@@ -36,7 +44,10 @@ def check_single_instance(lockfile):
     global lock_file
     lock_file = open(lockfile, 'w')
     try:
-        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        if os.name == 'nt':
+            msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError:
         print("Another instance is already running.")
         sys.exit(1)
@@ -44,6 +55,9 @@ def check_single_instance(lockfile):
     # Set up signal handling to release the lockfile on termination
     signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(0))
     signal.signal(signal.SIGTERM, lambda signum, frame: sys.exit(0))
+
+    # Register the release_lockfile function to be called on exit
+    atexit.register(release_lockfile, lockfile)
 
 def path_constructor(path: str, parent_path: str) -> str:
 
@@ -169,8 +183,8 @@ class MainApp(QWidget):
 
 if __name__ == "__main__":
     try:
-        lockfile = '/tmp/easy_diver2.lock'
-        check_single_instance('/tmp/easy_diver2.lock')
+        lockfile = 'easy_diver2.lock'
+        check_single_instance(lockfile)
         app = QApplication(sys.argv)
         window = MainApp()
         sys.exit(app.exec_())

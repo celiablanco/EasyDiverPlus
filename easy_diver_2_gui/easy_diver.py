@@ -69,18 +69,6 @@ class EasyDiver(QWidget):
         # Create a splitter
         splitter = QSplitter(Qt.Vertical)
 
-        # add logo
-        self.image_widget = QWidget()
-        self.image_layout = QVBoxLayout()
-        self.image_label = QLabel()
-        self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui/assets/")).scaledToWidth(15000)
-        self.image_label.setPixmap(self.image_pixmap)
-        self.image_layout.addWidget(self.image_label)
-        self.image_widget.setLayout(self.image_layout)
-
-        splitter.addWidget(self.image_widget)
-
         # Required parameters
         self.required_widget = QWidget()
         self.required_layout = QVBoxLayout()
@@ -340,20 +328,11 @@ class EasyDiver(QWidget):
         self.center_window()
         self.show()
 
-    def update_image_size(self):
-        self.image_label.setPixmap(
-            self.image_pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio)
-        )
-
     def center_window(self):
         screen_geometry = QApplication.primaryScreen().geometry()
         x = (screen_geometry.width() - self.width()) // 2
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
-
-    def resizeEvent(self, event):
-        self.update_image_size()
-        super().resizeEvent(event)
 
     def toggle_precision_option(self, state):
         if state == Qt.Checked:
@@ -396,20 +375,18 @@ class EasyDiver(QWidget):
             if not self.input_dir_edit.text():
                 QMessageBox.critical(self, "Error", "Please enter the required input.")
                 return
-            
-            run_script += f"-i {self.input_dir_edit.text()}"
+            input_no_spaces = self.input_dir_edit.text().replace(' ','\\ ')
+            run_script += f"-i {input_no_spaces}"
 
             if self.output_dir_edit.text():
-                run_script += f" -o {self.output_dir_edit.text()}"
+                output_no_spaces = self.output_dir_edit.text().replace(' ','\\ ')
+                run_script += f" -o {output_no_spaces}"
 
             if self.forward_primer_edit.text():
                 run_script += f" -p {self.forward_primer_edit.text()}"
 
             if self.reverse_primer_edit.text():
                 run_script += f" -q {self.reverse_primer_edit.text()}"
-
-            if self.threads_edit.text():
-                run_script += f" -T {self.threads_edit.text()}"
 
             if self.translate_check.isChecked():
                 run_script += " -a"
@@ -484,21 +461,7 @@ class EasyDiver(QWidget):
                 "Error",
                 "enrichment_analysis calculation failed. Please check the logs for more details.",
             )
-        
 
-    def on_graphs_finish(self, returncode):
-        if returncode == 0:
-            QMessageBox.information(
-                self, "Success", "All tasks completed successfully."
-            )
-            self.close()
-            
-        else:
-            QMessageBox.critical(
-                self,
-                "Error",
-                "An error occurred during graph generation. Please check the logs for more details.",
-            )
     def toggle_layout(self, layout, visible):
         for i in range(layout.count()):
             item = layout.itemAt(i)
@@ -524,10 +487,10 @@ class EasyDiver(QWidget):
         - Output directory filepath
         - Forward primer sequence for extraction
         - Reverse primer sequence for extraction
+        - Skip processing (Y/N)
         - Translating to amino acids (Y/N)
         - Retaining individual lane outputs (Y/N)
-        - Number of threads
-        - Extra flags for PANDASeq (use quotes, e.g. "-L 50")
+        - Extra flags for PANDASeq (use quotes, e.g. "-L 50" "-T 14")
         - Run Enrichment Analysis (Y/N)
         """
 

@@ -33,16 +33,22 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 echo "$SCRIPT_DIR/pandaseq"
 
-"$SCRIPT_DIR/pandaseq" -h
-
 # Test to verify pandaseq is installed and can be found
 pandatest=$(which "$SCRIPT_DIR/pandaseq")
 
 if [ -z "$pandatest" ];
 	then
-		echo "ERROR: Pandaseq is not installed or cannot be found - cannot continue"
-		echo ""
-		exit 1
+		pandatest2=$(which pandaseq)
+		if [ -z "$pandatest2" ]; then
+			echo "ERROR: Pandaseq is not installed or cannot be found - cannot continue"
+			echo ""
+			exit 1
+		else 
+			echo "Using already installed pandaseq"
+			alias pandaseq=$pandatest2
+		fi
+	else
+		alias pandaseq="$SCRIPT_DIR/pandaseq"
 fi
 
 # Parse arguments and set global variables

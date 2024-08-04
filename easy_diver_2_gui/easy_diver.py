@@ -328,20 +328,11 @@ class EasyDiver(QWidget):
         self.center_window()
         self.show()
 
-    def update_image_size(self):
-        self.image_label.setPixmap(
-            self.image_pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio)
-        )
-
     def center_window(self):
         screen_geometry = QApplication.primaryScreen().geometry()
         x = (screen_geometry.width() - self.width()) // 2
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
-
-    def resizeEvent(self, event):
-        self.update_image_size()
-        super().resizeEvent(event)
 
     def toggle_precision_option(self, state):
         if state == Qt.Checked:

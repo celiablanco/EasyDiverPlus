@@ -36,12 +36,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build application with PyInstaller (NOT macOS x86_64)
-        if: ${{ matrix.os }}-${{ matrix.architecture }} != 'macos-13-x86_64'
+        if: ${{ matrix.os }} != 'macos-13' || ${{ matrix.architecture }} != 'x86_64'
         run: |
           pyinstaller easydiver.spec --noconfirm
       
       - name: Build application with PyInstaller (macOS x86_64)
-        if: ${{ matrix.os }}-${{ matrix.architecture }} == 'macos-13-x86_64'
+        if: ${{ matrix.os }} == 'macos-13' && ${{ matrix.architecture }} == 'x86_64'
         run: |
           pyinstaller easydiver-${{ matrix.os }}-${{ matrix.architecture }}.spec --noconfirm
 

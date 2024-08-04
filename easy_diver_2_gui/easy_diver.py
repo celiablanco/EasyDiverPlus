@@ -69,18 +69,6 @@ class EasyDiver(QWidget):
         # Create a splitter
         splitter = QSplitter(Qt.Vertical)
 
-        # add logo
-        self.image_widget = QWidget()
-        self.image_layout = QVBoxLayout()
-        self.image_label = QLabel()
-        self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui/assets/")).scaledToWidth(15000)
-        self.image_label.setPixmap(self.image_pixmap)
-        self.image_layout.addWidget(self.image_label)
-        self.image_widget.setLayout(self.image_layout)
-
-        splitter.addWidget(self.image_widget)
-
         # Required parameters
         self.required_widget = QWidget()
         self.required_layout = QVBoxLayout()
@@ -396,11 +384,12 @@ class EasyDiver(QWidget):
             if not self.input_dir_edit.text():
                 QMessageBox.critical(self, "Error", "Please enter the required input.")
                 return
-            
-            run_script += f"-i {self.input_dir_edit.text()}"
+            input_no_spaces = self.input_dir_edit.text().replace(' ','\\ ')
+            run_script += f"-i {input_no_spaces}"
 
             if self.output_dir_edit.text():
-                run_script += f" -o {self.output_dir_edit.text()}"
+                output_no_spaces = self.output_dir_edit.text().replace(' ','\\ ')
+                run_script += f" -o {output_no_spaces}"
 
             if self.forward_primer_edit.text():
                 run_script += f" -p {self.forward_primer_edit.text()}"
@@ -481,21 +470,7 @@ class EasyDiver(QWidget):
                 "Error",
                 "enrichment_analysis calculation failed. Please check the logs for more details.",
             )
-        
 
-    def on_graphs_finish(self, returncode):
-        if returncode == 0:
-            QMessageBox.information(
-                self, "Success", "All tasks completed successfully."
-            )
-            self.close()
-            
-        else:
-            QMessageBox.critical(
-                self,
-                "Error",
-                "An error occurred during graph generation. Please check the logs for more details.",
-            )
     def toggle_layout(self, layout, visible):
         for i in range(layout.count()):
             item = layout.itemAt(i)

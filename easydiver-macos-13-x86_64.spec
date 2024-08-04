@@ -6,9 +6,9 @@ a = Analysis(
     ['easy_diver_2_gui/easy_diver_2_main.py'],
     pathex=[],
     binaries=[
-        ('_pandaseq/pandaseq', '.'),
-        ('_pandaseq/libpandaseq.7.dylib', '.'),
-        ('_pandaseq/libpandaseq.dylib', '.')
+        ('_pandaseq_macos_x86_64/pandaseq', '.'),
+        ('_pandaseq_macos_x86_64/libpandaseq.7.dylib', '.'),
+        ('_pandaseq_macos_x86_64/libpandaseq.dylib', '.')
     ],
     datas=[
         ('easydiver.sh', '.'),

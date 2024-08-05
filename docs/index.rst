@@ -2,7 +2,7 @@ EasyDIVER 2.0
 ============================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
 
    test

@@ -5,6 +5,7 @@ EasyDIVER 2.0
    :maxdepth: 1
    :caption: Contents:
 
+   test
    usage
    example
 

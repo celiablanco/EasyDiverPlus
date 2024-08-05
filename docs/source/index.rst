@@ -25,6 +25,7 @@ run the enrichment analysis and has the subsequent `modified_counts` and `modifi
 
    installation
    usage
+   usage example
    modules
    development
    contributing
@@ -236,9 +237,13 @@ For example, increasing the Count_out cutoff threshold, reduces significantly th
    :alt: EasyDIVER 2.0
    :align: center
 
-Clicking in the legend elements will display and hide different elements in the grpahs.
-Hoovering the mouse over any datapoint will display information about the corresponding sequence. 
-Hoovering over th top right corner will shop icons with options to: download the plots as png, zoom, pan, box select, lasso select, zoom in, zoom out, autoscale and reset axis.
+.. note::
+   **Display/hide elements**
+      Clicking in the legend elements will display and hide different elements in the grpahs.
+   **Individual sequence information**
+      Hoovering the mouse over any datapoint will display information about the corresponding sequence. 
+   **Additional options**
+      Hoovering over the top right corner will shop icons with options to: download the plots as png, zoom, pan, box select, lasso select, zoom in, zoom out, autoscale and reset axis.
 
 .. toctree::
    :maxdepth: 1

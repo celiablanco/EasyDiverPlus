@@ -11,32 +11,32 @@ The forward and reverse primers for the test dataset are TACATTACAGCA and GATGGT
 The test dataset correspods to two rounds of an experimental in vitro evolution of mRNA-displayed
 peptides (unpublished), so 'Translate to Amino Acids' is selected.  
 
-.. image:: source/_static/images/ex1.png
+.. image:: _static/images/ex1.png
    :alt: EasyDIVER 2.0
    :align: center
 
 There are 3 samples per round, corresponding to pre-selection, post-selection and negative control selection. 
 Once the number of rounds has been set to 2, the 6 files can be assigned to their corresponding buckets:
 
-.. image:: source/_static/images/ex2.png
+.. image:: _static/images/ex2.png
    :alt: EasyDIVER 2.0
    :align: center
 
 After saving choices, the file ``enrichment_analysis_file_sorting_logic.csv`` will be saved in the output directory. 
 
-.. image:: source/_static/images/table.png
+.. image:: _static/images/table.png
    :alt: EasyDIVER 2.0
    :align: center
 
 Upon submitting the job, the text box in the bottom will start printing real-time information from the run. 
 
-.. image:: source/_static/images/ex3.png
+.. image:: _static/images/ex3.png
    :alt: EasyDIVER 2.0
    :align: center
 
 Once data processing and analysis is over, the output directory should have seven folders, a log.txt file and the sorting csv table. 
 
-.. image:: source/_static/images/ex4.png
+.. image:: _static/images/ex4.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -44,7 +44,7 @@ In the ``modified_counts`` folders there will be one ``round_00X_enrichment_anal
 For details on how the metrics are calculated see [PAPER REF].
 There will also be anotehr six other csv, corresponding to the frequency and the enrichment of all sequences traced across all rounds of selection:
 
-.. image:: source/_static/images/ex4.png
+.. image:: _static/images/ex4.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -54,7 +54,7 @@ Graph Builder
 
 To run the Graph Builder with the processed and analyzed testdata, the input directoy directory must correspond to the output from EasyDIVER 2.0: 
 
-.. image:: source/_static/images/img8.png
+.. image:: _static/images/img8.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -64,7 +64,7 @@ The button “Generate Graphs” will start the graph generation process.
 Once completed, an html window will open displayignb the plots.
 If not cutoffs values are specified, the Graph Builder will include all data in the files (in this case, the plots will look crammed and frankly, ugly).
 
-.. image:: source/_static/images/plot1.png
+.. image:: _static/images/plot1.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -75,7 +75,7 @@ There are two ways in which the user can chose to focus on specific areas or dat
 
 For example, increasing the Count_out cutoff threshold, reduces significantly the number of datapoints being representedfor 
 
-.. image:: source/_static/images/plot2.png
+.. image:: _static/images/plot2.png
    :alt: EasyDIVER 2.0
    :align: center
 

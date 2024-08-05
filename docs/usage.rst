@@ -3,7 +3,7 @@ Usage
 
 When opening the application, the main interface will appear, featuring options for both EasyDIVER 2.0 and the Graph Builder.
 
-.. image:: source/_static/images/img1.png
+.. image:: _static/images/img1.png
    :alt: EasyDIVER Logo
    :align: center
 
@@ -14,7 +14,7 @@ Selecting the “EasyDIVER 2.0” option will run the EasyDIVER application. The
 
 * **Input Directory Path**: Field to specify the directory containing raw sequencing files. This field is mandatory.
    
-.. image:: source/_static/images/img2.png
+.. image:: _static/images/img2.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -31,7 +31,7 @@ Optional Parameters:
 * **Retain Individual Lane Outputs**: Checkbox to retain output files for each sequencing lane.
 * **Run Enrichment Analysis**: Checkbox to enable enrichment analysis for consecutive rounds of selection/amplification. 
 
-.. image:: source/_static/images/img3.png
+.. image:: _static/images/img3.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -40,7 +40,7 @@ If Run Enrichment Analysis is selected, two options show up:
 * **Output Decimal Precision**: Spin box to set the precision of decimal numbers in the enrichment output files (default is 6, max is 10).
 * **Required: Sort Files into Rounds and Types**: A button to open a sorting interface where users can categorize files.
 
-.. image:: source/_static/images/img4.png
+.. image:: _static/images/img4.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -49,13 +49,13 @@ In the sorting interface, the user must first specify how many rounds of selecti
 * **How many rounds?**: Spin box to set the number of rounds. Default is 1.
 * **Start sorting**: A button to open the buckets to assign files from the input directory to each bucket type (Pre-, Post-, Neg-).
 
-.. image:: source/_static/images/img5.png
+.. image:: _static/images/img5.png
    :alt: EasyDIVER 2.0
    :align: center
 
 Once a number of rounds has been selected, and after clicking 'Start sorting', the files in the input directory and the buckets will show up:
 
-.. image:: source/_static/images/img6.png
+.. image:: _static/images/img6.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -63,7 +63,7 @@ The files can be dragged to their corresponding bucket.
 
 * **Save choices and continue**: A button to save a csv file with the file names and their corresponding type of selection. 
 
-.. image:: source/_static/images/img7.png
+.. image:: _static/images/img7.png
    :alt: EasyDIVER 2.0
    :align: center
 
@@ -85,7 +85,7 @@ Graph Builder
 The Graph Builder can only be use if the data has been processed and analyzed, as the graphs are built using the output from the analyssy part. 
 If the Graph Builder option is selected, the main interface will appear: 
 
-.. image:: source/_static/images/img8.png
+.. image:: _static/images/img8.png
    :alt: EasyDIVER 2.0
    :align: center
 

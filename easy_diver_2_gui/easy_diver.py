@@ -376,7 +376,7 @@ class EasyDiver(QWidget):
                 easy_diver_path_wsl = '/mnt/' + easy_diver_path.split(':\\')[0].lower() + "/" + easy_diver_path.split(':\\')[1].replace('\\','/')
                 run_script = f"wsl --exec bash {easy_diver_path_wsl} "
             else:
-                run_script = "bash {easy_diver_path}"
+                run_script = f"bash {easy_diver_path} "
             if not self.input_dir_edit.text():
                 QMessageBox.critical(self, "Error", "Please enter the required input.")
                 return

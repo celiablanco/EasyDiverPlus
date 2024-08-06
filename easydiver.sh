@@ -125,7 +125,7 @@ if [ -z $helpm ];
 
 fi
 
-# Argument report
+# Argument report 
 # Check arguments, print, exit if necessary w/ message
 
 if [ -z "$inopt" ] && [ -z "$outopt" ] && [ -z $fwd ] && [ -z $rev ] && [ -z $threads ] && [ -z $extra ] && [ -z $prot ] && [ -z $slanes ];

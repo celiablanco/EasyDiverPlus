@@ -371,38 +371,46 @@ class EasyDiver(QWidget):
             self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
         else:
             easy_diver_path = path_constructor("easydiver.sh", ".")
-            run_script = f"bash {easy_diver_path} "
+            if os.name == 'nt':
+                os.chmod(easy_diver_path, 0o755)
+                easy_diver_path_wsl = '/mnt/' + easy_diver_path.split(':\\')[0].lower() + "/" + easy_diver_path.split(':\\')[1].replace('\\','/')
+                run_script = f"wsl --exec bash {easy_diver_path_wsl} "
+            else:
+                run_script = "bash {easy_diver_path}"
             if not self.input_dir_edit.text():
                 QMessageBox.critical(self, "Error", "Please enter the required input.")
                 return
             input_no_spaces = self.input_dir_edit.text().replace(' ','\\ ')
-            run_script += f"-i {input_no_spaces}"
+            run_script += f"-i {input_no_spaces} "
 
             if self.output_dir_edit.text():
                 output_no_spaces = self.output_dir_edit.text().replace(' ','\\ ')
-                run_script += f" -o {output_no_spaces}"
+                run_script += f"-o {output_no_spaces} "
 
             if self.forward_primer_edit.text():
-                run_script += f" -p {self.forward_primer_edit.text()}"
+                run_script += f"-p {self.forward_primer_edit.text()} "
 
             if self.reverse_primer_edit.text():
-                run_script += f" -q {self.reverse_primer_edit.text()}"
+                run_script += f"-q {self.reverse_primer_edit.text()} "
 
             if self.translate_check.isChecked():
-                run_script += " -a"
+                run_script += "-a "
 
             if self.retain_check.isChecked():
-                run_script += " -r"
+                run_script += "-r "
 
             if self.extra_flags_edit.text():
-                run_script += f' -e "{self.extra_flags_edit.text()}"'
+                run_script += f"-e {self.extra_flags_edit.text()} "
+
+            self.output_text.append(run_script)
             # Execute the script
             try:
                 res = subprocess.Popen(
-                    run_script.split(" "),
+                    run_script,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     universal_newlines=True,
+                    shell=False
                 )
 
                 while True:

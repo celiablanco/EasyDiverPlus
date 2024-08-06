@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 translator.py is a script that translates DNA sequences into amino acid sequences using a genetic code
 dictionary gencode. It takes an input file containing DNA sequences and their corresponding abundances
@@ -5,7 +6,6 @@ and generates an output file containing the translated amino acid sequences, the
 relative percentages.
 """
 
-from __future__ import print_function
 import numpy as np
 import sys
 
@@ -166,6 +166,8 @@ for i in range(0, len(list)):
 # print >> f_out, str(head[0].split("=")[0]).ljust(30), "=" , str(unique).rjust(10)
 # print >> f_out, str(head[1].split("=")[0]).ljust(30), "=" , str(tot).rjust(10)
 # print >>f_out, ""
+print(str(head[0].split("=")[0]).ljust(30) + "=" + str(unique).rjust(10))
+print(str(head[1].split("=")[0]).ljust(30) + "=" + str(tot).rjust(10))
 print(str(head[0].split("=")[0]).ljust(30) + "=" + str(unique).rjust(10), file=f_out)
 print(str(head[1].split("=")[0]).ljust(30) + "=" + str(tot).rjust(10), file=f_out)
 print("", file=f_out)

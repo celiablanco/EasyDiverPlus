@@ -15,7 +15,7 @@ class ClickableDirectoryEdit(QLineEdit):
         super().mousePressEvent(event)
 
     def setText(self, text):
-        if os.path.isdir(text) or text == "":
+        if os.path.isdir(text) or text == "" or text.endswith('.exe'):
             super().setText(text)
         else:
             raise ValueError("Invalid directory path")

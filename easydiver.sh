@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # This is EasyDIVER, a pipeline for Easy pre-processing and Dereplication of In Vitro Evolution Reads
 
 # by Sam Verbanic and Celia Blanco
@@ -31,25 +29,61 @@ start=`date +%s`
 # Record workking directory
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
-echo "$SCRIPT_DIR/pandaseq"
+pandaiteration=0
+
+unameOut=$(uname -a)
+case "${unameOut}" in
+    *Microsoft*)     OS="Windows";; #must be first since Windows subsystem for linux will have Linux in the name too
+    *microsoft*)     OS="Windows";; #WARNING: My v2 uses ubuntu 20.4 at the moment slightly different name may not always work
+    Linux*)     OS="Linux";;
+    Darwin*)    OS="Mac";;
+    CYGWIN*)    OS="Windows";;
+    MINGW*)     OS="Windows";;
+    *Msys)     OS="Windows";;
+	*)          OS="UNKNOWN:${unameOut}"
+esac
 
 # Test to verify pandaseq is installed and can be found
-pandatest=$(which "$SCRIPT_DIR/pandaseq")
-
-if [ -z "$pandatest" ];
-	then
-		pandatest2=$(which pandaseq)
-		if [ -z "$pandatest2" ]; then
-			echo "ERROR: Pandaseq is not installed or cannot be found - cannot continue"
+echo "Verifying pandaseq exists!"
+pandatest=$(which pandaseq)
+while [ -z "$pandatest" ]; do
+	if [[ pandaiteration -eq 0 ]]; then	
+		pandatest=$(which "./pandaseq")
+		if [ -z "$pandatest" ]; then
+			echo "checking next location"
 			echo ""
-			exit 1
-		else 
-			echo "Using already installed pandaseq"
-			alias pandaseq=$pandatest2
+		else
+			break
 		fi
-	else
-		alias pandaseq="$SCRIPT_DIR/pandaseq"
-fi
+		pandaiteration+=1
+	elif [[ pandaiteration -eq 1 ]]; then
+		pandatest=$(which "./_pandaseq/pandaseq")
+		if [ -z "$pandatest" ]; then
+			echo "checking next location"
+			echo ""
+		else
+			break
+		fi
+		pandaiteration+=1
+	elif [[ pandaiteration -eq 2 ]]; then
+		pandatest=$(which "./_pandaseq_macos_x86_64/pandaseq")
+		if [ -z "$pandatest" ]; then
+			echo "checking next location"
+			echo ""
+		else
+			break
+		fi
+		pandaiteration+=1
+	elif [[ pandaiteration -eq 3 ]]; then
+		echo "ERROR: Pandaseq is not installed or cannot be found - cannot continue"
+		echo ""
+		exit 1
+	fi
+done
+
+echo $pandatest
+
+echo $OS
 
 # Parse arguments and set global variables
 while getopts hi:o:p:q:T:e:ra option
@@ -169,6 +203,10 @@ if [ -z "$inopt" ];
 		exit 1
         else
 			# define input variable with correct path name
+
+			if [ "$OS" == "Windows" ]; then
+				inopt=$(wslpath $inopt)
+			fi
 			cd $inopt
 			fastqs=$(pwd)
 			echo "-----Input directory path: $fastqs"
@@ -184,8 +222,11 @@ if [ -z "$outopt" ];
 			echo "-----Output directory path: $outdir" >> $outdir/log.txt
         else
 			# define output variable with correct path name
+			if [ "$OS" == "Windows" ]; then
+				outopt=$(wslpath $outopt)
+			fi
 			mkdir $outopt 2>/dev/null
-		cd $outopt
+			cd $outopt
 			outdir=$(pwd)
 			echo "-----Output directory path: $outdir"
 			echo "-----Input directory path: $fastqs" > $outdir/log.txt
@@ -294,7 +335,7 @@ echo "(Approx.) Progress: $progress%"
 # move to working directory
 # make output directories
 cd $outdir
-mkdir counts individual.lanes fastqs fastas histos 2>/dev/null
+mkdir counts individual_lanes fastqs fastas histos 2>/dev/null
 
 # loop through reads & process them
 for R1 in $fastqs/*R1*
@@ -304,11 +345,11 @@ do
 	basename=$(basename ${R1})
 	lbase=${basename//_R*}
 	sbase=${basename//_L00*}
-	R2=${R1//R1_001.fastq*/R2_001.fastq*}
+	R2=${R1//R1/R2}
 
 	# Make a 'sample' directory for all analyses
 	# and combined lane outputs (aka 'sample' outputs)
-	dir=$outdir/individual.lanes/$sbase
+	dir=$outdir/individual_lanes/$sbase
 	mkdir $dir 2>/dev/null
 
 	 # Make a directory for indiv lane read & histo outputs
@@ -317,12 +358,14 @@ do
 	fqdir=$dir/fastqs
 	cdir=$dir/counts
 	mkdir $lhist $fadir $fqdir $cdir 2>/dev/null
-
+	
 	# Join reads & extract insert
 	echo "Joining $lbase reads & extracting primer..."
-	"$SCRIPT_DIR/pandaseq" -f $R1 -r $R2 -F \
+	joined_fastq=$fqdir/$lbase.joined.fastq
+
+	"$pandatest" -f "$R1" -r "$R2" -F \
 	$pval $qval \
-	-w $fqdir/$lbase.joined.fastq $tval -T $threads $extra $lval $dval 2>/dev/null
+	-w "$joined_fastq" $tval $extra $lval $dval 2>/dev/null
 
 	# Convert to fasta
 	echo "Converting joined $lbase FASTQ to FASTA..."
@@ -364,7 +407,7 @@ do
 	fi
 done
 
-cd $outdir/individual.lanes
+cd $outdir/individual_lanes
 ########## CREATE COUNTS FILE FOR DNA ##########
 
 # Loop through directories and generate count files
@@ -401,7 +444,7 @@ echo ""
 if [ -z $slanes ];
 	then
 		echo "Cleaning up all individual lane outputs..."
-                rm -r $outdir/individual.lanes/
+                rm -r $outdir/individual_lanes/
         else
                	echo "Individual lane outputs will be retained"
 fi
@@ -438,7 +481,7 @@ if [ -z $prot ];
 
 	# Translate into aa
 	echo "Translating ${file//_counts.txt} DNA to peptides..."	
- 	python "$SCRIPT_DIR/translator.py" $file
+ 	python3 "$SCRIPT_DIR/translator.py" $file
 
 	# Print in new file every line except the first 3 (2 with the number of molecules and sequences and town empty lines):
 	tail -n +4 ${file//_counts.txt}'_counts.aa.dup.txt' | sort > newfile.txt;
@@ -492,6 +535,7 @@ if [ -z $prot ];
 fi
 progress=$((90))
 echo "(Approx.) Progress: $progress%"
+echo "Processing complete! Generating Log File..."
 ########## CREATE LOG FILE FOR DNA ##########
 
 if [ -z $prot ];
@@ -508,7 +552,7 @@ if [ -z $prot ];
 			basename=$(basename ${R1})
 			lbase=${basename//_R*}
 			sbase=${basename//_L00*}
-			R2=${R1//R1_001.fastq*/R2_001.fastq*}
+			R2=${R1//R1/R2}
 
 			echo $sbase \
 			$(cat $R1 | zcat | awk 'END {print NR/4}') \
@@ -540,7 +584,7 @@ if [ -z $prot ];
 			basename=$(basename ${R1})
 			lbase=${basename//_R*}
 			sbase=${basename//_L00*}
-			R2=${R1//R1_001.fastq*/R2_001.fastq*}
+			R2=${R1//R1/R2}
 
 			echo $sbase \
 			$(cat $R1 | zcat | awk 'END {print NR/4}') \
@@ -560,10 +604,17 @@ if [ -z $prot ];
 		rm $outdir/log_temp2.txt
 fi
 
+progress=$((95))
+echo "(Approx.) Progress: $progress%"
+echo "Processing bootstrapping and adding unique sequence names to files. Converting txt to csv..."
+
 dir1="${outdir}/counts_aa"
 dir2="${outdir}/counts"
 
 echo "{}" > "${outdir}/bootstrap_dict.json"
+if [ "$OS" == "Windows" ]; then
+	python3 -m pip install -r "$SCRIPT_DIR/requirements.txt" >/dev/null 2>&1
+fi
 # Loop through the directories
 for directory in "$dir1" "$dir2"; do
   # Check if the directory exists
@@ -576,7 +627,7 @@ for directory in "$dir1" "$dir2"; do
       if [ -f "$file" ] && [ "$(basename "$file")" != "seq_dict.json" ]; then
         # Do something with the file
 		echo python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/bootstrap_dict.json"
-        python "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/bootstrap_dict.json"
+        python3 "$SCRIPT_DIR/seq_names_and_bootstrap.py" -file "$file" -seqdict "$directory/seq_dict.json" -bootdict "${outdir}/bootstrap_dict.json"
 		# Construct the expected .csv file name
 		csv_file="${file%.txt}.csv"
 		

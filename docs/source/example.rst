@@ -3,8 +3,8 @@ Usage Example
 
 Here, we will run both EasyDIVER 2.0 and the graph generator for the test data provided in the GitHub repository (ADD LINK).
 
-EasyDIVER 2.0
--------------
+Example EasyDIVER 2.0
+---------------------
 
 First, we downloaded the test data and placed it in a directory called ``raw.data``. 
 The forward and reverse primers for the test dataset are TACATTACAGCA and GATGGTGATGGTG, respectively. 
@@ -54,8 +54,8 @@ There will also be another six csv files, corresponding to the frequency and the
    :align: center
    :width: 600px
 
-Graph Builder
--------------
+Example Graph Builder
+---------------------
 
 To run the Graph Builder with the processed and analyzed test data, the input directory must correspond to the output from EasyDIVER 2.0: 
 

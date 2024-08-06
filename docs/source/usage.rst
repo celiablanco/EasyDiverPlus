@@ -1,5 +1,5 @@
-Usage
-=====
+Usage instructions
+==================
 
 When opening the application, the main interface will appear, featuring options for both EasyDIVER 2.0 and the Graph Builder.
 
@@ -8,8 +8,8 @@ When opening the application, the main interface will appear, featuring options 
    :align: center
    :width: 600px
 
-EasyDIVER 2.0
--------------
+Usage EasyDIVER 2.0
+-------------------
 
 Selecting the “EasyDIVER 2.0” option will run the EasyDIVER application. The only required field is the path to the input directory. Once the required field is filled, the optional parameters will show up. 
 
@@ -85,8 +85,8 @@ Each field box displays a question mark icon providing additional information.
 
 Upon submitting a job, the text box at the bottom will start printing real-time information from the run. 
 
-Graph Builder
--------------
+Usage Graph Builder
+-------------------
 
 The Graph Builder can only be used if the data has been processed and analyzed, as the graphs are built using the output from the analysis part. 
 If the Graph Builder option is selected, the main interface will appear: 

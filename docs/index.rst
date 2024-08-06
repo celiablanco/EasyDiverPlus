@@ -3,10 +3,14 @@ EasyDIVER 2.0
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Usage:
 
-   test
    usage
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Example:
+
    example
 
 

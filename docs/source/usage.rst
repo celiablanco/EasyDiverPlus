@@ -85,6 +85,37 @@ Each field box displays a question mark icon providing additional information.
 
 Upon submitting a job, the text box at the bottom will start printing real-time information from the run. 
 
+Output files
+------------
+
+Once data processing and analysis is over, the output directory should have seven folders, a log.txt file, and the sorting csv table. 
+
+.. image:: _static/images/ex4.png
+   :alt: EasyDIVER 2.0
+   :align: center
+   :width: 600px
+
+The seven folder contain the following:
+
+* **counts**: DNA counts files for every sample (unique sequences, count reads and frequency)
+* **counts.aa**: Amino acid counts files for every sample (unique sequences, count reads and frequency)
+* **fastas**: Joined fasta files
+* **fastqs**:
+* **histos**:
+* **log.txt**:
+* **modified_counts_test_aa**:
+
+In the ``modified_counts`` folders, there will be one ``round_00X_enrichment_analysis.csv`` file for each round. 
+These files will have all metrics for each sequence in the post-selection sample for each round. 
+For details on how the metrics are calculated see [link to article TBD].
+There will also be another six csv files, corresponding to the frequency and the enrichment of all sequences traced across all rounds of selection:
+
+.. image:: _static/images/ex5.png
+   :alt: EasyDIVER 2.0
+   :align: center
+   :width: 600px
+
+
 How to run the Graph Builder
 ----------------------------
 

@@ -19,7 +19,7 @@ The main improvements in EasyDIVER 2.0 compared to the original EasyDIVER are:
    installation
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Usage
 
    usage

@@ -10,7 +10,7 @@ EasyDIVER 2.0
 
 .. toctree::
    :maxdepth: 2
-   :caption: SOMETHING SOMETHING
+   :caption: OUTPUT
 
 
 

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+for each
+do
+	if [[ "${each}" == -* ]]
+	then
+		PT="${PT} ${each}"
+	else
+		if [ "x${SRC}" = x ]
+		then
+			SRC="${each}"
+			MOD=$(basename "${each}" .c)
+		else
+			SRC="${SRC} ${each}"
+		fi
+	fi
+done
+
+if [ "x${SRC}" = x ]
+then
+	echo "Error: No C file provided."
+	echo "Usage: $0 module.c supplementary.c -lextralib ..."
+	exit 1
+fi
+
+prefix=/home/andre/Documents/Coding/mingw
+exec_prefix=${prefix}
+LO_FILES=""
+for each in ${prefix}/include/pandaseq-2/panda_api.c $SRC
+do
+	LO="${MOD}-$(basename "${each}.lo")"
+	libtool --tag=CC --mode=compile i686-w64-mingw32-gcc -DPANDASEQ_MODULE=$MOD -DHAVE_CONFIG_H -I${prefix}/include/pandaseq-2 -g -O2 -pedantic -c -o "$LO" "$each" $PT || exit 1
+	LO_FILES="$LO_FILES $LO"
+done
+libtool --tag=CC --mode=link i686-w64-mingw32-gcc -module -g -O2 -pedantic -export-dynamic -export-symbols-regex "^${MOD}_LTX_" -L/home/andre/Documents/Coding/mingw/lib -no-undefined -avoid-version -shared -Wl,-static -rpath ${exec_prefix}/lib/pandaseq7 -o "${MOD}.la" $LO_FILES $PT || exit 1
+if [ -d "${exec_prefix}/lib/pandaseq7" -a -w "${exec_prefix}/lib/pandaseq7" ]
+then
+	libtool --mode=install /usr/bin/install -c  "${MOD}.la" "${exec_prefix}/lib/pandaseq7/${MOD}.la"
+else
+	echo To install: sudo libtool --mode=install /usr/bin/install -c  "${MOD}.la" "${exec_prefix}/lib/pandaseq7/${MOD}.la"
+fi

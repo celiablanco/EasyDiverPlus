@@ -14,9 +14,9 @@ def main(
     ):
     for input_val in input_values:
         if input_val.lower().startswith('freq'):
-            globals()[input_val.lower().replace(' cutoff threshold:','_input')] = float(input_values.get(input_val))
+            globals()[input_val.lower().replace(' minimum:','_input')] = float(input_values.get(input_val))
         else:
-            globals()[input_val.lower().replace(' cutoff threshold:','_input')] = int(input_values.get(input_val))
+            globals()[input_val.lower().replace(' minimum:','_input')] = int(input_values.get(input_val))
     # Load and preprocess data
     print(round_file)
     df = pd.read_csv(f"{round_file}", skiprows=6)
@@ -36,22 +36,22 @@ def main(
     
     if 'Enr_neg_upper' in df.columns:
         filtered_df = df[
-            (df['Count_out'] > count_out_input) &
-            (df['Freq_out'] > freq_out_input) &
-            (df['Count_in'] > count_in_input) &
-            (df['Freq_in'] > freq_in_input) &
-            (df['Count_neg'] > count_neg_input) &
-            (df['Freq_neg'] > freq_neg_input) &
-            (df['Enr_neg'] > enr_neg_input) &
-            (df['Enr_out'] > enr_out_input)
+            (df['Count_out'] >= count_post_input) &
+            (df['Freq_out'] >= freq_post_input) &
+            (df['Count_in'] >= count_pre_input) &
+            (df['Freq_in'] >= freq_pre_input) &
+            (df['Count_neg'] >= count_neg_input) &
+            (df['Freq_neg'] >= freq_neg_input) &
+            (df['Enr_neg'] >= enr_neg_input) &
+            (df['Enr_out'] >= enr_post_input)
         ]
     else:
         filtered_df = df[
-            (df['Count_out'] > count_out_input) &
-            (df['Freq_out'] > freq_out_input) &
-            (df['Count_in'] > count_in_input) &
-            (df['Freq_in'] > freq_in_input) &
-            (df['Enr_out'] > enr_out_input)
+            (df['Count_out'] >= count_post_input) &
+            (df['Freq_out'] >= freq_post_input) &
+            (df['Count_in'] >= count_pre_input) &
+            (df['Freq_in'] >= freq_pre_input) &
+            (df['Enr_out'] >= enr_post_input)
         ]
     # Create a subplot layout
     fig = make_subplots(
@@ -137,7 +137,7 @@ def main(
         text=filtered_df['Unique_Sequence_Name'],
         hovertemplate=
         '<b>%{text}</b><br>' +
-        'Enrichment_Out: %{y}<br>',
+        'Enrichment_Post: %{y}<br>',
             legendgroup='group1'
     ), row=1, col=1)
 

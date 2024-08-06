@@ -113,16 +113,6 @@ normal=$(tput sgr0)
 
 if [ -z $helpm ];
 	then
-
-		echo "${bold} ______                _____ _______      ________ _____  "
- 		echo "|  ____|              |  __ \_   _\ \    / /  ____|  __ \ "
- 		echo "| |__   ___  ___ _   _| |  | || |  \ \  / /| |__  | |__) |"
- 		echo "|  __| / _ \/ __| | | | |  | || |   \ \/ / |  __| |  _  / "
- 		echo "| |___| (_| \__ \ |_| | |__| || |_   \  /  | |____| | \ \ "
- 		echo "|______\__,_|___/\__, |_____/_____|   \/   |______|_|  \_\ "
- 		echo "                  __/ |"
-		echo "                 |___/ ${normal}"
-
 		banner()
 		{
 		  echo "+-------------------------------------------------------------------------------------------------+"
@@ -257,8 +247,8 @@ fi
 
 if [ -z $threads ];
 	then
-		echo "-----Number of threads not supplied. Proceeding with 1 thread, this could take a while ..."
-		echo "-----Number of threads = 1"  >> $outdir/log.txt
+		# echo "-----Number of threads not supplied. Proceeding with 1 thread, this could take a while ..."
+		# echo "-----Number of threads = 1"  >> $outdir/log.txt
 
 		threads=1
 	else

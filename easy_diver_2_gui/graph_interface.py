@@ -1,7 +1,7 @@
 import sys
 import os
 import subprocess
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QMessageBox, QFileDialog, QSplitter
 from PyQt5.QtGui import QDoubleValidator, QIntValidator, QPixmap, QCloseEvent
 from PyQt5.QtCore import Qt, QEvent # type: ignore # pylint: disable=import-error
 from directory_edit import ClickableDirectoryEdit
@@ -19,7 +19,13 @@ class Graphs_Window(QWidget):
         self.initUI()
 
     def initUI(self):
+        # Create a splitter
+        splitter = QSplitter(Qt.Vertical)
         layout = QVBoxLayout()
+        self.required_widget = QWidget()
+        self.required_layout = QVBoxLayout()
+        self.required_label = QLabel("REQUIRED")
+        self.required_layout.addWidget(self.required_label)
         if self.rounds_path is None:
             self.input_layout = QHBoxLayout()
             self.input_label = QLabel("Input Path for Parent Directory:")
@@ -35,7 +41,7 @@ class Graphs_Window(QWidget):
             self.input_layout.addWidget(self.input_label)
             self.input_layout.addWidget(self.input_dir_edit)
             self.input_layout.addWidget(self.input_tooltip_icon)
-            layout.addLayout(self.input_layout)
+            self.required_layout.addLayout(self.input_layout)
         # Select Round
         self.dna_or_aa_layout = QHBoxLayout()
         self.dna_or_aa_label = QLabel("Select Data Type:")
@@ -46,7 +52,7 @@ class Graphs_Window(QWidget):
         self.dna_or_aa_layout.addWidget(self.dna_or_aa_label)
         self.dna_or_aa_layout.addWidget(self.dna_or_aa_combo)
         self.dna_or_aa_combo.currentIndexChanged.connect(self.populate_rounds)
-        layout.addLayout(self.dna_or_aa_layout)
+        self.required_layout.addLayout(self.dna_or_aa_layout)
 
         # Select Round
         round_layout = QHBoxLayout()
@@ -55,26 +61,35 @@ class Graphs_Window(QWidget):
         self.populate_rounds()
         round_layout.addWidget(round_label)
         round_layout.addWidget(self.round_combo)
-        layout.addLayout(round_layout)
-
+        self.required_layout.addLayout(round_layout)
+        self.required_widget.setLayout(self.required_layout)
+        splitter.addWidget(self.required_widget)
 
         # Define input configurations
         input_configurations = [
-            ("Count_out cutoff threshold:", 0, False),
-            ("Freq_out cutoff threshold:", 0.0000000, True),
-            ("Count_in cutoff threshold:", 0, False),
-            ("Freq_in cutoff threshold:", 0.0000000, True),
-            ("Count_neg cutoff threshold:", 0, False),
-            ("Freq_neg cutoff threshold:", 0.0000000, True),
-            ("Enr_out cutoff threshold:", 0, False),
-            ("Enr_neg cutoff threshold:", 0, False)
+            ("Count_post minimum:", 0, False),
+            ("Freq_post minimum:", 0.0000000, True),
+            ("Count_pre minimum:", 0, False),
+            ("Freq_pre minimum:", 0.0000000, True),
+            ("Count_neg minimum:", 0, False),
+            ("Freq_neg minimum:", 0.0000000, True),
+            ("Enr_post minimum:", 0, False),
+            ("Enr_neg minimum:", 0, False)
         ]
+        self.optional_widget = QWidget()
+        self.optional_layout = QVBoxLayout()
+
+        optional_label = QLabel("OPTIONAL")
+        self.optional_layout.addWidget(optional_label)
 
         for label_text, default_value, is_float in input_configurations:
-            input_field = self.create_input_field(label_text, default_value, layout, is_float)
+            input_field = self.create_input_field(label_text, default_value, self.optional_layout, is_float)
             self.inputs[label_text] = input_field
-
-        self.buttons_box = QHBoxLayout()
+        self.optional_widget.setLayout(self.optional_layout)
+        splitter.addWidget(self.optional_widget)
+        self.buttons_box = QHBoxLayout(self.optional_widget)
+        
+        layout.addWidget(splitter)
         # Generate Graphs Button
         self.generate_button = QPushButton("Generate Graphs")
         self.generate_button.clicked.connect(self.generate_graphs)

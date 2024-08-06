@@ -11,7 +11,7 @@ When opening the application, the main interface will appear, featuring options 
 How to process and analyze data
 -------------------------------
 
-Selecting the “EasyDIVER 2.0” option will run the EasyDIVER application. The only required field is the path to the input directory. Once the required field is filled, the optional parameters will show up. 
+Selecting the **EasyDIVER 2.0** option will run the EasyDIVER application. The only required field is the path to the input directory. Once the required field is filled, the optional parameters will show up. 
 
 * **Input Directory Path**: Field to specify the directory containing raw sequencing files. This field is mandatory.
    
@@ -99,7 +99,7 @@ If the Graph Builder option is selected, the main interface will appear:
 * **Input Directory Selection**: Field to specify the directory containing the modified_counts folder. 
   This field only shows up if EasyDIVER 2.0 has not been run right before.
   If you run EasyDIVER 2.0 at a different time, this field should be filled with the Output Directory Path from EasyDIVER 2.0. 
-  If you did not specify an output directory name when running EasyDIVER, this will be ``pipeline.output``.
+  If you did not specify an output directory name when running EasyDIVER, this should be ``pipeline.output``.
 
 * **Select Data Type**: Dropdown menu to choose between ‘DNA’ and ‘AA’. 
   This determines which modified_counts folder is used (modified_counts or modified_counts_aa).
@@ -118,8 +118,8 @@ Users can customize various cutoff thresholds for the graphs by entering the des
 * **Enr_out cutoff threshold**: Minimum relative enrichment in the post-selection.
 * **Enr_neg cutoff threshold**: Minimum relative enrichment in the negative selection.
 
-The button “Generate Graphs” will start the graph generation process.
+The button **Generate Graphs** will start the graph generation process.
 The application will use the provided input parameters and the selected round to generate graphs.
 If the graphs are generated successfully, a confirmation message will appear.
 
-Click the “Exit” button to close the application.
+Click the **Exit** button to close the application.

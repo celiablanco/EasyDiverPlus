@@ -1,7 +1,7 @@
 Example: test dataset
 =====================
 
-Here, we will run both EasyDIVER 2.0 and the graph generator for the test data provided in the GitHub repository (ADD LINK).
+Here, we will run both EasyDIVER 2.0 and the graph generator for the test data provided in the GitHub repository (link to data TBD).
 
 Processing and analyzing the test dataset
 -----------------------------------------
@@ -38,6 +38,9 @@ Upon submitting the job, the text box at the bottom will start printing real-tim
    :align: center
    :width: 600px
 
+Output files
+-------------
+
 Once data processing and analysis is over, the output directory should have seven folders, a log.txt file, and the sorting csv table. 
 
 .. image:: _static/images/ex4.png
@@ -46,10 +49,10 @@ Once data processing and analysis is over, the output directory should have seve
    :width: 600px
 
 In the ``modified_counts`` folders, there will be one ``round_00X_enrichment_analysis.csv`` file for each round. These files will have all metrics for each sequence in the post-selection sample for each round. 
-For details on how the metrics are calculated see [PAPER REF].
+For details on how the metrics are calculated see [link to article TBD].
 There will also be another six csv files, corresponding to the frequency and the enrichment of all sequences traced across all rounds of selection:
 
-.. image:: _static/images/ex4.png
+.. image:: _static/images/ex5.png
    :alt: EasyDIVER 2.0
    :align: center
    :width: 600px
@@ -66,7 +69,7 @@ To run the Graph Builder with the processed and analyzed test data, the input di
 
 Since the dataset corresponds to mRNA-displayed peptides, data type is ‘AA’. 
 For testing purposes, we will plot the metrics corresponding to the last round of selection (round 2).
-The button “Generate Graphs” will start the graph generation process. 
+The button **Generate Graphs** will start the graph generation process. 
 Once completed, an HTML window displaying the plots will open.
 If no cutoff values are specified, the Graph Builder will include all data in the files (in this case, the plots will look crammed and frankly, ugly).
 
@@ -78,7 +81,7 @@ If no cutoff values are specified, the Graph Builder will include all data in th
 There are two ways in which the user can choose to focus on specific areas or data points in the graphs:
 
 1. By selecting specific plotting regions. The graphs interface is interactive, and specific areas of the plots can be selected by dragging the mouse. 
-2. By setting more stringent cutoff values. The user can fill the values in the Graph Builder interface as many times as needed, and a new HTML window will open every time “Generate Graphs” is selected.
+2. By setting more stringent cutoff values. The user can fill the values in the Graph Builder interface as many times as needed, and a new HTML window will open every time **Generate Graphs** is selected.
 
 For example, increasing the Count_out cutoff threshold significantly reduces the number of data points being represented. 
 

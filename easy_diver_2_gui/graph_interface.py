@@ -12,6 +12,9 @@ class Graphs_Window(QWidget):
         super().__init__(parent)
         if parent.__class__.__name__ == 'MainApp':
             parent.close()
+            super().__init__()
+        else:
+            super().__init__(parent)
         self.rounds_path = rounds_path
         self.inputs = {}
         self.worker = None
@@ -104,7 +107,7 @@ class Graphs_Window(QWidget):
 
         self.setLayout(layout)
         self.setWindowTitle("Graph Generator")
-        self.setWindowFlags(Qt.Window)
+        self.setWindowFlags(Qt.Window | Qt.Dialog)
         self.show()
         self.center_window()
     

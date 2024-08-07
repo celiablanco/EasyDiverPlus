@@ -54,15 +54,17 @@ class QTextEditStream:
 
 class EasyDiver(QWidget):
     def __init__(self, parent = None):
-        super().__init__(parent)
+        if parent.__class__.__name__ == 'MainApp':
+            parent.close()
+            super().__init__()
+        else:
+            super().__init__(parent)
         self.init_ui()
         self.graphi = None
         self.dash_thread = None
         self.output_dir = ""
 
     def init_ui(self):
-        if (self.parent() is not None):
-            self.parent().close()
         self.setWindowTitle("Easy Diver 2.0")
         layout = QVBoxLayout()
 

@@ -159,11 +159,11 @@ class MainApp(QWidget):
         super().resizeEvent(event)
     
     def grapher(self):
-        graphi = Graphs_Window(self)
-        graphi.show()
+        self.graphi = Graphs_Window(self)
+        self.graphi.show()
     def easy_diver(self):
-        easy_diver_app = EasyDiver(self)
-        easy_diver_app.show()
+        self.easy_diver_app = EasyDiver(self)
+        self.easy_diver_app.show()
 
     def display_help_message(self):
         help_text = """

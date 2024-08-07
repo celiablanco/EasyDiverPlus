@@ -223,7 +223,7 @@ class EasyDiver(QWidget):
         self.optional_layout.addLayout(retain_layout)
 
         # Option for enrichment_analysis
-        self.run_enrichment_analysis = QCheckBox("Run Enrichment Analysis")
+        self.run_enrichment_analysis = QCheckBox("Run Enrichment Analysis for Consecutive Rounds")
         self.run_enrichment_analysis.stateChanged.connect(self.toggle_precision_option)
         enrichment_analysis_tooltip_icon = QLabel()
         enrichment_analysis_tooltip_icon.setPixmap(

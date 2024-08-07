@@ -403,6 +403,7 @@ class EasyDiver(QWidget):
                 run_script += f"-e {self.extra_flags_edit.text()} "
 
             self.output_text.append(run_script)
+            run_script = run_script if os.name == 'nt' else run_script.split(" ")
             # Execute the script
             try:
                 res = subprocess.Popen(
@@ -477,7 +478,7 @@ class EasyDiver(QWidget):
                 self.toggle_layout(item, visible)
             elif item.widget():
                 item.widget().setVisible(visible)
-    
+
     def display_help_message(self):
         help_text = """
         EasyDIVER 2.0 is a pipeline to processes and analyzes raw sequencing data files from consecutive rounds of selection/evolution, providing:

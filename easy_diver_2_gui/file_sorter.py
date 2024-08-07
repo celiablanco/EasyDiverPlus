@@ -156,16 +156,16 @@ class SortingApp(QWidget):
             round_layout = QHBoxLayout()
 
             # In list
-            in_label = QLabel('Pre:')
-            in_list = self.create_list_widget()
-            round_layout.addWidget(in_label)
-            round_layout.addWidget(in_list)
+            pre_label = QLabel('Pre:')
+            pre_list = self.create_list_widget()
+            round_layout.addWidget(pre_label)
+            round_layout.addWidget(pre_list)
 
             # Out list
-            out_label = QLabel('Post:')
-            out_list = self.create_list_widget()
-            round_layout.addWidget(out_label)
-            round_layout.addWidget(out_list)
+            post_label = QLabel('Post:')
+            post_list = self.create_list_widget()
+            round_layout.addWidget(post_label)
+            round_layout.addWidget(post_list)
 
             # Neg list
             neg_label = QLabel('Neg:')
@@ -174,8 +174,8 @@ class SortingApp(QWidget):
             round_layout.addWidget(neg_list)
 
             self.round_widgets.append({
-                'in': in_list,
-                'out': out_list,
+                'pre': pre_list,
+                'post': post_list,
                 'neg': neg_list
             })
 
@@ -241,15 +241,15 @@ class SortingApp(QWidget):
             writer.writerow(['filename', 'round_number', 'file_type'])
 
             for round_num, widgets in enumerate(self.round_widgets, start=1):
-                # Save 'in' files
-                for i in range(widgets['in'].count()):
-                    item = widgets['in'].item(i)
-                    writer.writerow([item.text(), round_num, 'in'])
+                # Save 'pre' files
+                for i in range(widgets['pre'].count()):
+                    item = widgets['pre'].item(i)
+                    writer.writerow([item.text(), round_num, 'pre'])
 
-                # Save 'out' files
-                for i in range(widgets['out'].count()):
-                    item = widgets['out'].item(i)
-                    writer.writerow([item.text(), round_num, 'out'])
+                # Save 'post' files
+                for i in range(widgets['post'].count()):
+                    item = widgets['post'].item(i)
+                    writer.writerow([item.text(), round_num, 'post'])
 
                 # Save 'neg' files, if applicable
                 if widgets['neg']:

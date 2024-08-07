@@ -98,15 +98,11 @@ perform detailed statistical analysis and enrichment studies.
 #!/usr/bin/python
 
 import os
-import sys
-import argparse
 import glob
 from collections import Counter
-from concurrent.futures import ProcessPoolExecutor
-from typing import Optional, List, Callable, Any, Tuple
+from typing import Optional
 from tqdm import tqdm
 import pandas as pd
-import numpy as np
 
 def get_first_matching_file(
         counts_dir: str,
@@ -134,11 +130,11 @@ def get_first_matching_file(
     ```
     counts_dir = '/path/to/counts'
     rounds_df = pd.DataFrame({
-        'file_type': ['out', 'in', 'out', 'in'],
+        'file_type': ['post', 'pre', 'post', 'pre'],
         'round_number': [1, 1, 2, 2],
         'filename': ['file1', 'file2', 'file3', 'file4']
     })
-    file_type = 'out'
+    file_type = 'post'
     round_num = 1
 
     matching_file = get_first_matching_file(counts_dir, rounds_df, file_type, round_num)
@@ -158,6 +154,23 @@ def get_first_matching_file(
     return matches[0] if matches else None
 
 def check_rounds_file(rounds_df: pd.DataFrame, counts_dir: str) -> bool:
+    """
+    Check if the filenames in the provided DataFrame match the filenames in the specified directory.
+
+    This function compares the filenames listed in the 'filename' column of the provided DataFrame
+    to the filenames in the specified directory. The filenames in the directory are processed to 
+    remove the '_counts*' suffix before comparison. If the sets of filenames match, the function 
+    returns True; otherwise, it returns False.
+
+    Parameters:
+    rounds_df (pd.DataFrame): A pandas DataFrame containing 
+                              a 'filename' column with the filenames to check.
+    counts_dir (str): The directory path where the files to compare are located.
+
+    Returns:
+    bool: True if the filenames in the 
+          DataFrame match the filenames in the directory, False otherwise.
+    """
     filenames = rounds_df['filename'].tolist()
     files = [file.split('_counts')[0] for file in os.listdir(counts_dir)]
     if Counter(filenames) == Counter(files):
@@ -206,28 +219,6 @@ def easy_diver_parse_file_header(file_path: str, encoding: str = 'utf-8') -> tup
 
     return num_unique_sequences, total_num_molecules
 
-def process_row(args: Tuple[int, pd.Series, str, str, int, Callable]) -> Tuple[str, List[float]]:
-    total_counts, row, count_column, sequence_column, bootstrap_depth, func = args
-    count_seq = row[count_column]
-    sequence = row[sequence_column]
-    return func(total_counts, count_seq, sequence, bootstrap_depth)
-
-def parallel_apply(
-        df: pd.DataFrame,
-        func: Callable[[int, int, str, int], Any],
-        count_column: str,
-        sequence_column: str,
-        total_counts: int,
-        bootstrap_depth: int) -> List[Any]:
-    # Prepare arguments for each row
-    args_list = [(total_counts, row, count_column, sequence_column, bootstrap_depth, func) for _, row in df.iterrows()]
-
-    # Use ProcessPoolExecutor for parallel processing
-    with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
-        results = list(executor.map(process_row, args_list))
-
-    return results
-
 def easy_diver_counts_to_df(filename: str, ed_round: int, ftype: str) -> pd.DataFrame:
     """
     Converts an Easy Diver counts file to a pandas DataFrame, 
@@ -236,7 +227,7 @@ def easy_diver_counts_to_df(filename: str, ed_round: int, ftype: str) -> pd.Data
     Parameters:
     filename (str): The path to the counts file.
     ed_round (int): The round number.
-    ftype (str): The type of the file (e.g., 'out', 'in', 'neg').
+    ftype (str): The type of the file (e.g., 'post', 'pre', 'neg').
 
     Returns:
     pd.DataFrame: The DataFrame with the counts and calculated confidence intervals.
@@ -279,18 +270,18 @@ def process_enrichments(row: pd.Series) -> dict:
     include_negative = False
     if 'Count_neg' in row.index:
         include_negative = True
-    if row['Freq_Lower_in'] > 0:
+    if row['Freq_Lower_pre'] > 0:
         # If the max is more than 1, we've set the min to more than 1
 
         # Min enrichment due to selection - assumes smallest f_out and largest f_in
-        enr_post_min = safe_divide(row['Freq_Lower_out'], row['Freq_Upper_in'])
+        enr_post_min = safe_divide(row['Freq_Lower_post'], row['Freq_Upper_pre'])
 
         # Max enrichment due to selection - assumes largest f_out and smallest f_in
-        enr_post_max = safe_divide(row['Freq_Upper_out'], row['Freq_Lower_in'])
+        enr_post_max = safe_divide(row['Freq_Upper_post'], row['Freq_Lower_pre'])
 
         if include_negative:
-            enr_neg_min = safe_divide(row['Freq_Lower_neg'], row['Freq_Upper_in'])
-            enr_neg_max = safe_divide(row['Freq_Upper_neg'], row['Freq_Lower_in'])
+            enr_neg_min = safe_divide(row['Freq_Lower_neg'], row['Freq_Upper_pre'])
+            enr_neg_max = safe_divide(row['Freq_Upper_neg'], row['Freq_Lower_pre'])
         else:
             enr_neg_min = None
             enr_neg_max = None
@@ -301,12 +292,12 @@ def process_enrichments(row: pd.Series) -> dict:
         enr_neg_max = 0
 
     if enr_post_max > 0:  # Makes sense to print enr_post
-        enr_post = safe_divide(row['Freq_out'], row['Freq_in'])
+        enr_post = safe_divide(row['Freq_post'], row['Freq_pre'])
     else:
         enr_post = None
 
     if include_negative and enr_neg_max > 0:  # 2A, 2B case check
-        enr_neg = safe_divide(row['Freq_neg'], row['Freq_in'])
+        enr_neg = safe_divide(row['Freq_neg'], row['Freq_pre'])
     else:
         enr_neg = None
 
@@ -319,9 +310,9 @@ def process_enrichments(row: pd.Series) -> dict:
 
     return {
         'Sequence': row.Sequence,
-        'Enr_out': enr_post,
-        'Enr_out_lower': None if enr_post is None else enr_post_min,
-        'Enr_out_upper': None if enr_post is None else enr_post_max,
+        'Enr_post': enr_post,
+        'Enr_post_lower': None if enr_post is None else enr_post_min,
+        'Enr_post_upper': None if enr_post is None else enr_post_max,
         'Enr_neg': enr_neg,
         'Enr_neg_lower': None if enr_neg is None else enr_neg_min,
         'Enr_neg_upper': None if enr_neg is None else enr_neg_max,
@@ -331,8 +322,8 @@ def process_enrichments(row: pd.Series) -> dict:
     }
 
 def merge_data_for_rounds(
-        out_df: pd.DataFrame,
-        in_df: Optional[pd.DataFrame] = None,
+        post_df: pd.DataFrame,
+        pre_df: Optional[pd.DataFrame] = None,
         neg_df: Optional[pd.DataFrame] = None
     ) -> pd.DataFrame:
     """
@@ -340,16 +331,16 @@ def merge_data_for_rounds(
     same round into a single DataFrame.
 
     Parameters:
-    out_df (pd.DataFrame): The primary DataFrame, sourced from the 'out' file.
+    post_df (pd.DataFrame): The primary DataFrame, sourced from the 'post' file.
     sequence_dict (dict): The global dictionary used to hold all the unique sequence names.
-    in_df (Optional[pd.DataFrame]): The secondary DataFrame to merge, 
-        sourced from the 'in' file. Default is None.
+    pre_df (Optional[pd.DataFrame]): The secondary DataFrame to merge, 
+        sourced from the 'pre' file. Default is None.
     neg_df (Optional[pd.DataFrame]): The tertiary DataFrame to merge,
         sourced from the 'neg' file. Default is None.
     
     Returns:
     pd.DataFrame: The merged DataFrame, 
-        sorted by the `out` count column, `Count_out` in descending order.
+        sorted by the `out` count column, `Count_post` in descending order.
     """
     # Merge the first two DataFrames on 'Sequence' with a full join
     columns_to_keep = [
@@ -359,24 +350,24 @@ def merge_data_for_rounds(
         'Total_Unique_Sequences', 'Total_Molecules'
     ]
 
-    if in_df is not None:
+    if pre_df is not None:
         merged_df = pd.merge(
-            out_df[columns_to_keep],
-            in_df[columns_to_keep],
+            post_df[columns_to_keep],
+            pre_df[columns_to_keep],
             on=['Unique_Sequence_Name','Sequence'],
             how='left',
-            suffixes=(f"_{out_df['Type'][0]}", f"_{in_df['Type'][0]}")
+            suffixes=(f"_{post_df['Type'][0]}", f"_{pre_df['Type'][0]}")
         )
     elif neg_df is not None:
         merged_df = pd.merge(
-            out_df[columns_to_keep],
+            post_df[columns_to_keep],
             neg_df[columns_to_keep],
             on=['Unique_Sequence_Name','Sequence'],
             how='left',
-            suffixes=(f"_{out_df['Type'][0]}", f"_{neg_df['Type'][0]}")
+            suffixes=(f"_{post_df['Type'][0]}", f"_{neg_df['Type'][0]}")
         )
     # If a third DataFrame is provided, merge it as well with a full join
-    if neg_df is not None and in_df is not None:
+    if neg_df is not None and pre_df is not None:
         merged_df = pd.merge(
             merged_df,
             neg_df[columns_to_keep],
@@ -387,20 +378,20 @@ def merge_data_for_rounds(
         # ensure the remaining columns have '_neg' suffix
         merged_df.columns = [
             col+'_neg'
-            if col not in ('Sequence','Unique_Sequence_Name') and col in out_df.columns
+            if col not in ('Sequence','Unique_Sequence_Name') and col in post_df.columns
             else col
             for col in merged_df.columns
         ]
     else:
-        merged_df = out_df[columns_to_keep]
-        # ensure the columns of the single df have '_out' suffix
+        merged_df = post_df[columns_to_keep]
+        # ensure the columns of the single df have '_post' suffix
         merged_df.columns = [
-            col+'_out' if col not in ('Sequence','Unique_Sequence_Name') and col in out_df.columns
+            col+'_post' if col not in ('Sequence','Unique_Sequence_Name') and col in post_df.columns
             else col
             for col in merged_df.columns
         ]
 
-    sorted_df = merged_df.sort_values(by = 'Count_out', ascending = False)
+    sorted_df = merged_df.sort_values(by = 'Count_post', ascending = False)
 
     # Move the 'Unique_Sequence_Name' column to the first position
     other_cols = [
@@ -414,14 +405,14 @@ def merge_data_for_rounds(
     # if the negative or in dataframe are not present,
     # we will ensure those columns exist and
     # fill them with NaN
-    for group in ['neg','in']:
+    for group in ['neg','pre']:
         if f"Count_{group}" not in sorted_df.columns:
             for col in [
                 'Count', 'Count_Lower', 'Count_Upper',
                 'Freq', 'Freq_Lower', 'Freq_Upper',
                 'Total_Unique_Sequences' , 'Total_Molecules'
             ]:
-                sorted_df[f"{col}_{group}"] = np.nan
+                sorted_df[f"{col}_{group}"] = pd.NA
 
     # Reset the index to remove the actual numbered index
     sorted_df = sorted_df.reset_index(drop=True)
@@ -453,30 +444,30 @@ def enrich_and_write (
     if include_negative is True:
         final_columns = [
             'Unique_Sequence_Name','Sequence',
-            'Count_in','Count_Lower_in','Count_Upper_in',
-            'Freq_in','Freq_Lower_in','Freq_Upper_in',
-            'Count_out','Count_Lower_out','Count_Upper_out',
-            'Freq_out','Freq_Lower_out','Freq_Upper_out',
+            'Count_pre','Count_Lower_pre','Count_Upper_pre',
+            'Freq_pre','Freq_Lower_pre','Freq_Upper_pre',
+            'Count_post','Count_Lower_post','Count_Upper_post',
+            'Freq_post','Freq_Lower_post','Freq_Upper_post',
             'Count_neg','Count_Lower_neg','Count_Upper_neg',
             'Freq_neg','Freq_Lower_neg','Freq_Upper_neg',
-            'Enr_out','Enr_out_lower','Enr_out_upper',
+            'Enr_post','Enr_post_lower','Enr_post_upper',
             'Enr_neg','Enr_neg_lower','Enr_neg_upper',
             'Enr_ratio','Enr_ratio_lower','Enr_ratio_upper'
         ]
     else:
         final_columns = [
             'Unique_Sequence_Name','Sequence',
-            'Count_in','Count_Lower_in','Count_Upper_in',
-            'Freq_in','Freq_Lower_in','Freq_Upper_in',
-            'Count_out','Count_Lower_out','Count_Upper_out',
-            'Freq_out','Freq_Lower_out','Freq_Upper_out',
-            'Enr_out','Enr_out_lower','Enr_out_upper'
+            'Count_pre','Count_Lower_pre','Count_Upper_pre',
+            'Freq_pre','Freq_Lower_pre','Freq_Upper_pre',
+            'Count_post','Count_Lower_post','Count_Upper_post',
+            'Freq_post','Freq_Lower_post','Freq_Upper_post',
+            'Enr_post','Enr_post_lower','Enr_post_upper'
         ]
 
     enrichments_df = round_df.apply(process_enrichments, axis = 1, result_type = 'expand')
     final_df = pd.merge(round_df, enrichments_df, on = 'Sequence', how = 'inner')
     extras = {}
-    for file_type in ['in','out','neg']:
+    for file_type in ['pre','post','neg']:
         extras[f"seq_{file_type}"] = int(
                 final_df[f"Total_Unique_Sequences_{file_type}"].fillna(0).astype(int)[0]
         )
@@ -485,9 +476,9 @@ def enrich_and_write (
         )
 
     extra_header = f"""Number of Unique Sequences (Input),{extras.get('seq_in')}
-Total Number of Molecules (Input),{extras.get('mol_in')}
-Number of Unique Sequences (Output),{extras.get('seq_out')}
-Total Number of Molecules (Output),{extras.get('mol_out')}
+Total Number of Molecules (Pre),{extras.get('mol_in')}
+Number of Unique Sequences (Post),{extras.get('seq_out')}
+Total Number of Molecules (Post),{extras.get('mol_out')}
 Number of Unique Sequences (Neg Control),{extras.get('seq_neg')}
 Total Number of Molecules (Neg Control),{extras.get('mol_neg')}"""
     for col in final_df.columns:
@@ -544,13 +535,13 @@ def write_enrichments_final_output(
                              frequencies and enrichments.
                              If True, files are output for the negative enrichment, the ratio,
                              the out enrichment, and the frequence for negative and out files.
-                             If False, only the 'out' files are included. Default is False.
+                             If False, only the 'post' files are included. Default is False.
                              This will be True if ANY round has a negative control file.
-    include_in (bool): A flag indicating whether to include files for the 'in' frequencies.
+    include_in (bool): A flag indicating whether to include files for the 'pre' frequencies.
                        If True, all_rounds_frequency_in_results.csv will be created,
                        otherwise it will not. include_in should be True if ANY of the rounds
-                       have an actual 'in' file and will be False if NONE of the rounds have
-                       an 'in' file.
+                       have an actual 'pre' file and will be False if NONE of the rounds have
+                       an 'pre' file.
     precision (int): The number of decimal places to use for floating point 
                      numbers in the output CSV files.
                      Default is 6.
@@ -578,11 +569,11 @@ def write_enrichments_final_output(
     """
     files = [file for file in os.listdir(directory) if not file.startswith('.')]
     merged_df = None
-    columns_to_keep = ['Unique_Sequence_Name', 'Sequence', 'Enr_out', 'Freq_out']
+    columns_to_keep = ['Unique_Sequence_Name', 'Sequence', 'Enr_post', 'Freq_post']
     if include_negative is True:
         columns_to_keep.extend(['Enr_ratio', 'Enr_neg', 'Freq_neg'])
     if include_in is True:
-        columns_to_keep.extend(['Freq_in'])
+        columns_to_keep.extend(['Freq_pre'])
 
     for i, file in enumerate(files):
         rnd = file.split('_')[1]
@@ -612,7 +603,8 @@ def write_enrichments_final_output(
             if coln.endswith(col):
                 temp_cols.append(coln)
         final_cols_to_keep.extend(sorted(temp_cols))
-        expand_name = col.lower().replace('enr','enrichment').replace('neg','negative').replace('freq','frequency')
+        expand_name = col.lower().replace(
+            'enr','enrichment').replace('neg','negative').replace('freq','frequency')
         file_name = f"all_rounds_{expand_name}_results.csv"
         final_output = merged_df[final_cols_to_keep]
         final_output_sorted = final_output.sort_values(by=final_output.columns[-1], ascending=False)
@@ -637,33 +629,24 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
     and writing the enriched results to an output directory. 
     Progress is printed at each step.
     """
-    counts_type = ""
     # Parse command-line arguments
-    print("enrichment_analysis <=> Processing enrichments for the 'counts' and 'counts.aa' output folders")
+    print("enrichment_analysis <=> "+
+          "Processing enrichments for the 'counts' and 'counts_aa' output folders")
 
-    dir_path = output_dir
-    precision = 6 if precision_input is None else precision_input
+    precision_input = 6 if precision_input is None else precision_input
 
-    if dir_path is None:
-        print("Directory path not provided.")
-        sys.exit(1)
-
-    outdir = dir_path
-    print(outdir)
     # read the enrichment_analysis_file_sorting_logic.csv file
-    rounds_data = pd.read_csv(f"{outdir}/enrichment_analysis_file_sorting_logic.csv")
+    rounds_data = pd.read_csv(f"{output_dir}/enrichment_analysis_file_sorting_logic.csv")
 
     # Set directory path
     for ind, counts_type in enumerate(
         tqdm(['counts','counts_aa'], desc = 'Processing each counts output folder')
         ):
-        counts_dir = os.path.join(outdir, counts_type)
+        counts_dir = os.path.join(output_dir, counts_type)
         if not os.path.isdir(counts_dir):
             continue
 
-        modified_counts_location = f"modified_{counts_type}"
-        matching_check = check_rounds_file(rounds_data, counts_dir)
-        if matching_check is False:
+        if check_rounds_file(rounds_data, counts_dir) is False:
             print('data in enrichment_analysis_file_sorting_logic.csv file incorrect '+
                 f'does not match the files found in the directory: {counts_dir}'
             )
@@ -674,42 +657,40 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
 
         # Check if there are any negative controls
         neg_files_exist = any(rounds_data['file_type'] == 'negative')
-        in_files_exist = any(rounds_data['file_type'] == 'in')
+        pre_files_exist = any(rounds_data['file_type'] == 'pre')
         for i in tqdm(
             range(1, max_round + 1),
             desc = f"Processing each round for the {counts_type} enrichment analysis", leave = False
             ):
-            out_file = get_first_matching_file(counts_dir, rounds_data, 'out', i)
+            post_file = get_first_matching_file(counts_dir, rounds_data, 'post', i)
             neg_file = get_first_matching_file(counts_dir, rounds_data, 'negative', i)
-            in_file = get_first_matching_file(counts_dir, rounds_data, 'in', i)
-            if in_file is None and i > 1:
-                in_file = get_first_matching_file(counts_dir, rounds_data, 'out', i-1)
-
-            in_df = easy_diver_counts_to_df(in_file, i, 'in')
-            out_df = easy_diver_counts_to_df(out_file, i, 'out')
-            neg_df = easy_diver_counts_to_df(neg_file, i, 'neg')
+            pre_file = get_first_matching_file(counts_dir, rounds_data, 'pre', i)
+            if pre_file is None and i > 1:
+                pre_file = get_first_matching_file(counts_dir, rounds_data, 'post', i-1)
 
             merged_data = merge_data_for_rounds(
-                out_df = out_df,
-                in_df = in_df,
-                neg_df = neg_df
+                post_df = easy_diver_counts_to_df(
+                    post_file, i, 'post'),
+                pre_df = easy_diver_counts_to_df(
+                    pre_file, i, 'pre'),
+                neg_df = easy_diver_counts_to_df(
+                    neg_file, i, 'neg')
             )
 
             enrich_and_write(
                 merged_data,
-                f"{outdir}/{modified_counts_location}/round_{str(i).zfill(3)}_enrichment_analysis",
-                precision,
+                f"{output_dir}/modified_{counts_type}/round_{str(i).zfill(3)}_enrichment_analysis",
+                precision_input,
                 include_negative = neg_files_exist
             )
 
-            # Calculate progress
-            progress = i * 100 / max_round / (2 - ind)
-            print("(Approx.) Progress:", progress, "%")
+            # Calculate & print progress
+            print(f"(Approx.) Progress: {i * 100 / max_round / (2 - ind)} %")
 
         write_enrichments_final_output(
-            f"{outdir}/{modified_counts_location}",
+            f"{output_dir}/modified_{counts_type}",
             neg_files_exist,
-            in_files_exist,
-            precision
+            pre_files_exist,
+            precision_input
         )
     return True

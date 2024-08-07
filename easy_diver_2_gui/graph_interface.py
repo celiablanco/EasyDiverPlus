@@ -67,14 +67,14 @@ class Graphs_Window(QWidget):
 
         # Define input configurations
         input_configurations = [
-            ("Count_post minimum:", 0, False),
-            ("Freq_post minimum:", 0.0000000, True),
-            ("Count_pre minimum:", 0, False),
-            ("Freq_pre minimum:", 0.0000000, True),
-            ("Count_neg minimum:", 0, False),
-            ("Freq_neg minimum:", 0.0000000, True),
-            ("Enr_post minimum:", 0, False),
-            ("Enr_neg minimum:", 0, False)
+            ("Count_post", 0, 10000000, False),
+            ("Freq_post", 0.0000000, 10000000.0000000, True),
+            ("Count_pre", 0, 10000000, False),
+            ("Freq_pre", 0.0000000, 10000000.0000000, True),
+            ("Count_neg", 0, 10000000, False),
+            ("Freq_neg", 0.0000000, 10000000.0000000, True),
+            ("Enr_post", 0, 10000000, False),
+            ("Enr_neg", 0, 10000000, False)
         ]
         self.optional_widget = QWidget()
         self.optional_layout = QVBoxLayout()
@@ -82,12 +82,13 @@ class Graphs_Window(QWidget):
         optional_label = QLabel("OPTIONAL")
         self.optional_layout.addWidget(optional_label)
 
-        for label_text, default_value, is_float in input_configurations:
-            input_field = self.create_input_field(label_text, default_value, self.optional_layout, is_float)
-            self.inputs[label_text] = input_field
+        for label_text, min_default, max_default, is_float in input_configurations:
+            input_field_min, input_field_max = self.create_input_field(
+                label_text, min_default, max_default, self.optional_layout, is_float)
+            self.inputs[label_text] = input_field_min, input_field_max
         self.optional_widget.setLayout(self.optional_layout)
         splitter.addWidget(self.optional_widget)
-        self.buttons_box = QHBoxLayout(self.optional_widget)
+        self.buttons_box = QHBoxLayout()
         
         layout.addWidget(splitter)
         # Generate Graphs Button
@@ -122,26 +123,31 @@ class Graphs_Window(QWidget):
         except Exception as error:
             QMessageBox.critical(self, "Error", f"An error occurred:\n{error}")
             self.close()
-    def create_input_field(self, label_text, default_value, layout, is_float=False):
+    def create_input_field(self, label_text, min_default_value, max_default_value, layout, is_float=False):
         input_layout = QHBoxLayout()
-        label = QLabel(label_text)
-        input_field = QLineEdit()
-        input_field.setText(str(default_value))
+        label = QLabel(label_text + " minimum & maximum:")
+        input_field_min = QLineEdit()
+        input_field_min.setText(str(min_default_value))
+        input_field_max = QLineEdit()
+        input_field_max.setText(str(max_default_value))
         if is_float:
-            input_field.setValidator(QDoubleValidator(0.0, 1.0, 7))
+            input_field_min.setValidator(QDoubleValidator(0.0, 1.0, 7))
+            input_field_max.setValidator(QDoubleValidator(0.0, 1.0, 7))
         else:
-            input_field.setValidator(QIntValidator(0, 10000))
+            input_field_min.setValidator(QIntValidator(0, 10000))
+            input_field_max.setValidator(QIntValidator(0, 10000))
         input_layout.addWidget(label)
-        input_layout.addWidget(input_field)
+        input_layout.addWidget(input_field_min)
+        input_layout.addWidget(input_field_max)
         layout.addLayout(input_layout)
-        return input_field
+        return input_field_min, input_field_max
 
     def generate_graphs(self):
         # Implement the graph generation logic here
         mod_counts = 'modified_counts'
         if self.dna_or_aa_combo.currentText() == 'AA':
             mod_counts = mod_counts+'_aa'
-        input_values = {label: field.text() for label, field in self.inputs.items()}
+        input_values = {label: (vals[0].text(), vals[1].text()) for label, vals in self.inputs.items()}
         rounds_file = f"{self.rounds_path}/{mod_counts}/round_{self.round_combo.currentText()}_enrichment_analysis.csv"
         try:
             grapher = gg_main(rounds_file, input_values)

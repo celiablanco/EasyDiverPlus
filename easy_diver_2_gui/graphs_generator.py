@@ -13,10 +13,16 @@ def main(
         input_values: dict
     ):
     for input_val in input_values:
+        vals = input_values.get(input_val)
+        val_min, val_max = vals[0], vals[1]
         if input_val.lower().startswith('freq'):
-            globals()[input_val.lower().replace(' minimum:','_input')] = float(input_values.get(input_val))
+            
+            globals()[input_val.lower()+'_input_min'] = float(val_min)
+            globals()[input_val.lower()+'_input_max'] = float(val_max)
+
         else:
-            globals()[input_val.lower().replace(' minimum:','_input')] = int(input_values.get(input_val))
+            globals()[input_val.lower()+'_input_min'] = int(val_min)
+            globals()[input_val.lower()+'_input_max'] = int(val_max)
     # Load and preprocess data
     print(round_file)
     df = pd.read_csv(f"{round_file}", skiprows=6)
@@ -31,27 +37,27 @@ def main(
         df['Enr_neg_error_pos'] = 0
         df['Enr_neg_error_neg'] = 0
 
-    df['Enr_out_error_pos'] = df['Enr_out_upper'] - df['Enr_out']
-    df['Enr_out_error_neg'] = df['Enr_out'] - df['Enr_out_lower']
+    df['Enr_post_error_pos'] = df['Enr_post_upper'] - df['Enr_post']
+    df['Enr_post_error_neg'] = df['Enr_post'] - df['Enr_post_lower']
     
     if 'Enr_neg_upper' in df.columns:
         filtered_df = df[
-            (df['Count_out'] >= count_post_input) &
-            (df['Freq_out'] >= freq_post_input) &
-            (df['Count_in'] >= count_pre_input) &
-            (df['Freq_in'] >= freq_pre_input) &
-            (df['Count_neg'] >= count_neg_input) &
-            (df['Freq_neg'] >= freq_neg_input) &
-            (df['Enr_neg'] >= enr_neg_input) &
-            (df['Enr_out'] >= enr_post_input)
+            (df['Count_post'] >= count_post_input_min) & (df['Count_post'] <= count_post_input_max) &
+            (df['Freq_post'] >= freq_post_input_min) & (df['Freq_post'] <= freq_post_input_max) &
+            (df['Count_pre'] >= count_pre_input_min) & (df['Count_pre'] <= count_pre_input_max) &
+            (df['Freq_pre'] >= freq_pre_input_min) & (df['Freq_pre'] <= freq_pre_input_max) &
+            (df['Count_neg'] >= count_neg_input_min) & (df['Count_neg'] <= count_neg_input_max) &
+            (df['Freq_neg'] >= freq_neg_input_min) & (df['Freq_neg'] <= freq_neg_input_max) &
+            (df['Enr_neg'] >= enr_neg_input_min) & (df['Enr_neg'] <= enr_neg_input_max) &
+            (df['Enr_post'] >= enr_post_input_min) & (df['Enr_post'] <= enr_post_input_max)
         ]
     else:
         filtered_df = df[
-            (df['Count_out'] >= count_post_input) &
-            (df['Freq_out'] >= freq_post_input) &
-            (df['Count_in'] >= count_pre_input) &
-            (df['Freq_in'] >= freq_pre_input) &
-            (df['Enr_out'] >= enr_post_input)
+            (df['Count_post'] >= count_post_input_min) & (df['Count_post'] <= count_post_input_max) &
+            (df['Freq_post'] >= freq_post_input_min) & (df['Freq_post'] <= freq_post_input_max) &
+            (df['Count_pre'] >= count_pre_input_min) & (df['Count_pre'] <= count_pre_input_max) &
+            (df['Freq_pre'] >= freq_pre_input_min) & (df['Freq_pre'] <= freq_pre_input_max) &
+            (df['Enr_post'] >= enr_post_input_min) & (df['Enr_post'] <= enr_post_input_max) 
         ]
     # Create a subplot layout
     fig = make_subplots(
@@ -62,18 +68,18 @@ def main(
 
         # Add y=x line to scatter plot
         fig.add_trace(go.Scatter(
-            x=[0, df['Enr_out'].max() + 1000],
-            y=[0, df['Enr_out'].max() + 1000],
+            x=[0, df['Enr_post'].max() + 1000],
+            y=[0, df['Enr_post'].max() + 1000],
             mode='lines',
             marker=dict(color='orange'),
             name='y=x',
-            legendgroup='group2'
+            legendrank=5
         ), row=1, col=2)
 
         # Add scatter plot with asymmetric error bars
         fig.add_trace(go.Scatter(
             x=filtered_df['Enr_neg'],
-            y=filtered_df['Enr_out'],
+            y=filtered_df['Enr_post'],
             mode='markers',
             marker=dict(color='black'),
             error_x=dict(
@@ -85,18 +91,18 @@ def main(
             ),
             error_y=dict(
                 type='data',
-                array=filtered_df['Enr_out_error_pos'],
-                arrayminus=filtered_df['Enr_out_error_neg'],
+                array=filtered_df['Enr_post_error_pos'],
+                arrayminus=filtered_df['Enr_post_error_neg'],
                 width=1,
                 color='rgba(0, 0, 0, 0.2)'
             ),
-            name='Unique Sequence Name',
+            name='Unique Sequence Name            ',
             text=filtered_df['Unique_Sequence_Name'],
             hovertemplate=
             '<b>%{text}</b><br>' +
             'Enrichment in negative selection: %{x}<br>' +
             'Enrichment in post-selection: %{y}<br>',
-            legendgroup='group2'
+            legendrank=4
         ), row=1, col=2)
 
         # Add marker plot for Enrichment_Negative
@@ -105,7 +111,7 @@ def main(
             y=filtered_df['Enr_neg'],
             mode='markers',
             marker=dict(color='red', symbol='square'),
-            name='Enrichment_Negative',
+            name='Enrichment_Negative            ',
             error_y=dict(
                 type='data',
                 array=filtered_df['Enr_neg_error_pos'],
@@ -117,20 +123,20 @@ def main(
             hovertemplate=
             '<b>%{text}</b><br>' +
             'Enrichment_Negative: %{y}<br>',
-            legendgroup='group1'
+            legendrank=2
             ), row=1, col=1)
     
-    # Add marker plot for Enrichment_Out
+    # Add marker plot for Enrichment_post
     fig.add_trace(go.Scatter(
         x=filtered_df['Unique_Sequence_Name'],
-        y=filtered_df['Enr_out'],
+        y=filtered_df['Enr_post'],
         mode='markers',
         marker=dict(color='blue', symbol='star'),
-        name='Enrichment_Out',
+        name='Enrichment_Post            ',
         error_y=dict(
             type='data',
-            array=filtered_df['Enr_out_error_pos'],
-            arrayminus=filtered_df['Enr_out_error_neg'],
+            array=filtered_df['Enr_post_error_pos'],
+            arrayminus=filtered_df['Enr_post_error_neg'],
             width=1,
             color='rgba(0, 0, 255, 0.2)'
         ),
@@ -138,7 +144,7 @@ def main(
         hovertemplate=
         '<b>%{text}</b><br>' +
         'Enrichment_Post: %{y}<br>',
-            legendgroup='group1'
+        legendrank=1
     ), row=1, col=1)
 
     # Update layout for the entire subplot
@@ -180,8 +186,7 @@ def main(
             yanchor="bottom",
             y=1.01,
             xanchor="right",
-            x=1,
-            traceorder="grouped"
+            x=1
         )
     )
     # Show combined plot

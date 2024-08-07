@@ -5,8 +5,6 @@ dictionary gencode. It takes an input file containing DNA sequences and their co
 and generates an output file containing the translated amino acid sequences, their abundances, and
 relative percentages.
 """
-
-import numpy as np
 import sys
 
 # Dict maps each DNA codon (sequence of three nucleotides) to corresponding amino acid
@@ -100,8 +98,8 @@ def split_into_codons(dna, frame):
     start_index = frame - 1
     end_index = dna_length - 2
 
-    indices = np.arange(start_index, end_index, 3)
-    codons = np.array([dna[i : i + 3] for i in indices])
+    indices = range(start_index, end_index, 3)
+    codons = [dna[i : i + 3] for i in indices]
 
     return codons
 

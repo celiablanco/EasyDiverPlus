@@ -59,5 +59,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='EasyDiver'
+    name='EasyDiver2_FILES'
 )

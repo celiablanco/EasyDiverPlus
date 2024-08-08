@@ -45,41 +45,28 @@ esac
 
 # Test to verify pandaseq is installed and can be found
 echo "Verifying pandaseq exists!"
+echo "checking next location - pandaseq base installation location: `which pandaseq`"
 pandatest=$(which pandaseq)
-while [ -z "$pandatest" ]; do
-	if [[ pandaiteration -eq 0 ]]; then	
-		pandatest=$(which "./pandaseq")
-		if [ -z "$pandatest" ]; then
-			echo "checking next location"
-			echo ""
-		else
-			break
-		fi
-		pandaiteration+=1
-	elif [[ pandaiteration -eq 1 ]]; then
-		pandatest=$(which "./_pandaseq/pandaseq")
-		if [ -z "$pandatest" ]; then
-			echo "checking next location"
-			echo ""
-		else
-			break
-		fi
-		pandaiteration+=1
-	elif [[ pandaiteration -eq 2 ]]; then
-		pandatest=$(which "./_pandaseq_macos_x86_64/pandaseq")
-		if [ -z "$pandatest" ]; then
-			echo "checking next location"
-			echo ""
-		else
-			break
-		fi
-		pandaiteration+=1
-	elif [[ pandaiteration -eq 3 ]]; then
-		echo "ERROR: Pandaseq is not installed or cannot be found - cannot continue"
+if [ -z "$pandatest" ]; then
+	echo "checking next location - $SCRIPT_DIR/pandaseq"
+	echo ""
+	pandatest=$(which "$SCRIPT_DIR/pandaseq")
+	if [ -z "$pandatest" ]; then
+		echo "checking next location - $SCRIPT_DIR/_pandaseq/pandaseq"
 		echo ""
-		exit 1
+		pandatest=$(which "$SCRIPT_DIR/_pandaseq/pandaseq")
+		if [ -z "$pandatest" ]; then
+			echo "checking next location - $SCRIPT_DIR/_pandaseq_macos_x86_64/pandaseq"
+			echo ""
+			pandatest=$(which "$SCRIPT_DIR/_pandaseq_macos_x86_64/pandaseq")
+			if [ -z "$pandatest" ]; then
+				echo "ERROR: Pandaseq is not installed or cannot be found - cannot continue"
+				echo ""
+				exit 1
+			fi
+		fi
 	fi
-done
+fi
 
 echo $pandatest
 

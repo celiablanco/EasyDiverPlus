@@ -27,33 +27,71 @@ You will receive a prompt asking whether you are sure you want to open this appl
 
 From here, you can follow the instructions detailed in the :any:`usage` section.
 
+Pandaseq note
+~~~~~~~~~~~~~
+If you encounter any issues with pandaseq not running correctly after clicking **Submit** and starting the processing, we recommend
+that you download and install `pandaseq <https://github.com/neufeld/pandaseq>`_ locally. The application will always attempt to leverage the local installation first, and this should relieve any potential issues.
+
+
 Windows (x86_64 / Windows 10+)
 -----------------------------------
 
-To run EasyDIVER 2.0 on Windows, download the appropriate release for your machine (Windows x86_64).
+To run EasyDIVER 2.0 on Windows, there is a bit of extra work to prepare the Ubuntu environment which will be used to execute the underlying code.
 
-If you have :ref:`WSL(2) <https://learn.microsoft.com/en-us/windows/wsl/install>` already set up on your computer, you can just proceed to the last two paragraphs of this section.
+WSL / Ubuntu Virtual Machine Setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If you have `WSL(2) <https://learn.microsoft.com/en-us/windows/wsl/install>`_ already set up on your computer, you can just proceed to the :ref:`Install pandaseq section<pandaseq_section>`.
+
 Otherwise, you will need to open **Powershell**. Once opened, you will need to run:
+
 .. code-block::
+    :dedent:
+
     wsl --install -d Ubuntu
 
 This will open a new window. If you haven't run this before, you'll need to now set up a User & Password for this Ubuntu Virtual Machine.
 We suggest using the same username and password as you use for your Windows user. PLEASE NOTE - you will need this password for the next steps!!
 You can now close the Ubuntu window that appeared.
 
-Next, you will need to run each of these lines (also in Powershell), so that you can appropriately install :ref:`pandaseq <https://github.com/neufeld/pandaseq>` in that Ubuntu Virtual Machine:
+.. _pandaseq_section:
+
+Install pandaseq
+~~~~~~~~~~~~~~~~~~
+Next, you will need to run each of these lines (also in Powershell), so that you can appropriately install `pandaseq <https://github.com/neufeld/pandaseq>`_ in that Ubuntu Virtual Machine:
+
 .. code-block::
+    :dedent:
+
     wsl -e bash -c "sudo apt-get install -y zlib1g-dev libbz2-dev libltdl-dev libtool zlib1g-dev pkg-config autoconf make python3 python3-pip"
     wsl -e bash -c "git clone http://github.com/neufeld/pandaseq.git/"
     wsl -e bash -c "cd ./pandaseq; bash ./autogen.sh && MAKE=gmake ./configure && make && sudo make install"
 
 To confirm everything has been installed once this has all completed its execution, you can now run the following, which should point to the location of pandaseq in that Ubuntu Virtual Machine:
+
 .. code-block::
+    :dedent:
+
     wsl -e bash -c "which pandaseq"
 
-Alternatively to running each of these lines individually, the authors have created a shell script file in the root directory of the EasyDiver2 repository, titled 
+Alternatively to running each of these lines individually, the authors have created a shell script file in the root directory of the EasyDiver2 repository, titled `install_pandaseq_ubuntu.sh`.
+This can be run in one command like the following, which will then execute the shell script (that contains the above code).
+
+.. code-block::
+    :dedent:
+
+    wsl -e bash -c "$(curl https://raw.githubusercontent.com/celiablanco/EasyDiver2/main/install_pandaseq_ubuntu.sh )"
+
+Once the above steps are completed, you now have a WSL Ubuntu environment prepared, and EasyDiver2's interface will handle the rest for you. 
+You can now proceed to download the .zip archive, extract and run the EasyDiver2.exe file!
+
+.. _run-section:
+
+Download and Run
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Right-click on the downloaded .zip file and click **Extract All** from the menu, and choose a destination for the extracted files, then click **Extract** to unzip the files.
+
 Within the extracted folder, you should now see the `dist` folder. Within that folder, right-click on the `EasyDiver2` executable (the icon is a floppy disk with a yellow python in the upper left corner) and click **Run as Administrator** from the menu.
+
 In the prompt that appears, titled **Windows protected your PC**, you must click `More info` and then click *Run Anyway*.
 
 From here, you can follow the instructions detailed in the :any:`usage` section.

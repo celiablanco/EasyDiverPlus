@@ -24,8 +24,6 @@ The main improvements in EasyDIVER 2.0 compared to the original EasyDIVER are:
 
    usage
    example
-
-
    
 
 

@@ -31,6 +31,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 pandaiteration=0
 
+uname_m=$(uname -m)
 unameOut=$(uname -a)
 case "${unameOut}" in
     *Microsoft*)     OS="Windows";; #must be first since Windows subsystem for linux will have Linux in the name too
@@ -52,13 +53,14 @@ if [ -z "$pandatest" ]; then
 	echo ""
 	pandatest=$(which "$SCRIPT_DIR/pandaseq")
 	if [ -z "$pandatest" ]; then
-		echo "checking next location - $SCRIPT_DIR/_pandaseq/pandaseq"
-		echo ""
-		pandatest=$(which "$SCRIPT_DIR/_pandaseq/pandaseq")
-		if [ -z "$pandatest" ]; then
-			echo "checking next location - $SCRIPT_DIR/_pandaseq_macos_x86_64/pandaseq"
-			echo ""
-			pandatest=$(which "$SCRIPT_DIR/_pandaseq_macos_x86_64/pandaseq")
+		if [[ "$OS" == "Mac" ]]; then
+			if [[ "$uname_m" == "x86_64" ]]; then
+				echo "checking next location - $SCRIPT_DIR/_pandaseq_macos_x86_64/pandaseq"
+				pandatest=$(which "$SCRIPT_DIR/_pandaseq_macos_x86_64/pandaseq")
+			else
+				echo "checking next location - $SCRIPT_DIR/_pandaseq/pandaseq"
+				pandatest=$(which "$SCRIPT_DIR/_pandaseq/pandaseq")
+			fi
 			if [ -z "$pandatest" ]; then
 				echo "ERROR: Pandaseq is not installed or cannot be found - cannot continue"
 				echo ""

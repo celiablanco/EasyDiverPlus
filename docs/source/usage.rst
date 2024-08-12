@@ -237,7 +237,7 @@ Since the test dataset corresponds to mRNA-displayed peptides, data type is set 
 For testing purposes, we will plot the metrics corresponding to the last round of selection (round 2).
 The button **Generate Graphs** will start the graph generation process. 
 Once completed, an HTML window displaying the plots will open.
-If no cutoff values are specified, the Graph Builder will include all data in the files (in this case, the plots will look crammed and frankly, ugly).
+If no cutoff values are specified, the Graph Builder will include all data in the files (in this case, the plots will look crammed and probably, very ugly).
 
 .. image:: _static/images/plot1.png
    :alt: EasyDIVER 2.0

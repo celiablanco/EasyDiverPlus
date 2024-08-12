@@ -25,13 +25,21 @@ Within that `dist` folder (or in the EasyDiver subfolder on ARM machines), right
 
 You will receive a prompt asking whether you are sure you want to open this application, as macOS cannot verify the developer. Click **Open** to continue.
 
-From here, you can follow the instructions detailed in the :any:`usage` section.
+From here, you can follow the instructions detailed in the `usage` section.
 
 Pandaseq note
 ~~~~~~~~~~~~~
 If you encounter any issues with pandaseq not running correctly after clicking **Submit** and starting the processing, we recommend
 that you download and install `pandaseq <https://github.com/neufeld/pandaseq>`_ locally. The application will always attempt to leverage the local installation first, and this should relieve any potential issues.
 
+If a problem is encountered with newer MacOS versions after installing PANDASeq, you may try the following:
+
+1. Install Homebrew (see here: https://brew.sh/)
+2. brew install bzip2 pkgconfig libtools
+3. Run the ./autogen.sh build step (see PANDASeq manual)
+
+If an error referencing snprintf occurs, identify the file from the error message, open that file and adjust 'snprintf' to be 'printf' instead. During our test runs, this issue was found in line 528 in the pandaseq package args.c file. 
+Run the ./autogen.sh build step again. At this point, you might get many ‘warnings’ but you shouldn't get any errors. 
 
 Windows (x86_64 / Windows 10+)
 -----------------------------------

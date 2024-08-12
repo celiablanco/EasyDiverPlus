@@ -1,15 +1,26 @@
 How to use EasyDIVER 2.0
 ========================
 
+Input requirements
+------------------
+
+All input files must be:
+    
+1. Located in the same directory (even reads from separate lanes).
+2. In FASTQ format
+3. Named using the standard Illumina naming scheme: sample-name_S#_L00#_R#_001.fastq
+4. In either .fastq or .fastq.gz extensions.
+
+
+How to process and analyze data
+-------------------------------
+
 When opening the application, the main interface will appear, featuring options for both EasyDIVER 2.0 and the Graph Builder.
 
 .. image:: _static/images/img1.png
    :alt: EasyDIVER Logo
    :align: center
    :width: 600px
-
-How to process and analyze data
--------------------------------
 
 Selecting the **EasyDIVER 2.0** option will run the EasyDIVER application. 
 The only required field is the path to the input directory. 

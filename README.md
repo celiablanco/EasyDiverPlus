@@ -1,4 +1,4 @@
-<!-- ![EasyDIVER Logo](easy_diver_2_gui/assets/logo.png) -->
+![EasyDIVER Logo](easy_diver_2_gui/assets/logo.png)
 
 # EasyDIVER 2.0
 This is the README document for the EasyDIVER 2.0 pipeline for pre-processing and analyzing HTS reads from _in vitro_ selection experiments. EasyDIVER can be used to process and analyze nucleotides or amino acids sequencing data corresponding to consecutive rounds of in vitro selection and amplification.

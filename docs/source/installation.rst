@@ -2,7 +2,7 @@ Installation
 ============
 
 To run EasyDIVER 2.0, you should utilize the appropriate `.zip` file for your machine.
-These zip files can be found in the Releases section in the EasyDiver2 repo. [link here]
+These zip files can be found in the `Releases section in the EasyDiver2 repository <https://github.com/celiablanco/EasyDiver2/releases>`_.
 
 Contained in the zip file is a folder called `dist` (for "distribution"). Within this folder, 
 depending on the machine you are using, you will see a folder called EasyDiver and an executable
@@ -16,7 +16,7 @@ choose to trust it (see details below).
 MacOS (x86_64 and ARM)
 ----------------------------
 
-To run EasyDIVER 2.0 on MacOS, download the appropriate release for your machine. If you have an 'm' series
+To run EasyDIVER 2.0 on MacOS, download the appropriate release for your machine from the `Releases section in the EasyDiver2 repository <https://github.com/celiablanco/EasyDiver2/releases>`_.. If you have an 'm' series
 machine, with an m1, m2, etc chip, you'll need to use the .zip with `ARM` in the name, otherwise you should use the `x86_64` .zip file.
 
 Right-click on the downloaded .zip file and click **Open** from the menu.. This will prompt the Archive Utility to unzip the 
@@ -34,7 +34,7 @@ that you download and install `pandaseq <https://github.com/neufeld/pandaseq>`_ 
 
 If a problem is encountered with newer MacOS versions after installing PANDASeq, you may try the following:
 
-1. Install Homebrew (see here: https://brew.sh/)
+1. Install `Homebrew <https://brew.sh/>`
 2. brew install bzip2 pkgconfig libtools
 3. Run the ./autogen.sh build step (see PANDASeq manual)
 
@@ -96,6 +96,9 @@ You can now proceed to download the .zip archive, extract and run the EasyDiver2
 
 Download and Run
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Download the zip package for Windows from the `Releases section in the EasyDiver2 repository <https://github.com/celiablanco/EasyDiver2/releases>`_.
+
 Right-click on the downloaded .zip file and click **Extract All** from the menu, and choose a destination for the extracted files, then click **Extract** to unzip the files.
 
 Within the extracted folder, you should now see the `dist` folder. Within that folder, right-click on the `EasyDiver2` executable (the icon is a floppy disk with a yellow python in the upper left corner) and click **Run as Administrator** from the menu.

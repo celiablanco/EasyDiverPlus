@@ -25,7 +25,7 @@ When opening the application, the main interface will appear, featuring options 
 Selecting the **EasyDIVER 2.0** option will run the EasyDIVER application. 
 The only required field is the path to the input directory. 
 
-For illustrative purposes, we will run the interface using the test dataset provided in the repository.
+For illustrative purposes, we will run the interface using the test dataset provided in a `Google Drive directory <https://drive.google.com/drive/folders/102sCv5uJUiUcnsgVskJigmh8lxbl3KCD?usp=sharing>`_.
 First, we downloaded the test data and placed it in a directory called ``raw.data`` in the Desktop. 
 The forward and reverse primers for the test dataset are TACATTACAGCA and GATGGTGATGGTG, respectively. 
 The test dataset corresponds to two rounds of an experimental in vitro evolution of mRNA-displayed

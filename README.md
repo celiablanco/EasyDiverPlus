@@ -9,7 +9,7 @@ Consult the original EasyDIVER [documentation and manual](https://github.com/ich
 
 # Test dataset
 
-A test dataset is provided in a [Google Drive directory](https://drive.google.com/drive/folders/102sCv5uJUiUcnsgVskJigmh8lxbl3KCD?usp=sharing). The test data corresponds to two samples obtained from a real experiment of in vitro evolution of mRNA displayed peptides. Instructions on how to run the pipeline for the testdataset can be found in the [documentation](https://easydiver2.readthedocs.io/) for detailed information on Installation, Usage and Examples. 
+A test dataset is provided in a [Google Drive directory](https://drive.google.com/drive/folders/102sCv5uJUiUcnsgVskJigmh8lxbl3KCD?usp=sharing). The test data corresponds to two samples obtained from a real experiment of in vitro evolution of mRNA displayed peptides. Instructions on how to run the pipeline for the test dataset can be found in the [documentation](https://easydiver2.readthedocs.io/).
      
 # Reporting bugs
 

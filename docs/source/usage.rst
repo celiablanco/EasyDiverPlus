@@ -11,7 +11,8 @@ When opening the application, the main interface will appear, featuring options 
 How to process and analyze data
 -------------------------------
 
-Selecting the **EasyDIVER 2.0** option will run the EasyDIVER application. The only required field is the path to the input directory. Once the required field is filled, the optional parameters will show up. 
+Selecting the **EasyDIVER 2.0** option will run the EasyDIVER application. 
+The only required field is the path to the input directory. 
 
 * **Input Directory Path**: Field to specify the directory containing raw sequencing files. This field is mandatory.
    
@@ -19,6 +20,8 @@ Selecting the **EasyDIVER 2.0** option will run the EasyDIVER application. The o
     :alt: EasyDIVER 2.0
     :align: center
     :width: 600px
+
+Once the required field is filled, the optional parameters will show up. 
 
 Optional Parameters:
 

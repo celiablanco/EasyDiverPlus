@@ -81,7 +81,7 @@ class MainApp(QWidget):
         self.easy_diver_app = None
 
     def init_ui(self):
-        self.setWindowTitle("Easy Diver 2.0")
+        self.setWindowTitle("Easy Diver+")
         layout = QVBoxLayout()
         
         # Create a splitter
@@ -92,7 +92,7 @@ class MainApp(QWidget):
         self.image_layout = QVBoxLayout()
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_2_gui/assets/")).scaledToWidth(15000)
+        self.image_pixmap = QPixmap(path_constructor("logo.png","easy_diver_plus_gui/assets/")).scaledToWidth(15000)
         self.image_label.setPixmap(self.image_pixmap)
         self.image_layout.addWidget(self.image_label)
         self.image_widget.setLayout(self.image_layout)
@@ -115,16 +115,16 @@ class MainApp(QWidget):
         self.cancel_button.clicked.connect(self.close)
 
         # Easy Diver
-        self.easy_diver_button = QPushButton("Easy Diver 2.0", self)
+        self.easy_diver_button = QPushButton("Easy Diver+", self)
         self.easy_diver_button.setToolTip(
-            "Click to start the Easy Diver 2.0 interactive application."
+            "Click to start the Easy Diver+ interactive application."
         )
         self.easy_diver_button.clicked.connect(self.easy_diver)
 
         # Graphing Interface
-        self.graph_button = QPushButton("Graph Builder", self)
+        self.graph_button = QPushButton("Graph Generator", self)
         self.graph_button.setToolTip(
-            "Click to start the results Graph Builder interactive application."
+            "Click to start the Graph Generator interactive application."
         )
         self.graph_button.clicked.connect(self.grapher)
         
@@ -167,16 +167,16 @@ class MainApp(QWidget):
 
     def display_help_message(self):
         help_text = """
-        EasyDIVER 2.0 is a pipeline to processes and analyzes raw sequencing data files from consecutive rounds of selection/evolution, providing:
+        EasyDiver+ is a pipeline to processes and analyzes raw sequencing data files from consecutive rounds of selection/evolution, providing:
         - Read count files
         - Sequence length distribution
         - Enrichment metrics across consecutive rounds of selection
         - Visualizations
 
-        Graph Builder is an application to process the enrichment analysis outputs of Easy Diver 2.0 into plotly charts in a customizable manner.
+        Graph Generator is an application to process the enrichment analysis outputs of Easy Diver+ into plotly charts in a customizable manner.
         The user may edit the parameters and re-generate the graphs as many times as needed. Each new generation of plots will open in a new tab in
         the user's default browser. Once satisfied, the user may save the graphs via the web view display which opens.
-        This can be run independently of Easy Diver 2.0, allowing the user to go through the process of identifying the appropriate graph and customization for their needs.
+        This can be run independently of Easy Diver+, allowing the user to go through the process of identifying the appropriate graph and customization for their needs.
         """
 
         QMessageBox.information(self, "Help", help_text)

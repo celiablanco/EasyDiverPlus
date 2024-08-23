@@ -36,10 +36,10 @@ class Graphs_Window(QWidget):
             self.input_dir_edit.clicked.connect(self.browse_input)
             self.input_tooltip_icon = QLabel()
             self.input_tooltip_icon.setPixmap(
-                QPixmap("easy_diver_2_gui/assets/question_icon.png").scaled(20, 20)
+                QPixmap("easy_diver_plus_gui/assets/question_icon.png").scaled(20, 20)
             )
             self.input_tooltip_icon.setToolTip(
-                "Select the directory containing the modified_counts folder(s)."
+                "Select the directory containing the analysis_output_nt folder. (e.g. pipeline_output)"
             )
             self.input_layout.addWidget(self.input_label)
             self.input_layout.addWidget(self.input_dir_edit)
@@ -114,12 +114,14 @@ class Graphs_Window(QWidget):
     def populate_rounds(self):
         # Assuming the directory containing rounds is pre-defined in the code
         self.round_combo.clear()
-        mod_counts = 'modified_counts'
+        analysis_output = 'analysis_output'
         if self.dna_or_aa_combo.currentText() == 'AA':
-            mod_counts = mod_counts+'_aa'
+            analysis_output = analysis_output+'_aa'
+        else:
+            analysis_output = analysis_output+'_nt'
         try:
             if self.rounds_path is not None:
-                rounds_directory = f"{self.rounds_path}/{mod_counts}"
+                rounds_directory = f"{self.rounds_path}/{analysis_output}"
                 rounds = sorted([f for f in os.listdir(rounds_directory) if f.startswith('round_')])
                 for round_name in rounds:
                     self.round_combo.addItem(round_name.split('_')[1])
@@ -147,11 +149,13 @@ class Graphs_Window(QWidget):
 
     def generate_graphs(self):
         # Implement the graph generation logic here
-        mod_counts = 'modified_counts'
+        analysis_output = 'analysis_output'
         if self.dna_or_aa_combo.currentText() == 'AA':
-            mod_counts = mod_counts+'_aa'
+            analysis_output = analysis_output+'_aa'
+        else:
+            analysis_output = analysis_output+'_nt'
         input_values = {label: (vals[0].text(), vals[1].text()) for label, vals in self.inputs.items()}
-        rounds_file = f"{self.rounds_path}/{mod_counts}/round_{self.round_combo.currentText()}_enrichment_analysis.csv"
+        rounds_file = f"{self.rounds_path}/{analysis_output}/round_{self.round_combo.currentText()}_enrichment_analysis.csv"
         try:
             grapher = gg_main(rounds_file, input_values)
             if grapher is True:
@@ -163,19 +167,19 @@ class Graphs_Window(QWidget):
 
     def browse_input(self):
         directory = QFileDialog.getExistingDirectory(self, "Select Directory")
-        mod_counts_exists = False
+        analysis_output_exists = False
         if directory:
             for f in os.listdir(directory):
-                if f == 'modified_counts':
-                    mod_counts_exists = True
+                if f == 'analysis_output_nt':
+                    analysis_output_exists = True
                     self.input_dir_edit.setText(directory)
                     self.rounds_path = directory
 
-        if mod_counts_exists is False:
+        if analysis_output_exists is False:
             QMessageBox.critical(
                 self,
                 "Error",
-                "Please choose the parent directory containing the 'modified_counts' folder.",
+                "Please choose the parent directory containing the 'analysis_output_nt' folder.",
             )
 
     def center_window(self):

@@ -1,12 +1,12 @@
 Installation
 ============
 
-To run EasyDIVER 2.0, you should utilize the appropriate `.zip` file for your machine.
-These zip files can be found in the `Releases section in the EasyDiver2 repository <https://github.com/celiablanco/EasyDiver2/releases>`_.
+To run EasyDiver+, you should utilize the appropriate `.zip` file for your machine.
+These zip files can be found in the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.
 
 Contained in the zip file is a folder called `dist` (for "distribution"). Within this folder, 
 depending on the machine you are using, you will see a folder called EasyDiver and an executable
-with the name EasyDiver2 OR you will see just the folder EasyDiver. Within the EasyDiver folder,
+with the name EasyDiverPlus OR you will see just the folder EasyDiver. Within the EasyDiver folder,
 you would then find the executable instead.
 
 Once you extract the .zip archive into your computer, you will generally need to right-click on the executable, 
@@ -16,12 +16,12 @@ choose to trust it (see details below).
 MacOS (x86_64 and ARM)
 ----------------------------
 
-To run EasyDIVER 2.0 on MacOS, download the appropriate release for your machine from the `Releases section in the EasyDiver2 repository <https://github.com/celiablanco/EasyDiver2/releases>`_.. If you have an 'm' series
+To run EasyDiver+ on MacOS, download the appropriate release for your machine from the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.. If you have an 'm' series
 machine, with an m1, m2, etc chip, you'll need to use the .zip with `ARM` in the name, otherwise you should use the `x86_64` .zip file.
 
 Right-click on the downloaded .zip file and click **Open** from the menu.. This will prompt the Archive Utility to unzip the 
 file into the a folder titled `dist` in the same location as the .zip file.
-Within that `dist` folder (or in the EasyDiver subfolder on ARM machines), right-click on the `EasyDiver2` executable (the icon is a black square with `exec`) and click **Open** from the menu.
+Within that `dist` folder (or in the EasyDiver subfolder on ARM machines), right-click on the `EasyDiverPlus` executable (the icon is a black square with `exec`) and click **Open** from the menu.
 
 You will receive a prompt asking whether you are sure you want to open this application, as macOS cannot verify the developer. Click **Open** to continue.
 
@@ -44,7 +44,7 @@ Run the ./autogen.sh build step again. At this point, you might get many ‘warn
 Windows (x86_64 / Windows 10+)
 -----------------------------------
 
-To run EasyDIVER 2.0 on Windows, there is a bit of extra work to prepare the Ubuntu environment which will be used to execute the underlying code.
+To run EasyDiver+ on Windows, there is a bit of extra work to prepare the Ubuntu environment which will be used to execute the underlying code.
 
 WSL / Ubuntu Virtual Machine Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,27 +81,27 @@ To confirm everything has been installed once this has all completed its executi
 
     wsl -e bash -c "which pandaseq"
 
-Alternatively to running each of these lines individually, the authors have created a shell script file in the root directory of the EasyDiver2 repository, titled `install_pandaseq_ubuntu.sh`.
+Alternatively to running each of these lines individually, the authors have created a shell script file in the root directory of the EasyDiverPlus repository, titled `install_pandaseq_ubuntu.sh`.
 This can be run in one command like the following, which will then execute the shell script (that contains the above code).
 
 .. code-block::
     :dedent:
 
-    wsl -e bash -c "$(curl https://raw.githubusercontent.com/celiablanco/EasyDiver2/main/install_pandaseq_ubuntu.sh )"
+    wsl -e bash -c "$(curl https://raw.githubusercontent.com/celiablanco/EasyDiverPlus/main/install_pandaseq_ubuntu.sh )"
 
-Once the above steps are completed, you now have a WSL Ubuntu environment prepared, and EasyDiver2's interface will handle the rest for you. 
-You can now proceed to download the .zip archive, extract and run the EasyDiver2.exe file!
+Once the above steps are completed, you now have a WSL Ubuntu environment prepared, and EasyDiverPlus's interface will handle the rest for you. 
+You can now proceed to download the .zip archive, extract and run the EasyDiverPlus.exe file!
 
 .. _run-section:
 
 Download and Run
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Download the zip package for Windows from the `Releases section in the EasyDiver2 repository <https://github.com/celiablanco/EasyDiver2/releases>`_.
+Download the zip package for Windows from the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.
 
 Right-click on the downloaded .zip file and click **Extract All** from the menu, and choose a destination for the extracted files, then click **Extract** to unzip the files.
 
-Within the extracted folder, you should now see the `dist` folder. Within that folder, right-click on the `EasyDiver2` executable (the icon is a floppy disk with a yellow python in the upper left corner) and click **Run as Administrator** from the menu.
+Within the extracted folder, you should now see the `dist` folder. Within that folder, right-click on the `EasyDiverPlus` executable (the icon is a floppy disk with a yellow python in the upper left corner) and click **Run as Administrator** from the menu.
 
 In the prompt that appears, titled **Windows protected your PC**, you must click `More info` and then click *Run Anyway*.
 

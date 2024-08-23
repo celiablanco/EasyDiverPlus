@@ -125,7 +125,7 @@ if [ -z "$inopt" ] && [ -z "$outopt" ] && [ -z $fwd ] && [ -z $rev ] && [ -z $th
 		echo "${bold}Path to your input directory:${normal}"
 		read inopt
 		echo ""
-		echo "${bold}Path to your output directory (default value /pipeline.output):${normal}"
+		echo "${bold}Path to your output directory (default value /pipeline_output):${normal}"
 		read outopt
 		echo ""
 		echo "${bold}Forward primer sequence for extraction:${normal}"
@@ -194,7 +194,7 @@ fi
 
 if [ -z "$outopt" ];
         then
-			outdir=$fastqs/pipeline.output
+			outdir=$fastqs/pipeline_output
 			mkdir $outdir
 			echo "-----No output directory supplied. New output directory is: $outdir"
 			echo "-----Input directory path: $fastqs" > $outdir/log.txt
@@ -314,7 +314,7 @@ echo "(Approx.) Progress: $progress%"
 # move to working directory
 # make output directories
 cd $outdir
-mkdir counts individual_lanes fastqs fastas histos 2>/dev/null
+mkdir counts_nt individual_lanes fastqs fastas histos 2>/dev/null
 
 # loop through reads & process them
 for R1 in $fastqs/*R1*
@@ -335,7 +335,7 @@ do
 	lhist=$dir/histos
 	fadir=$dir/fastas
 	fqdir=$dir/fastqs
-	cdir=$dir/counts
+	cdir=$dir/counts_nt
 	mkdir $lhist $fadir $fqdir $cdir 2>/dev/null
 	
 	# Join reads & extract insert
@@ -405,10 +405,10 @@ do
 	total=$(awk 'NR%2 == 0 {tot += 1} END {print tot}' $base.joined.fasta)
 
 	# Collect unique, total and sequences with counts in the counts file
-	echo "number of unique sequences = $unique" > $outdir/counts/$base\_counts.txt
-	echo "total number of molecules = $total"   >> $outdir/counts/$base\_counts.txt
-	echo  >>  $outdir/counts/$base\_counts.txt
-	awk -v tot="$total" 'NR%2 == 0 {seen[$1] += 1} END {for (i in seen) printf "%s %s %.3f%% \n", i, seen[i], 100*seen[i]/tot}' $base.joined.fasta | column -t | sort -n -r -k2 >>  $outdir/counts/$base\_counts.txt
+	echo "number of unique sequences = $unique" > $outdir/counts_nt/$base\_counts.txt
+	echo "total number of molecules = $total"   >> $outdir/counts_nt/$base\_counts.txt
+	echo  >>  $outdir/counts_nt/$base\_counts.txt
+	awk -v tot="$total" 'NR%2 == 0 {seen[$1] += 1} END {for (i in seen) printf "%s %s %.3f%% \n", i, seen[i], 100*seen[i]/tot}' $base.joined.fasta | column -t | sort -n -r -k2 >>  $outdir/counts_nt/$base\_counts.txt
 
 	# Redirect outputs
 	mv $base.joined.fasta $outdir/fastas/$base.joined.fasta
@@ -430,7 +430,7 @@ fi
 
 ########## CREATE HISTO FILE FOR DNA ##########
 
-cd $outdir/counts
+cd $outdir/counts_nt
 total_files=$(ls -1 *counts.txt | wc -l)
 current_file=1
 for file in *counts.txt
@@ -509,8 +509,8 @@ if [ -z $prot ];
 		:
 	else
 		mkdir counts_aa
-		mv counts/*aa.txt counts_aa/
-		mv counts/*aa_histo.txt histos/
+		mv counts_nt/*aa.txt counts_aa/
+		mv counts_nt/*aa_histo.txt histos/
 fi
 progress=$((90))
 echo "(Approx.) Progress: $progress%"
@@ -536,8 +536,8 @@ if [ -z $prot ];
 			echo $sbase \
 			$(cat $R1 | zcat | awk 'END {print NR/4}') \
 			$(cat $R2 | zcat | awk 'END {print NR/4}')  \
-			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
-			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
+			$(cat ${outdir}/counts_nt/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
+			$(cat ${outdir}/counts_nt/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
 			| column -t >> $outdir/log_temp2.txt
 		done
 
@@ -568,8 +568,8 @@ if [ -z $prot ];
 			echo $sbase \
 			$(cat $R1 | zcat | awk 'END {print NR/4}') \
 			$(cat $R2 | zcat | awk 'END {print NR/4}')  \
-			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
-			$(cat ${outdir}/counts/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
+			$(cat ${outdir}/counts_nt/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
+			$(cat ${outdir}/counts_nt/$sbase\_counts.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
 			$(cat ${outdir}/counts_aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==1{print $6}' ) \
 			$(cat ${outdir}/counts_aa/$sbase\_counts.aa.txt | awk 'BEGIN {ORS=" "}; NR==2{print $6}' ) \
 			| column -t >> $outdir/log_temp2.txt
@@ -588,7 +588,7 @@ echo "(Approx.) Progress: $progress%"
 echo "Processing bootstrapping and adding unique sequence names to files. Converting txt to csv..."
 
 dir1="${outdir}/counts_aa"
-dir2="${outdir}/counts"
+dir2="${outdir}/counts_nt"
 
 echo "{}" > "${outdir}/bootstrap_dict.json"
 if [ "$OS" == "Windows" ]; then

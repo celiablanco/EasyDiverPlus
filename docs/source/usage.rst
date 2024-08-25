@@ -131,13 +131,15 @@ Once data processing and analysis is over, the output directory should have seve
 
 The seven folders contain the following:
 
-* **counts**: DNA counts files for every sample (unique sequences, count reads and frequency)
-* **counts.aa**: Amino acid counts files for every sample (unique sequences, count reads and frequency)
+* **counts_nt**: DNA counts files for every sample (unique sequences, count reads and frequency)
+* **counts_aa**: Amino acid counts files for every sample (unique sequences, count reads and frequency)
 * **fastas**: Joined fasta files
 * **fastqs**: Joined fastq files
 * **histos**: DNA sequence length distributions and the peptide sequence length distribution (if translation is required)
 * **log.txt**: Log file with information on the parameters used and the outcome of each processing step
-* **analysis_output_test_aa**: files (joined fasta files joined fastq files, text counts files and text 
+* **analysis_output_nt**: DNA enrichment analysis output files (one per round), and frequency and enrichment output files with metric for all sequences across all rounds
+* **analysis_output_aa**: Amino acid enrichment analysis output files (one per round), and frequency and enrichment output files with metric for all sequences across all rounds
+* **individual.lanes**: all processing files (joined fasta files, joined fastq files, text counts files and text 
   histograms) corresponding to the individual lanes (if requested using the flag -r)
 
 .. note::
@@ -233,11 +235,12 @@ Users can customize various cutoff cuttofs for the graphs by entering the desire
 The application will use the provided input parameters and the selected round to generate graphs.
 If the graphs are generated successfully, a confirmation message will appear.
 
-Since the test dataset corresponds to mRNA-displayed peptides, data type is set as ‘AA’. 
+Test dataset corresponds to mRNA-displayed peptides, so data type is set as ‘AA’. 
 For testing purposes, we will plot the metrics corresponding to the last round of selection (round 2).
 The button **Generate Graphs** will start the graph generation process. 
 Once completed, an HTML window displaying the plots will open.
 If no cutoff values are specified, the Graph Generator will include all data in the files (in this case, the plots will look crammed and probably, very ugly).
+If the HTML window is taking too long to open or it's not loading the contents approperly, try adding some cutoff values to reduce the number of points. 
 
 .. image:: _static/images/plot1.png
    :alt: EasyDiver+
@@ -250,6 +253,7 @@ There are two ways in which the user can choose to focus on specific areas or da
 2. By setting more stringent cutoff values. The user can fill the values in the Graph Generator interface as many times as needed, and a new HTML window will open every time **Generate Graphs** is selected.
 
 For example, increasing the Count_out cutoff threshold significantly reduces the number of data points being represented. 
+In this case, the minimum post-selection count is arbitrarely set to 200 and the maximum frequency in the negative selection to 0.05.
 
 .. image:: _static/images/plot2.png
    :alt: EasyDiver+

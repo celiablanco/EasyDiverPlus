@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Easy Diver+'
+project = 'EasyDIVER+'
 copyright = '2024, Dr. Celia Blanco'
 author = 'Dr. Celia Blanco'
 release = '1.0'

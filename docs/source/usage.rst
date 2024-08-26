@@ -1,5 +1,5 @@
 How to use EasyDiver+
-========================
+=====================
 
 Input requirements
 ------------------

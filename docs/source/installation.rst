@@ -14,7 +14,7 @@ and click **Open** from the menu. This is due to the fact that this is an 'unsig
 choose to trust it (see details below).
 
 MacOS (x86_64 and ARM)
-----------------------------
+----------------------
 
 To run EasyDiver+ on MacOS, download the appropriate release for your machine from the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.. If you have an 'm' series
 machine, with an m1, m2, etc chip, you'll need to use the .zip with `ARM` in the name, otherwise you should use the `x86_64` .zip file.
@@ -42,12 +42,12 @@ If an error referencing snprintf occurs, identify the file from the error messag
 Run the ./autogen.sh build step again. At this point, you might get many ‘warnings’ but you shouldn't get any errors. 
 
 Windows (x86_64 / Windows 10+)
------------------------------------
+------------------------------
 
 To run EasyDiver+ on Windows, there is a bit of extra work to prepare the Ubuntu environment which will be used to execute the underlying code.
 
 WSL / Ubuntu Virtual Machine Setup
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 If you have `WSL(2) <https://learn.microsoft.com/en-us/windows/wsl/install>`_ already set up on your computer, you can just proceed to the :ref:`Install pandaseq section<pandaseq_section>`.
 
 Otherwise, you will need to open **Powershell**. Once opened, you will need to run:
@@ -64,7 +64,7 @@ You can now close the Ubuntu window that appeared.
 .. _pandaseq_section:
 
 Install pandaseq
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 Next, you will need to run each of these lines (also in Powershell), so that you can appropriately install `pandaseq <https://github.com/neufeld/pandaseq>`_ in that Ubuntu Virtual Machine:
 
 .. code-block::
@@ -95,7 +95,7 @@ You can now proceed to download the .zip archive, extract and run the EasyDiverP
 .. _run-section:
 
 Download and Run
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Download the zip package for Windows from the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.
 

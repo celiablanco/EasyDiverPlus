@@ -199,7 +199,7 @@ If there is no negative control, there will only be two files:
 
 
 How to run the Graph Generator
-----------------------------
+------------------------------
 
 The Graph Generator builds graphs using the numerical output from the analysis part, and can only be used if the data has already been processed and analyzed. 
 If the Graph Generator option is selected, the main interface will appear: 

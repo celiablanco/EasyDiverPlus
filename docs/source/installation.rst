@@ -5,8 +5,8 @@ To run EasyDiver+, you should utilize the appropriate `.zip` file for your machi
 These zip files can be found in the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.
 
 Contained in the zip file is a folder called `dist` (for "distribution"). Within this folder, 
-depending on the machine you are using, you will see a folder called EasyDiver and an executable
-with the name EasyDiverPlus OR you will see just the folder EasyDiver. Within the EasyDiver folder,
+depending on the machine you are using, you will see a folder called `EasyDiverPlus_FILES` and an executable
+with the name EasyDiverPlus OR you will see just the folder `EasyDiverPlus_FILES`. Within the `EasyDiverPlus_FILES` folder,
 you would then find the executable instead.
 
 Once you extract the .zip archive into your computer, you will generally need to right-click on the executable, 

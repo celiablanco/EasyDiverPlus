@@ -23,7 +23,7 @@ from PyQt5.QtCore import Qt
 from directory_edit import ClickableDirectoryEdit
 from file_sorter import SortingApp
 from graph_interface import Graphs_Window
-from modified_counts import find_enrichments as mod_counts_main
+from analysis_output import find_enrichments as mod_counts_main
 
 def path_constructor(path: str, parent_path: str) -> str:
 
@@ -65,7 +65,7 @@ class EasyDiver(QWidget):
         self.output_dir = ""
 
     def init_ui(self):
-        self.setWindowTitle("Easy Diver 2.0")
+        self.setWindowTitle("Easy Diver+")
         layout = QVBoxLayout()
 
         # Create a splitter
@@ -76,7 +76,7 @@ class EasyDiver(QWidget):
         self.required_layout = QVBoxLayout()
         self.required_label = QLabel("REQUIRED")
         self.required_layout.addWidget(self.required_label)
-        question_path = path_constructor("question_icon.png","easy_diver_2_gui/assets/")
+        question_path = path_constructor("question_icon.png","easy_diver_plus_gui/assets/")
         # Option -i
         self.input_label = QLabel("Input Directory Path:")
         self.input_dir_edit = ClickableDirectoryEdit()
@@ -114,7 +114,7 @@ class EasyDiver(QWidget):
             QPixmap(question_path).scaled(20, 20)
         )
         output_tooltip_icon.setToolTip(
-            "Specify the directory to save output files. If not provided, it defaults to the input directory with '/pipeline.output' appended."
+            "Specify the directory to save output files. If not provided, it defaults to the input directory with '/pipeline_output' appended."
         )
 
         output_layout = QHBoxLayout()
@@ -368,7 +368,7 @@ class EasyDiver(QWidget):
         if self.output_dir_edit.text():
             self.output_dir = f"{self.input_dir_edit.text()}/{self.output_dir_edit.text()}"
         else:
-            self.output_dir = f"{self.input_dir_edit.text()}/pipeline.output"
+            self.output_dir = f"{self.input_dir_edit.text()}/pipeline_output"
         if self.skip_processing.isChecked():
             self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
         else:
@@ -483,7 +483,7 @@ class EasyDiver(QWidget):
 
     def display_help_message(self):
         help_text = """
-        EasyDIVER 2.0 is a pipeline to processes and analyzes raw sequencing data files from consecutive rounds of selection/evolution, providing:
+        EasyDiver+ is a pipeline to processes and analyzes raw sequencing data files from consecutive rounds of selection/evolution, providing:
         - Read count files
         - Sequence length distribution
         - Enrichment metrics across consecutive rounds of selection

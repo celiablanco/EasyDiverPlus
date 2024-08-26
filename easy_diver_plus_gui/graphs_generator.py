@@ -187,6 +187,11 @@ def main(
             y=1.01,
             xanchor="right",
             x=1
+        ),
+        font=dict(
+            family="Open Sans",  # Font family
+            size=18,  # Font size (increase this value to make it larger)
+            color="Black"  # Font color
         )
     )
     # Show combined plot

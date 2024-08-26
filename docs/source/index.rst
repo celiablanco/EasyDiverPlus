@@ -1,10 +1,10 @@
-EasyDIVER 2.0
+EasyDiver+
 ============================
 
-EasyDIVER 2.0 is an improved build of the `EasyDIVER tool <https://link.springer.com/article/10.1007/s00239-020-09954-0>`_. 
-While EasyDIVER was a pipeline exclusively to process paired-end sequencing data, EasyDIVER 2.0 can process, analyze and visualize sequencing data from consecutive rounds of in vitro evolution. 
+EasyDiver+ is an improved build of the `EasyDIVER tool <https://link.springer.com/article/10.1007/s00239-020-09954-0>`_. 
+While EasyDIVER was a pipeline exclusively to process paired-end sequencing data, EasyDiver+ can process, analyze and visualize sequencing data from consecutive rounds of in vitro evolution. 
 
-The main improvements in EasyDIVER 2.0 compared to the original EasyDIVER are:
+The main improvements in EasyDiver+ compared to the original EasyDIVER are:
 
 * Straightforward, user-friendly GUI.
 * Option to analyze sequencing data, calculating metrics for the relative enrichment across consecutive rounds of selection.

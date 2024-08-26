@@ -55,7 +55,7 @@ class SortingApp(QWidget):
         """
         super().__init__(parent)
         self.selected_directory = selected_directory
-        self.output_directory = output_directory if output_directory != '' else 'pipeline.output'
+        self.output_directory = output_directory if output_directory != '' else 'pipeline_output'
         self.initialize_user_interface()
         self.saved_choices = False
         self.round_widgets = []

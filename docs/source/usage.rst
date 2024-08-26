@@ -1,4 +1,4 @@
-How to use EasyDIVER 2.0
+How to use EasyDiver+
 ========================
 
 Input requirements
@@ -15,14 +15,14 @@ All input files must be:
 How to process and analyze data
 -------------------------------
 
-When opening the application, the main interface will appear, featuring options for both EasyDIVER 2.0 and the Graph Builder.
+When opening the application, the main interface will appear, featuring options for both EasyDiver+ and the Graph Generator.
 
 .. image:: _static/images/img1.png
    :alt: EasyDIVER Logo
    :align: center
    :width: 600px
 
-Selecting the **EasyDIVER 2.0** option will run the EasyDIVER application. 
+Selecting the **EasyDiver+** option will run the EasyDIVER application. 
 The only required field is the path to the input directory. 
 
 For illustrative purposes, we will run the interface using the test dataset provided in a `Google Drive directory <https://drive.google.com/drive/folders/102sCv5uJUiUcnsgVskJigmh8lxbl3KCD?usp=sharing>`_.
@@ -34,7 +34,7 @@ peptides (unpublished), so 'Translate to Amino Acids' is selected.
 * **Input Directory Path**: Field to specify the directory containing raw sequencing files. This field is mandatory.
    
 .. image:: _static/images/img2.png
-    :alt: EasyDIVER 2.0
+    :alt: EasyDiver+
     :align: center
     :width: 600px
 
@@ -42,7 +42,7 @@ Once the required field is filled, the optional parameters will show up.
 
 Optional Parameters:
 
-* **Output Directory Path**: Field for specifying where the output files should be saved. If left blank, the default is ``pipeline.output``.
+* **Output Directory Path**: Field for specifying where the output files should be saved. If left blank, the default is ``pipeline_output``.
 * **Forward Primer Sequence**: Input for the forward primer sequence used in extraction.
 * **Reverse Primer Sequence**: Input for the reverse primer sequence used in extraction.
 * **Extra Flags for PANDASeq**: Allows additional parameters for PANDASeq to be entered, enclosed in quotes.
@@ -54,7 +54,7 @@ Optional Parameters:
 * **Run Enrichment Analysis for Consecutive Rounds**: Checkbox to enable enrichment analysis for consecutive rounds of selection/amplification. 
 
 .. image:: _static/images/img3.png
-    :alt: EasyDIVER 2.0
+    :alt: EasyDiver+
     :align: center
     :width: 600px
 
@@ -64,7 +64,7 @@ If 'Run Enrichment Analysis for Consecutive Rounds' is selected, two options sho
 * **Required: Sort Files into Rounds and types!**: A button to open a sorting interface where users can categorize files.
 
 .. image:: _static/images/img4.png
-    :alt: EasyDIVER 2.0
+    :alt: EasyDiver+
     :align: center
     :width: 600px
 
@@ -74,7 +74,7 @@ In the sorting interface, the user must first specify how many rounds of selecti
 * **Start sorting**: A button to open the buckets to assign files from the input directory to each bucket type (Pre-, Post-, Neg-).
 
 .. image:: _static/images/img5.png
-    :alt: EasyDIVER 2.0
+    :alt: EasyDiver+
     :align: center
     :width: 600px
 
@@ -83,7 +83,7 @@ each of them with pre-selection, post-selection, and a negative control selectio
 Once the number of rounds has been set to 2, and after clicking 'Start sorting', the 6 files in the input directory and the buckets will show up:
 
 .. image:: _static/images/img6.png
-    :alt: EasyDIVER 2.0
+    :alt: EasyDiver+
     :align: center
     :width: 600px
 
@@ -92,14 +92,14 @@ The files can be dragged to their corresponding bucket.
 * **Save choices and continue**: A button to save a csv file with the file names and their corresponding type of selection. 
 
 .. image:: _static/images/img7.png
-    :alt: EasyDIVER 2.0
+    :alt: EasyDiver+
     :align: center
     :width: 600px
 
 After saving choices, the file ``enrichment_analysis_file_sorting_logic.csv`` will be saved in the output directory. 
 
 .. image:: _static/images/table.png
-   :alt: EasyDIVER 2.0
+   :alt: EasyDiver+
    :align: center
    :width: 250px
 
@@ -115,7 +115,7 @@ Each field box displays a question mark icon providing additional information.
 Upon submitting the job, the text box at the bottom will start printing real-time information from the run. 
 
 .. image:: _static/images/img8.png
-   :alt: EasyDIVER 2.0
+   :alt: EasyDiver+
    :align: center
    :width: 600px
 
@@ -125,29 +125,31 @@ Output files
 Once data processing and analysis is over, the output directory should have seven folders, a log.txt file, and the sorting csv table. 
 
 .. image:: _static/images/out1.png
-   :alt: EasyDIVER 2.0
+   :alt: EasyDiver+
    :align: center
    :width: 600px
 
 The seven folders contain the following:
 
-* **counts**: DNA counts files for every sample (unique sequences, count reads and frequency)
-* **counts.aa**: Amino acid counts files for every sample (unique sequences, count reads and frequency)
+* **counts_nt**: DNA counts files for every sample (unique sequences, count reads and frequency)
+* **counts_aa**: Amino acid counts files for every sample (unique sequences, count reads and frequency)
 * **fastas**: Joined fasta files
 * **fastqs**: Joined fastq files
 * **histos**: DNA sequence length distributions and the peptide sequence length distribution (if translation is required)
 * **log.txt**: Log file with information on the parameters used and the outcome of each processing step
-* **modified_counts_test_aa**: files (joined fasta files joined fastq files, text counts files and text 
+* **analysis_output_nt**: DNA enrichment analysis output files (one per round), and frequency and enrichment output files with metric for all sequences across all rounds
+* **analysis_output_aa**: Amino acid enrichment analysis output files (one per round), and frequency and enrichment output files with metric for all sequences across all rounds
+* **individual.lanes**: all processing files (joined fasta files, joined fastq files, text counts files and text 
   histograms) corresponding to the individual lanes (if requested using the flag -r)
 
 .. note::
    We will focus on the analysis output files here. 
    Please refer to the original EasyDIVER materials (publication and repository)   for a more detailed description of the processing output files. 
 
-In the ``modified_counts`` folders, there will be several ``.csv`` files:
+In the ``analysis_output`` folders, there will be several ``.csv`` files:
 
 .. image:: _static/images/out2.png
-   :alt: EasyDIVER 2.0
+   :alt: EasyDiver+
    :align: center
    :width: 600px
 
@@ -196,25 +198,25 @@ If there is no negative control, there will only be two files:
 * **all_rounds_frequency_pre_results.csv**: Relative frequency in the pre-selection for each unique sequence across all rounds of selection.
 
 
-How to run the Graph Builder
+How to run the Graph Generator
 ----------------------------
 
-The Graph Builder can only be used if the data has been processed and analyzed, as the graphs are built using the output from the analysis part. 
-If the Graph Builder option is selected, the main interface will appear: 
+The Graph Generator builds graphs using the numerical output from the analysis part, and can only be used if the data has already been processed and analyzed. 
+If the Graph Generator option is selected, the main interface will appear: 
 
 .. image:: _static/images/img9.png
-    :alt: EasyDIVER 2.0
+    :alt: EasyDiver+
     :align: center
     :width: 350px
 
 * **Input Directory Selection**: This field only shows up if the processing has not been run right before 
   (if processing has been run before, the interface will use the processing output directory as input here)
-  Field to specify the directory containing the modified_counts folder. 
+  Field to specify the directory containing the analysis_output folder. 
   If you run the processing steps at a different time, this field should be filled with the Output Directory Path from processing. 
-  If you did not specify an output directory name when running the processing steps, this will be output default name ``pipeline.output``.
+  If you did not specify an output directory name when running the processing steps, this will be output default name ``pipeline_output``.
 
 * **Select Data Type**: Dropdown menu to choose between ‘DNA’ and ‘AA’. 
-  This determines which modified_counts folder is used (modified_counts or modified_counts_aa).
+  This determines which analysis_output folder is used (analysis_output or analysis_output_aa).
 
 * **Select Round**: Dropdown menu with the available rounds based on the selected directory.
   Choose the desired round for which you want to generate graphs.
@@ -233,26 +235,28 @@ Users can customize various cutoff cuttofs for the graphs by entering the desire
 The application will use the provided input parameters and the selected round to generate graphs.
 If the graphs are generated successfully, a confirmation message will appear.
 
-Since the test dataset corresponds to mRNA-displayed peptides, data type is set as ‘AA’. 
+Test dataset corresponds to mRNA-displayed peptides, so data type is set as ‘AA’. 
 For testing purposes, we will plot the metrics corresponding to the last round of selection (round 2).
 The button **Generate Graphs** will start the graph generation process. 
 Once completed, an HTML window displaying the plots will open.
-If no cutoff values are specified, the Graph Builder will include all data in the files (in this case, the plots will look crammed and probably, very ugly).
+If no cutoff values are specified, the Graph Generator will include all data in the files (in this case, the plots will look crammed and probably, very ugly).
+If the HTML window is taking too long to open or it's not loading the contents approperly, try adding some cutoff values to reduce the number of points. 
 
 .. image:: _static/images/plot1.png
-   :alt: EasyDIVER 2.0
+   :alt: EasyDiver+
    :align: center
    :width: 800px
 
 There are two ways in which the user can choose to focus on specific areas or data points in the graphs:
 
 1. By selecting specific plotting regions. The graphs interface is interactive, and specific areas of the plots can be selected by dragging the mouse. 
-2. By setting more stringent cutoff values. The user can fill the values in the Graph Builder interface as many times as needed, and a new HTML window will open every time **Generate Graphs** is selected.
+2. By setting more stringent cutoff values. The user can fill the values in the Graph Generator interface as many times as needed, and a new HTML window will open every time **Generate Graphs** is selected.
 
 For example, increasing the Count_out cutoff threshold significantly reduces the number of data points being represented. 
+In this case, the minimum post-selection count is arbitrarely set to 200 and the maximum frequency in the negative selection to 0.05.
 
 .. image:: _static/images/plot2.png
-   :alt: EasyDIVER 2.0
+   :alt: EasyDiver+
    :align: center
    :width: 800px
 

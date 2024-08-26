@@ -10,87 +10,54 @@ analysis. The module also supports parallel processing to enhance performance on
 
 Functions:
     - get_first_matching_file(
-        counts_dir: str,
-        rounds_df: pd.DataFrame,
-        file_type: str,
+        counts_dir: str, 
+        rounds_df: pd.DataFrame, 
+        file_type: str, 
         round_num: int) -> str:
-        Finds the first matching file in the given directory based on specified criteria.
-
+      Finds the first matching file in the given directory based on specified criteria.
+      
+    - check_rounds_file(rounds_df: pd.DataFrame, counts_dir: str) -> bool:
+      Checks if the filenames in the provided DataFrame match the filenames in 
+      the specified directory.
+      
     - safe_divide(a: float, b: float, default: float = 0.0) -> float:
-        Safely divides two numbers, returning a default value in case of division by zero.
-
-    - base_encode(sequence_number: str, input_string: str) -> str:
-        Generates a shortened base58-encoded unique string for each sequence based on position
-
-    - unique_sequence_name_generator(row: pd.Series, sequence_dict: dict) -> str:
-        Either retrieves the unique sequence name from the global dictionary or 
-        uses the `base_encode` function to calculate a unique string for each sequence 
-        and stores it into that dictionary. 
-
-    - bootstrap_counts_resampling(
-        total_counts: int, 
-        count_seq: int, 
-        sequence: str, 
-        bootstrap_depth: int = 1000, 
-        seed: int = 42) -> tuple[str, List[float]]:
-        Performs bootstrap resampling on counts data to generate confidence intervals.
-
-    - bootstrap_counts_binomial(
-        total_counts: int, 
-        count_seq: int, 
-        sequence: str, 
-        bootstrap_depth: int = 1000, 
-        seed: int = 42) -> tuple[str, List[float]]:
-        Performs bootstrap binomial sampling on counts data to generate confidence intervals.
-
-    - easy_diver_parse_file_header(filename: str) -> tuple[int, int]:
-        Parses the header of an Easy Diver counts file 
-        to extract the number of sequences and total molecules.
-
-    - process_row(
-        row: pd.Series, 
-        total_counts: int, 
-        sequence_column: str, 
-        bootstrap_depth: int, 
-        func: Callable) -> tuple:
-        Processes a single row of a DataFrame, applying a bootstrapping function.
-
-    - parallel_apply(
-        df: pd.DataFrame, 
-        func: Callable, 
-        total_counts: int, 
-        sequence_column: str, 
-        bootstrap_depth: int) -> List:
-        Applies a function to each row of a DataFrame in parallel using multiprocessing.
-
+      Safely divides two numbers, handling division by zero.
+      
+    - easy_diver_parse_file_header(file_path: str, encoding: str = 'utf-8') -> tuple[int, int]:
+      Parses the header of an Easy Diver counts file to extract the number of 
+      sequences and total molecules.
+      
     - easy_diver_counts_to_df(filename: str, ed_round: int, ftype: str) -> pd.DataFrame:
-        Converts an Easy Diver counts file to a pandas DataFrame, 
-        including bootstrapped confidence intervals.
-
+      Converts an Easy Diver counts file to a pandas DataFrame, including 
+      bootstrapped confidence intervals.
+      
     - process_enrichments(row: pd.Series) -> dict:
-        Calculates enrichment metrics for a single row of data.
-
+      Calculates enrichment metrics for a single row of data.
+      
     - merge_data_for_rounds(
-        df1: pd.DataFrame, 
-        df2: Optional[pd.DataFrame] = None, 
-        df3: Optional[pd.DataFrame] = None, 
-        include_in: bool = True, 
-        include_neg: bool = True) -> pd.DataFrame:
-        Merges data from different rounds into a single DataFrame.
-
-    - enrich_and_write(round_df: pd.DataFrame, file_prefix: str, precision: int) -> bool:
-        Enriches the DataFrame and writes it to a file.
-
+        post_df: pd.DataFrame, 
+        pre_df: Optional[pd.DataFrame] = None, 
+        neg_df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+      Merges data from different files for the same round into a single DataFrame.
+      
+    - enrich_and_write(
+        round_df: pd.DataFrame, 
+        file_prefix: str, 
+        precision: int, 
+        include_negative: bool = True) -> bool:
+      Calculates the enrichments for the joined data and writes it to a file.
+      
     - write_enrichments_final_output(
-        directory: str,
-        include_negative: bool = False,
-        include_in: bool = False,
+        directory: str, 
+        include_negative: bool = False, 
+        include_pre: bool = False, 
         precision: int = 6) -> bool:
-        Writes 'pivoted' files which have the metrics across rounds for each of the sequences.
-
-    - find_enrichments():
-        Main function to find enrichments in modified counts data 
-        by running multiple rounds of processing.
+      Processes enrichment data files in the specified directory and 
+      generates CSV output files in a 'pivoted' form.
+      
+    - find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
+      Main function to find enrichments in modified counts data, processing 
+      the counts data and writing the enriched results to an output directory.
 
 This module is intended for researchers and data scientists working with sequence count data to 
 perform detailed statistical analysis and enrichment studies.
@@ -190,9 +157,7 @@ def safe_divide(a: float, b: float, default: float = 0.0) -> float:
     float: The result of the division, or the default value if division by zero occurs.
     """
     try:
-        if a is None or b is None:
-            return None
-        return a / b
+        return a / b if a is not None and b is not None else None
     except ZeroDivisionError:
         return default
 
@@ -475,10 +440,10 @@ def enrich_and_write (
                 final_df[f"Total_Molecules_{file_type}"].fillna(0).astype(int)[0]
         )
 
-    extra_header = f"""Number of Unique Sequences (Input),{extras.get('seq_in')}
-Total Number of Molecules (Pre),{extras.get('mol_in')}
-Number of Unique Sequences (Post),{extras.get('seq_out')}
-Total Number of Molecules (Post),{extras.get('mol_out')}
+    extra_header = f"""Number of Unique Sequences (Pre),{extras.get('seq_pre')}
+Total Number of Molecules (Pre),{extras.get('mol_pre')}
+Number of Unique Sequences (Post),{extras.get('seq_post')}
+Total Number of Molecules (Post),{extras.get('mol_post')}
 Number of Unique Sequences (Neg Control),{extras.get('seq_neg')}
 Total Number of Molecules (Neg Control),{extras.get('mol_neg')}"""
     for col in final_df.columns:
@@ -517,7 +482,7 @@ Total Number of Molecules (Neg Control),{extras.get('mol_neg')}"""
 def write_enrichments_final_output(
         directory: str,
         include_negative: bool = False,
-        include_in: bool = False,
+        include_pre: bool = False,
         precision: int = 6) -> bool:
     """
     Processes enrichment data files in the specified directory and generates CSV output files
@@ -537,9 +502,9 @@ def write_enrichments_final_output(
                              the out enrichment, and the frequence for negative and out files.
                              If False, only the 'post' files are included. Default is False.
                              This will be True if ANY round has a negative control file.
-    include_in (bool): A flag indicating whether to include files for the 'pre' frequencies.
+    include_pre (bool): A flag indicating whether to include files for the 'pre' frequencies.
                        If True, all_rounds_frequency_in_results.csv will be created,
-                       otherwise it will not. include_in should be True if ANY of the rounds
+                       otherwise it will not. include_pre should be True if ANY of the rounds
                        have an actual 'pre' file and will be False if NONE of the rounds have
                        an 'pre' file.
     precision (int): The number of decimal places to use for floating point 
@@ -572,7 +537,7 @@ def write_enrichments_final_output(
     columns_to_keep = ['Unique_Sequence_Name', 'Sequence', 'Enr_post', 'Freq_post']
     if include_negative is True:
         columns_to_keep.extend(['Enr_ratio', 'Enr_neg', 'Freq_neg'])
-    if include_in is True:
+    if include_pre is True:
         columns_to_keep.extend(['Freq_pre'])
 
     for i, file in enumerate(files):
@@ -631,7 +596,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
     """
     # Parse command-line arguments
     print("enrichment_analysis <=> "+
-          "Processing enrichments for the 'counts' and 'counts_aa' output folders")
+          "Processing enrichments for the 'counts_nt' and 'counts_aa' output folders")
 
     precision_input = 6 if precision_input is None else precision_input
 
@@ -640,7 +605,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
 
     # Set directory path
     for ind, counts_type in enumerate(
-        tqdm(['counts','counts_aa'], desc = 'Processing each counts output folder')
+        tqdm(['counts_nt','counts_aa'], desc = 'Processing each counts output folder')
         ):
         counts_dir = os.path.join(output_dir, counts_type)
         if not os.path.isdir(counts_dir):
@@ -679,7 +644,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
 
             enrich_and_write(
                 merged_data,
-                f"{output_dir}/modified_{counts_type}/round_{str(i).zfill(3)}_enrichment_analysis",
+                f"{output_dir}/analysis_output{counts_type.replace('counts','')}/round_{str(i).zfill(3)}_enrichment_analysis",
                 precision_input,
                 include_negative = neg_files_exist
             )
@@ -688,7 +653,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
             print(f"(Approx.) Progress: {i * 100 / max_round / (2 - ind)} %")
 
         write_enrichments_final_output(
-            f"{output_dir}/modified_{counts_type}",
+            f"{output_dir}/analysis_output{counts_type.replace('counts','')}",
             neg_files_exist,
             pre_files_exist,
             precision_input

@@ -21,7 +21,7 @@ machine, with an m1, m2, etc chip, you'll need to use the .zip with `ARM` in the
 
 Right-click on the downloaded .zip file and click **Open** from the menu.. This will prompt the Archive Utility to unzip the 
 file into the a folder titled `dist` in the same location as the .zip file.
-Within that `dist` folder (or in the EasyDiver subfolder on ARM machines), right-click on the `EasyDiverPlus` executable (the icon is a black square with `exec`) and click **Open** from the menu.
+Within that `dist` folder (or in the `EasyDiverPlus_FILES` subfolder on ARM machines), right-click on the `EasyDiverPlus` executable (the icon is a black square with `exec`) and click **Open** from the menu.
 
 You will receive a prompt asking whether you are sure you want to open this application, as macOS cannot verify the developer. Click **Open** to continue.
 

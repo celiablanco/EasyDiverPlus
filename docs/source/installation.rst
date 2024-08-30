@@ -70,6 +70,7 @@ Next, you will need to run each of these lines (also in Powershell), so that you
 .. code-block::
     :dedent:
 
+    wsl -e bash -c "sudo apt-get update -y"
     wsl -e bash -c "sudo apt-get install -y zlib1g-dev libbz2-dev libltdl-dev libtool zlib1g-dev pkg-config autoconf make python3 python3-pip"
     wsl -e bash -c "git clone http://github.com/neufeld/pandaseq.git/"
     wsl -e bash -c "cd ./pandaseq; bash ./autogen.sh && MAKE=gmake ./configure && make && sudo make install"

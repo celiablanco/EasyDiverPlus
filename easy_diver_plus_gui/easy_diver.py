@@ -2,6 +2,8 @@
 import subprocess
 import sys
 import os
+import time
+import json
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -15,7 +17,8 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QTextEdit,
     QSpinBox,
-    QSplitter
+    QSplitter,
+    QComboBox
 )
 from PyQt5.QtGui import QPixmap, QCloseEvent
 from PyQt5.QtCore import Qt
@@ -42,15 +45,29 @@ def path_constructor(path: str, parent_path: str) -> str:
         adjusted_path = os.path.join(base_path, parent_path, path)
     return adjusted_path
 
-class QTextEditStream:
-    def __init__(self, text_edit: QTextEdit):
+
+
+class QTextEditStreamWithLog:
+    """ A stream that writes to both a QTextEdit UI and a log file """
+    def __init__(self, text_edit, log_file_path):
         self.text_edit = text_edit
+        self.log_file = open(log_file_path, "a", encoding="utf-8")
 
     def write(self, message):
-        self.text_edit.append(message)
+        if message.strip():  # Avoid empty lines
+            # Write to QTextEdit
+            self.text_edit.append(message.strip())
+            self.text_edit.ensureCursorVisible()
+            QApplication.processEvents()
 
+            # Write to log file
+            self.log_file.write(message)
+            self.log_file.flush()  # Ensure real-time writing
     def flush(self):
-        pass  # Not needed for this implementation
+        self.log_file.flush()
+
+    def close(self):
+        self.log_file.close()
 
 class EasyDiver(QWidget):
     def __init__(self, parent = None):
@@ -194,6 +211,7 @@ class EasyDiver(QWidget):
 
         # Option -a
         self.translate_check = QCheckBox("Translate to Amino Acids")
+        self.translate_check.stateChanged.connect(self.toggle_gen_code_selection)
         translate_tooltip_icon = QLabel()
         translate_tooltip_icon.setPixmap(
             QPixmap(question_path).scaled(20, 20)
@@ -207,6 +225,51 @@ class EasyDiver(QWidget):
         translate_layout.addStretch()
         translate_layout.addWidget(translate_tooltip_icon)
         self.optional_layout.addLayout(translate_layout)
+
+
+        # Get the absolute path of the script directory
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Construct the full path to the JSON file
+        json_file_path = os.path.join(script_dir,"easy_diver_plus_gui","code_libs.json")
+
+        # Load JSON data
+        with open(json_file_path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        
+        gencode_names = [gencode["name"] for gencode in data]
+
+        # Create dropdown (QComboBox) for gen code selection
+        self.translation_layout = QVBoxLayout()
+        self.toggle_layout(self.translation_layout, False)
+        self.gen_code_dropdown = QComboBox()
+        self.gen_code_dropdown.hide()
+        self.gen_code_dropdown.addItems(gencode_names)  # Populate with list
+
+        # Set default selection (e.g., "Option 2")
+        default_value = "Standard"
+        index = self.gen_code_dropdown.findText(default_value)
+        self.gen_code_dropdown.setCurrentIndex(index)
+
+        # Label to display selected value
+        self.gen_code_dropdown_label = QLabel("Choose Genetic Code for Translation: ")
+        self.gen_code_dropdown_label.hide()
+        self.gen_code_dropdown_tooltip_icon = QLabel()
+        self.gen_code_dropdown_tooltip_icon.hide()
+        self.gen_code_dropdown_tooltip_icon.setPixmap(
+            QPixmap(question_path).scaled(20, 20)
+        )
+        self.gen_code_dropdown_tooltip_icon.setToolTip(
+            "Genetic Code to use for Translation"
+        )
+        self.gen_code_dropdown_layout = QHBoxLayout()
+        self.gen_code_dropdown_layout.addWidget(self.gen_code_dropdown_label)
+        self.gen_code_dropdown_layout.addWidget(self.gen_code_dropdown)
+        self.gen_code_dropdown_layout.addStretch()
+        self.gen_code_dropdown_layout.addWidget(self.gen_code_dropdown_tooltip_icon)
+        self.translation_layout.addLayout(self.gen_code_dropdown_layout)
+        self.optional_layout.addLayout(self.translation_layout)
+        self.toggle_layout(self.translation_layout, False)
 
         # Option -r
         self.retain_check = QCheckBox("Retain Individual Lane Outputs")
@@ -223,6 +286,22 @@ class EasyDiver(QWidget):
         retain_layout.addStretch()
         retain_layout.addWidget(retain_tooltip_icon)
         self.optional_layout.addLayout(retain_layout)
+
+        # Use Packaged pandaseq
+        self.local_pandaseq_check = QCheckBox("Use Local PANDASeq (Verify you have working version first!)")
+        local_pandaseq_check_tooltip_icon = QLabel()
+        local_pandaseq_check_tooltip_icon.setPixmap(
+            QPixmap(question_path).scaled(20, 20)
+        )
+        local_pandaseq_check_tooltip_icon.setToolTip(
+            "Check this box to use your own working installation of PANDASeq (instead of the version packaged with this software)"
+        )
+
+        local_pandaseq_check_layout = QHBoxLayout()
+        local_pandaseq_check_layout.addWidget(self.local_pandaseq_check)
+        local_pandaseq_check_layout.addStretch()
+        local_pandaseq_check_layout.addWidget(local_pandaseq_check_tooltip_icon)
+        self.optional_layout.addLayout(local_pandaseq_check_layout)
 
         # Option for enrichment_analysis
         self.run_enrichment_analysis = QCheckBox("Run Enrichment Analysis for Consecutive Rounds")
@@ -350,6 +429,17 @@ class EasyDiver(QWidget):
             self.precision_input_tooltip_icon.hide()
             self.interaction_button.hide()
             self.submit_button.setDisabled(False)
+    
+    def toggle_gen_code_selection(self, state):
+        if state == Qt.Checked:
+            self.gen_code_dropdown_label.show()
+            self.gen_code_dropdown.show()
+            self.gen_code_dropdown_tooltip_icon.show()
+        else:
+            self.gen_code_dropdown_label.hide()
+            self.gen_code_dropdown.hide()
+            self.gen_code_dropdown_tooltip_icon.hide()
+
 
     def open_sorting_window(self):
         sorting_window = SortingApp(self, self.input_dir_edit.text(),self.output_dir_edit.text())
@@ -369,6 +459,7 @@ class EasyDiver(QWidget):
             self.output_dir = f"{self.input_dir_edit.text()}/{self.output_dir_edit.text()}"
         else:
             self.output_dir = f"{self.input_dir_edit.text()}/pipeline_output"
+        log_file_path = f"{self.output_dir}/__easy_diver_plus_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
         if self.skip_processing.isChecked():
             self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
         else:
@@ -401,6 +492,11 @@ class EasyDiver(QWidget):
             if self.retain_check.isChecked():
                 run_script += "-r "
 
+            if self.local_pandaseq_check.isChecked():
+                run_script += "-L "
+
+            if self.gen_code_dropdown.currentText() != "":
+                run_script += f'-c "{self.gen_code_dropdown.currentText()}"'
             if self.extra_flags_edit.text():
                 run_script += f"-e {self.extra_flags_edit.text()} "
 
@@ -408,48 +504,76 @@ class EasyDiver(QWidget):
             run_script = run_script if os.name == 'nt' else run_script.split(" ")
             # Execute the script
             try:
-                res = subprocess.Popen(
-                    run_script,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    universal_newlines=True,
-                    shell=False
-                )
-
-                while True:
-                    output = res.stdout.readline()
-                    if output == "" and res.poll() is not None:
-                        break
-                    if output:
-                        self.output_text.append(output.strip())
-                        self.output_text.ensureCursorVisible()
-                        QApplication.processEvents()
-                        print(output)
-
-                if res.returncode == 0:
-                    self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
-                else:
-                    error_message = res.stderr.read()
-                    self.output_text.append(f"Error: {error_message}")
-                    self.output_text.ensureCursorVisible()
-                    QMessageBox.critical(
-                        self, "Error", f"An error occurred: {error_message}"
+                with open(log_file_path, "a", encoding="utf-8") as log_file:
+                    res = subprocess.Popen(
+                        run_script,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        universal_newlines=True,
+                        bufsize=1,  # Line buffering for real-time output
+                        shell=False
                     )
 
+                    while True:
+                        output = res.stdout.readline()
+                        error_output = res.stderr.readline()
+
+                        if output == "" and error_output == "" and res.poll() is not None:
+                            break
+                        
+                        if output:
+                            log_file.write(output)  # Log stdout
+                            log_file.flush()  # Ensure real-time logging
+                            self.output_text.append(output.strip())
+                            self.output_text.ensureCursorVisible()
+                            QApplication.processEvents()
+                            print(output, end="")  # Print to console as well
+
+                        if error_output:
+                            log_file.write(error_output)  # Log stderr
+                            log_file.flush()  # Ensure real-time logging
+                            self.output_text.append(f"Error: {error_output.strip()}")
+                            self.output_text.ensureCursorVisible()
+                            QApplication.processEvents()
+                            print(error_output, end="")  # Print to console as well
+
+                    # Handle process completion
+                    res.wait()
             except Exception as e:
+                with open(log_file_path, "a", encoding="utf-8") as log_file:
+                    log_file.write(f"Exception: {str(e)}\n")
+                    log_file.flush()
+
                 self.output_text.append(f"Error: {str(e)}")
                 self.output_text.ensureCursorVisible()
                 QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
 
+            if res.returncode == 0:
+                self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
+            else:
+                error_message = res.stderr.read()
+                log_file.write(f"Error: {error_message}\n")
+                log_file.flush()
+                self.output_text.append(f"Error: {error_message.strip()}")
+                self.output_text.ensureCursorVisible()
+                QMessageBox.critical(self, "Error", f"An error occurred: {error_message.strip()}")  
+
+            self.run_ls_and_log_simple(output_directory=self.output_dir)              
+
     def run_enrichment_analysis_steps(self, output_dir, precision):
-        original_stdout = sys.stdout  # Save a reference to the original standard output
+        # Timestamped log file
+        log_file_path = f"{output_dir}/___enrichment_analysis_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"  
+        log_stream = QTextEditStreamWithLog(self.output_text, log_file_path)
+
+        original_stdout = sys.stdout  # Save the original stdout
+        original_stderr = sys.stderr  # Save the original stderr
 
         try:
-            # Redirect sys.stdout to the QTextEditStream
-            sys.stdout = QTextEditStream(self.output_text)
+            sys.stdout = log_stream  # Redirect stdout to QTextEdit and log file
+            sys.stderr = log_stream  # Redirect stderr as well
 
             if self.run_enrichment_analysis.isChecked():
-                mod_counts = mod_counts_main(output_dir, precision)
+                mod_counts = mod_counts_main(output_dir, precision)  # Call external function
                 if mod_counts is True:
                     self.on_calculate_finish(0, output_dir)
                 else:
@@ -457,8 +581,10 @@ class EasyDiver(QWidget):
             else:
                 self.on_calculate_finish(0, output_dir)
         finally:
-            # Restore the original sys.stdout
+            # Restore original stdout and stderr
             sys.stdout = original_stdout
+            sys.stderr = original_stderr
+            log_stream.close()  # Close log file properly
 
     def on_calculate_finish(self, returncode, output_dir):
         if returncode == 0:
@@ -481,6 +607,21 @@ class EasyDiver(QWidget):
             elif item.widget():
                 item.widget().setVisible(visible)
 
+    def run_ls_and_log_simple(self, output_directory):
+        log_file_path = f"{output_directory}/___folder_details_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
+
+        result = subprocess.run(["ls", "-Rlh", output_directory], capture_output=True, text=True)
+
+        # Write to log file
+        with open(log_file_path, "w", encoding="utf-8") as log_file:
+            log_file.write(result.stdout)
+            log_file.write(result.stderr)
+
+        # Show in PyQt UI
+        self.output_text.append(result.stdout)
+        self.output_text.append(result.stderr)
+        self.output_text.ensureCursorVisible()
+
     def display_help_message(self):
         help_text = """
         EasyDiver+ is a pipeline to processes and analyzes raw sequencing data files from consecutive rounds of selection/evolution, providing:
@@ -502,6 +643,7 @@ class EasyDiver(QWidget):
         - Translating to amino acids (Y/N)
         - Retaining individual lane outputs (Y/N)
         - Extra flags for PANDASeq (use quotes, e.g. "-L 50" "-T 14")
+        - Use Local Pandaseq (Y/N)
         - Run Enrichment Analysis (Y/N)
         """
 

@@ -22,14 +22,38 @@ where:
 	-e extra flags for PANDASeq (use quotes, e.g. \"-L 50\")
 	-h prints this friendly message"
 
+local_pandaseq=""
+codelib="Standard"
+# Parse arguments and set global variables
+while getopts hi:o:p:q:T:e:L:c:ra option
+do
+case "${option}"
+in
+
+h) helpm="TRUE"
+	printf "%`tput cols`s"|tr ' ' '#'
+	echo "$usage"
+	printf "%`tput cols`s"|tr ' ' '#'
+	exit 1;;
+i) inopt="${OPTARG}";;
+o) outopt="${OPTARG}";;
+p) fwd="${OPTARG}";;
+q) rev="${OPTARG}";;
+T) threads="${OPTARG}";;
+e) extra="${OPTARG}";;
+r) slanes="TRUE";;
+a) prot="TRUE";;
+L) local_pandaseq="TRUE";;
+c) codelib="${OPTARG}";;
+*) 
+esac
+done
 
 # Record start time in seconds to calculate run time at the end
 start=`date +%s`
 
 # Record workking directory
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-
-pandaiteration=0
 
 uname_m=$(uname -m)
 unameOut=$(uname -a)
@@ -46,12 +70,24 @@ esac
 
 # Test to verify pandaseq is installed and can be found
 echo "Verifying pandaseq exists!"
-echo "checking next location - pandaseq base installation location: `which pandaseq`"
-pandatest=$(which pandaseq)
-if [ -z "$pandatest" ]; then
+if [ -z local_pandaseq ];
+then
 	echo "checking next location - $SCRIPT_DIR/pandaseq"
 	echo ""
 	pandatest=$(which "$SCRIPT_DIR/pandaseq")
+else
+	echo "local install selected - checking pandaseq base installation location via 'which pandaseq'"
+	pandatest=$(which pandaseq)
+fi
+
+if [ -z "$pandatest" ]; then
+	if [ -z local_pandaseq ];
+	then
+		echo ""
+	else
+		echo "local install not found, falling back to packaged install -> $SCRIPT_DIR/pandaseq"
+		pandatest=$(which "$SCRIPT_DIR/pandaseq")
+	fi
 	if [ -z "$pandatest" ]; then
 		if [[ "$OS" == "Mac" ]]; then
 			if [[ "$uname_m" == "x86_64" ]]; then
@@ -66,36 +102,19 @@ if [ -z "$pandatest" ]; then
 				echo ""
 				exit 1
 			fi
+		else
+			echo "pandaseq not found at $pandatest and not on Mac OS. cannot continue"
+			echo ""
+			exit 1
 		fi
+	else
+		echo "pandaseq found at $pandatest"
 	fi
+else
+	echo "pandaseq found at $pandatest"
 fi
 
-echo $pandatest
-
-echo $OS
-
-# Parse arguments and set global variables
-while getopts hi:o:p:q:T:e:ra option
-do
-case "${option}"
-in
-
-h) helpm="TRUE"
-	printf "%`tput cols`s"|tr ' ' '#'
-	echo "$usage"
-	printf "%`tput cols`s"|tr ' ' '#'
-	exit 1;;
-i) inopt=${OPTARG};;
-o) outopt=${OPTARG};;
-p) fwd=${OPTARG};;
-q) rev=${OPTARG};;
-T) threads=${OPTARG};;
-e) extra=${OPTARG};;
-r) slanes="TRUE";;
-a) prot="TRUE";;
-
-esac
-done
+echo "$OS operating system detected."
 
 bold=$(tput bold)
 normal=$(tput sgr0)
@@ -460,7 +479,7 @@ if [ -z $prot ];
 
 	# Translate into aa
 	echo "Translating ${file//_counts.txt} DNA to peptides..."	
- 	python3 "$SCRIPT_DIR/translator.py" $file
+ 	python3 "$SCRIPT_DIR/translator.py" "$file" "$codelib"
 
 	# Print in new file every line except the first 3 (2 with the number of molecules and sequences and town empty lines):
 	tail -n +4 ${file//_counts.txt}'_counts.aa.dup.txt' | sort > newfile.txt;

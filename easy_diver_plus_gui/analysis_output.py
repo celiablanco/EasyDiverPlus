@@ -68,7 +68,6 @@ import os
 import glob
 from collections import Counter
 from typing import Optional
-from tqdm import tqdm
 import pandas as pd
 
 def get_first_matching_file(
@@ -604,9 +603,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
     rounds_data = pd.read_csv(f"{output_dir}/enrichment_analysis_file_sorting_logic.csv")
 
     # Set directory path
-    for ind, counts_type in enumerate(
-        tqdm(['counts_nt','counts_aa'], desc = 'Processing each counts output folder')
-        ):
+    for ind, counts_type in enumerate(['counts_nt','counts_aa']):
         counts_dir = os.path.join(output_dir, counts_type)
         if not os.path.isdir(counts_dir):
             continue
@@ -623,10 +620,7 @@ def find_enrichments(output_dir: str, precision_input: int = 6) -> bool:
         # Check if there are any negative controls
         neg_files_exist = any(rounds_data['file_type'] == 'negative')
         pre_files_exist = any(rounds_data['file_type'] == 'pre')
-        for i in tqdm(
-            range(1, max_round + 1),
-            desc = f"Processing each round for the {counts_type} enrichment analysis", leave = False
-            ):
+        for i in range(1, max_round + 1):
             post_file = get_first_matching_file(counts_dir, rounds_data, 'post', i)
             neg_file = get_first_matching_file(counts_dir, rounds_data, 'negative', i)
             pre_file = get_first_matching_file(counts_dir, rounds_data, 'pre', i)

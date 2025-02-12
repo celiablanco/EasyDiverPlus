@@ -48,27 +48,13 @@ def path_constructor(path: str, parent_path: str) -> str:
 
 
 
-class QTextEditStreamWithLog:
-    """ A stream that writes to both a QTextEdit UI and a log file """
-    def __init__(self, text_edit, log_file_path):
+class QTextEditStream:
+    def __init__(self, text_edit: QTextEdit):
         self.text_edit = text_edit
-        self.log_file = open(log_file_path, "a", encoding="utf-8")
-
     def write(self, message):
-        if message.strip():  # Avoid empty lines
-            # Write to QTextEdit
-            self.text_edit.append(message.strip())
-            self.text_edit.ensureCursorVisible()
-            QApplication.processEvents()
-
-            # Write to log file
-            self.log_file.write(message)
-            self.log_file.flush()  # Ensure real-time writing
+        self.text_edit.append(message)
     def flush(self):
-        self.log_file.flush()
-
-    def close(self):
-        self.log_file.close()
+        pass  # Not needed for this implementation
 
 class EasyDiver(QWidget):
     def __init__(self, parent = None):
@@ -506,81 +492,70 @@ class EasyDiver(QWidget):
             # Execute the script
             start_time = datetime.now()
             try:
-                with open(log_file_path, "a", encoding="utf-8") as log_file:
-                    res = subprocess.Popen(
-                        run_script,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        universal_newlines=True,
-                        bufsize=1,  # Line buffering for real-time output
-                        shell=False
-                    )
+                res = subprocess.Popen(
+                    run_script,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True,
+                    shell=False
+                )
 
-                    while True:
-                        output = res.stdout.readline()
-                        error_output = res.stderr.readline()
+                while True:
+                    output = res.stdout.readline()
+                    error_output = res.stderr.readline()
 
-                        if output == "" and error_output == "" and res.poll() is not None:
-                            break
-                        
-                        if output:
-                            log_file.write(output)  # Log stdout
-                            log_file.flush()  # Ensure real-time logging
-                            self.output_text.append(output.strip())
-                            self.output_text.ensureCursorVisible()
-                            QApplication.processEvents()
-                            print(output, end="")  # Print to console as well
+                    if output == "" and error_output == "" and res.poll() is not None:
+                        break
+                    
+                    if output:
+                        self.output_text.append(output.strip())
+                        self.output_text.ensureCursorVisible()
+                        QApplication.processEvents()
+                        print(output, end="")  # Print to console as well
 
-                        if error_output:
-                            log_file.write(error_output)  # Log stderr
-                            log_file.flush()  # Ensure real-time logging
-                            self.output_text.append(f"Error: {error_output.strip()}")
-                            self.output_text.ensureCursorVisible()
-                            QApplication.processEvents()
-                            print(error_output, end="")  # Print to console as well
+                    if error_output:
+                        self.output_text.append(f"Error: {error_output.strip()}")
+                        self.output_text.ensureCursorVisible()
+                        QApplication.processEvents()
+                        print(error_output, end="")  # Print to console as well
 
-                    # Handle process completion
-                    res.wait()
+                # Handle process completion
+                res.wait()
             except Exception as e:
-                with open(log_file_path, "a", encoding="utf-8") as log_file:
-                    log_file.write(f"Exception: {str(e)}\n")
-                    log_file.flush()
-
                 self.output_text.append(f"Error: {str(e)}")
                 self.output_text.ensureCursorVisible()
                 QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+            finally:
+                with open(log_file_path, "w", encoding="utf-8") as log_file:
+                    log_file.write(self.output_text)
+                    log_file.flush()
 
             if res.returncode == 0:
                 self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
             else:
                 error_message = res.stderr.read()
-                log_file.write(f"Error: {error_message}\n")
-                log_file.flush()
                 self.output_text.append(f"Error: {error_message.strip()}")
                 self.output_text.ensureCursorVisible()
                 QMessageBox.critical(self, "Error", f"An error occurred: {error_message.strip()}")  
 
             self.run_ls_and_log_simple(output_directory=self.output_dir)
             end_time = datetime.now()
-            difference = start_time - end_time  # timedelta object
+            difference = end_time - start_time   # timedelta object
 
             # Convert to hours, minutes, seconds
             total_seconds = int(difference.total_seconds())
             hours = total_seconds // 3600
             minutes = (total_seconds % 3600) // 60
             seconds = total_seconds % 60
-            with open(log_file_path, "a", encoding="utf-8") as log_file:
+            with open(log_file_path, "w", encoding="utf-8") as log_file:
+                log_file.write(self.output_text)
                 log_file.write(f"Total Elapsed Time: {hours:02}:{minutes:02}:{seconds:02}\n")
                 log_file.flush()
 
     def run_enrichment_analysis_steps(self, output_dir, precision):
-        # Timestamped log file
-        log_file_path = f"{output_dir}/___enrichment_analysis_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"  
-        log_stream = QTextEditStreamWithLog(self.output_text, log_file_path)
-
         original_stdout = sys.stdout  # Save the original stdout
         original_stderr = sys.stderr  # Save the original stderr
-
+        log_stream = QTextEditStream(self.output_text)
         try:
             sys.stdout = log_stream  # Redirect stdout to QTextEdit and log file
             sys.stderr = log_stream  # Redirect stderr as well
@@ -597,7 +572,6 @@ class EasyDiver(QWidget):
             # Restore original stdout and stderr
             sys.stdout = original_stdout
             sys.stderr = original_stderr
-            log_stream.close()  # Close log file properly
 
     def on_calculate_finish(self, returncode, output_dir):
         if returncode == 0:

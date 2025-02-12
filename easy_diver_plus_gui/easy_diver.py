@@ -502,9 +502,8 @@ class EasyDiver(QWidget):
 
                 while True:
                     output = res.stdout.readline()
-                    error_output = res.stderr.readline()
 
-                    if output == "" and error_output == "" and res.poll() is not None:
+                    if output == "" and res.poll() is not None:
                         break
                     
                     if output:
@@ -512,15 +511,6 @@ class EasyDiver(QWidget):
                         self.output_text.ensureCursorVisible()
                         QApplication.processEvents()
                         print(output, end="")  # Print to console as well
-
-                    if error_output:
-                        self.output_text.append(f"Error: {error_output.strip()}")
-                        self.output_text.ensureCursorVisible()
-                        QApplication.processEvents()
-                        print(error_output, end="")  # Print to console as well
-
-                # Handle process completion
-                res.wait()
             except Exception as e:
                 self.output_text.append(f"Error: {str(e)}")
                 self.output_text.ensureCursorVisible()

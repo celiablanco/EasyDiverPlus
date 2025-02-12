@@ -3,6 +3,7 @@ import subprocess
 import sys
 import os
 import time
+from datetime import datetime
 import json
 from PyQt5.QtWidgets import (
     QApplication,
@@ -503,6 +504,7 @@ class EasyDiver(QWidget):
             self.output_text.append(run_script)
             run_script = run_script if os.name == 'nt' else run_script.split(" ")
             # Execute the script
+            start_time = datetime.now()
             try:
                 with open(log_file_path, "a", encoding="utf-8") as log_file:
                     res = subprocess.Popen(
@@ -558,7 +560,18 @@ class EasyDiver(QWidget):
                 self.output_text.ensureCursorVisible()
                 QMessageBox.critical(self, "Error", f"An error occurred: {error_message.strip()}")  
 
-            self.run_ls_and_log_simple(output_directory=self.output_dir)              
+            self.run_ls_and_log_simple(output_directory=self.output_dir)
+            end_time = datetime.now()
+            difference = start_time - end_time  # timedelta object
+
+            # Convert to hours, minutes, seconds
+            total_seconds = int(difference.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            seconds = total_seconds % 60
+            with open(log_file_path, "a", encoding="utf-8") as log_file:
+                log_file.write(f"Total Elapsed Time: {hours:02}:{minutes:02}:{seconds:02}\n")
+                log_file.flush()
 
     def run_enrichment_analysis_steps(self, output_dir, precision):
         # Timestamped log file

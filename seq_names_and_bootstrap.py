@@ -68,7 +68,7 @@ def unique_sequence_name_generator(row: pd.Series, sequence_dict: dict, prefix: 
     if row['Sequence'] in sequence_dict.keys():
         return sequence_dict[row['Sequence']]
 
-    encoded_name = base_encode(len(sequence_dict) + 1, prefix)
+    encoded_name = base_encode(len(sequence_dict), prefix)
     sequence_dict[row['Sequence']] = encoded_name
     return encoded_name
 

@@ -13,6 +13,7 @@ a = Analysis(
     datas=[
         ('easydiver.sh', '.'),
         ('translator.py', '.'),
+        ('requirements.txt','.'),
         ('seq_names_and_bootstrap.py','.'),
         ('easy_diver_plus_gui/assets/question_icon.png', 'easy_diver_plus_gui/assets/'),
         ('easy_diver_plus_gui/easy_diver.py', 'easy_diver_plus_gui/'),

@@ -79,7 +79,7 @@ esac
 
 # Test to verify pandaseq is installed and can be found
 echo "Verifying pandaseq exists!"
-if [ -z $local_pandaseq ];
+if [ -z $local_pandaseq ] && [ "$OS" != "Windows" ];
 then
 	echo "checking next location - $SCRIPT_DIR/pandaseq"
 	echo ""

@@ -30,6 +30,11 @@ else:
 
 lock_file = None
 
+if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+
 def release_lockfile(lockfile):
     global lock_file
     if lock_file:

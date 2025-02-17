@@ -7,6 +7,11 @@ from PyQt5.QtCore import Qt, QEvent # type: ignore # pylint: disable=import-erro
 from directory_edit import ClickableDirectoryEdit
 from graphs_generator import main as gg_main
 
+if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+
 class Graphs_Window(QWidget):
     def __init__(self, parent = None, rounds_path = None):
         super().__init__(parent)

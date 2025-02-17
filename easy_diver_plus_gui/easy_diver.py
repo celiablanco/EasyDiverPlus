@@ -29,6 +29,11 @@ from file_sorter import SortingApp
 from graph_interface import Graphs_Window
 from analysis_output import find_enrichments as mod_counts_main
 
+if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+
 def path_constructor(path: str, parent_path: str) -> str:
 
     # Determine if we are running in a bundled mode

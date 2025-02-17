@@ -23,6 +23,11 @@ from PyQt5.QtCore import Qt
 from graph_interface import Graphs_Window
 from easy_diver import EasyDiver
 
+if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+
 if os.name == 'nt':
     import msvcrt
 else:

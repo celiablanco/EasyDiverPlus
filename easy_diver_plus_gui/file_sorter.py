@@ -9,6 +9,11 @@ from PyQt5.QtWidgets import ( # type: ignore # pylint: disable=import-error
 from PyQt5.QtCore import Qt, QEvent # type: ignore # pylint: disable=import-error
 from PyQt5.QtGui import QCloseEvent # type: ignore # pylint: disable=import-error
 
+if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+
 
 class SortingApp(QWidget):
     """

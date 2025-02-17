@@ -1,10 +1,11 @@
-# This is EasyDIVER, a pipeline for Easy pre-processing and Dereplication of In Vitro Evolution Reads
-
-# by Sam Verbanic and Celia Blanco
-# contact: samuel.verbanic@lifesci.ucsb.edu or cblanco@chem.ucsb.edu
+# EasyDIVER+
+# by Celia Blanco
+# contact: celia.blanco@bmsis.org
 # Dependencies:
 	# pandaseq
 	# python
+echo "Command run: $0 $*"
+logfilename="log_output_$(date +"%Y_%m_%d_%H_%M_%S").txt"
 progress=$((0))
 echo "(Approx.) Progress: $progress%"
 usage="USAGE: bash easydiver.sh -i [-o -p -q -r -T -h -a -e]
@@ -22,7 +23,6 @@ where:
 	-e extra flags for PANDASeq (use quotes, e.g. \"-L 50\")
 	-h prints this friendly message"
 
-local_pandaseq=""
 codelib="Standard"
 # Parse arguments and set global variables
 while getopts hi:o:p:q:T:e:L:c:ra option
@@ -49,6 +49,15 @@ c) codelib="${OPTARG}";;
 esac
 done
 
+for ((i = 1; i <= $#; i++)); do
+    if [[ ${!i} == "-e" ]]; then
+        j=$((i+1))
+        extra="${!j}"
+    fi
+done
+
+echo "inputs provided" "$inopt" "$outopt" "$fwd" "$rev" "$threads" "$extra" "$local_pandaseq" "$codelib" "$slanes" "$prot"
+
 # Record start time in seconds to calculate run time at the end
 start=`date +%s`
 
@@ -70,7 +79,7 @@ esac
 
 # Test to verify pandaseq is installed and can be found
 echo "Verifying pandaseq exists!"
-if [ -z local_pandaseq ];
+if [ -z $local_pandaseq ];
 then
 	echo "checking next location - $SCRIPT_DIR/pandaseq"
 	echo ""
@@ -81,7 +90,7 @@ else
 fi
 
 if [ -z "$pandatest" ]; then
-	if [ -z local_pandaseq ];
+	if [ -z $local_pandaseq ];
 	then
 		echo ""
 	else
@@ -119,24 +128,10 @@ echo "$OS operating system detected."
 bold=$(tput bold)
 normal=$(tput sgr0)
 
-if [ -z $helpm ];
-	then
-		banner()
-		{
-		  echo "+-------------------------------------------------------------------------------------------------+"
-		  printf "| %-95s |\n" "`date`"
-		  echo "|                                                                                                 |"
-		  printf "|${bold} %-95s ${normal}|\n" "$@"
-		  echo "+-------------------------------------------------------------------------------------------------+"
-		}
-		banner "Welcome to the pipeline for Easy pre-processing and Dereplication of In Vitro Evolution Reads"
-
-fi
-
 # Argument report 
 # Check arguments, print, exit if necessary w/ message
 
-if [ -z "$inopt" ] && [ -z "$outopt" ] && [ -z $fwd ] && [ -z $rev ] && [ -z $threads ] && [ -z $extra ] && [ -z $prot ] && [ -z $slanes ];
+if [ -z "$inopt" ] && [ -z "$outopt" ] && [ -z $fwd ] && [ -z $rev ] && [ -z $threads ] && [ -z "$extra" ] && [ -z $prot ] && [ -z $slanes ];
 	then
 		echo ""
 		echo "${bold}NO FLAGS PROVIDED. ENTERING PROMPTED INPUT VERSION${normal}"
@@ -157,7 +152,7 @@ if [ -z "$inopt" ] && [ -z "$outopt" ] && [ -z $fwd ] && [ -z $rev ] && [ -z $th
 		read threads
 		echo ""
 		echo "${bold}Extra flags for PANDAseq (default value “-l 1 -d rbfkms“ ; see manual):${normal}"
-		read extras
+		read extra
 		echo ""
 		echo "${bold}Perform translation into amino acids? (yes / no)${normal}"
 		read prot
@@ -216,8 +211,8 @@ if [ -z "$outopt" ];
 			outdir=$fastqs/pipeline_output
 			mkdir $outdir
 			echo "-----No output directory supplied. New output directory is: $outdir"
-			echo "-----Input directory path: $fastqs" > $outdir/log.txt
-			echo "-----Output directory path: $outdir" >> $outdir/log.txt
+			echo "-----Input directory path: $fastqs" > $outdir/$logfilename
+			echo "-----Output directory path: $outdir" >> $outdir/$logfilename
         else
 			# define output variable with correct path name
 			if [ "$OS" == "Windows" ]; then
@@ -227,93 +222,94 @@ if [ -z "$outopt" ];
 			cd $outopt
 			outdir=$(pwd)
 			echo "-----Output directory path: $outdir"
-			echo "-----Input directory path: $fastqs" > $outdir/log.txt
-			echo "-----Output directory path: $outdir" >> $outdir/log.txt
+			echo "-----Input directory path: $fastqs" > $outdir/$logfilename
+			echo "-----Output directory path: $outdir" >> $outdir/$logfilename
 fi
 
 if [ -z $fwd ];
     then
 		echo "-----No forward primer supplied. Extraction will be skipped."
-		echo "-----No forward primer supplied." >> $outdir/log.txt
+		echo "-----No forward primer supplied." >> $outdir/$logfilename
 		pval=""
 	else
 		echo "-----Forward Primer: $fwd"
-		echo "-----Forward Primer: $fwd" >> $outdir/log.txt
+		echo "-----Forward Primer: $fwd" >> $outdir/$logfilename
 		pval="-p $fwd"
 fi
 
 if [ -z $rev ];
 	then
 		echo "-----No reverse primer supplied. Extraction will be skipped."
-		echo "-----No reverse primer supplied." >> $outdir/log.txt
+		echo "-----No reverse primer supplied." >> $outdir/$logfilename
 		qval=""
 	else
 		echo "-----Reverse Primer: $rev"
-		echo "-----Reverse Primer: $rev" >> $outdir/log.txt
+		echo "-----Reverse Primer: $rev" >> $outdir/$logfilename
 		qval="-q $rev"
 fi
 
 if [ -z $threads ];
 	then
 		# echo "-----Number of threads not supplied. Proceeding with 1 thread, this could take a while ..."
-		# echo "-----Number of threads = 1"  >> $outdir/log.txt
+		# echo "-----Number of threads = 1"  >> $outdir/$logfilename
 
 		threads=1
 	else
 		echo "-----Number of threads = $threads"
-		echo "-----Number of threads = $threads" >> $outdir/log.txt
+		echo "-----Number of threads = $threads" >> $outdir/$logfilename
 fi
 
-if [ -z "$extra" ];
+if [ -z "$extra" ]; 
 	then
 		echo "-----No additional PANDAseq flags supplied."
-		echo "-----No additional PANDAseq flags."  >> $outdir/log.txt
-		extra=""
-
+		echo "-----No additional PANDAseq flags." >> "$outdir/$logfilename"
 	else
 		echo "-----Additional PANDAseq flags = $extra"
-		echo "-----Additional PANDAseq flags = $extra" >> $outdir/log.txt
-
+		echo "-----Additional PANDAseq flags = $extra" >> "$outdir/$logfilename"
 fi
 
-if [[ $extra == *"t"* ]]
-	then
-  		tval=""
-  	else
-  		tval="-t 0.6"
+# Default values
+tval="-t 0.6"
+lval="-l 1"
+dval="-d rbfkms"
+
+# Check if specific flags exist in the string
+if [[ "$extra" == *"-t"* ]]; then
+    tval=""
 fi
 
-if [[ $extra == *"l"* ]]
-	then
-  		lval=""
-  	else
-  		lval="-l 1"
+if [[ "$extra" == *"-l"* ]]; then
+    lval=""
 fi
 
-if [[ $extra == *"d"* ]]
-	then
-  		dval=""
-  	else
-  		dval="-d rbfkms"
+if [[ "$extra" == *"-d"* ]]; then
+    dval=""
 fi
-
 
 if [ -z $prot ];
 	then
 		echo "-----Translation off."
-		echo "-----Translation off." >> $outdir/log.txt
+		echo "-----Translation off." >> $outdir/$logfilename
 	else
 		echo "-----Translation needed."
-		echo "-----Translation needed." >> $outdir/log.txt
+		echo "-----Translation needed." >> $outdir/$logfilename
+fi
+
+if [ -z $codelib ];
+	then
+		echo ""
+	else
+		echo "-----Genetic code used for translation: $codelib"
+		echo "-----Genetic code used for translation: $codelib" >> $outdir/$logfilename
 fi
 
 if [ -z $slanes ];
 	then
 		echo "-----Individual lane outputs will be suppressed."
-		echo "-----Individual lane outputs suppressed." >> $outdir/log.txt
+		echo "-----Individual lane outputs suppressed." >> $outdir/$logfilename
 	else
 		echo "-----Individual lane outputs will be retained."
-		echo "-----Individual lane outputs retained." >> $outdir/log.txt
+		echo "-----Individual lane outputs retained." >> $outdir/$logfilename
 fi
 
 echo ""
@@ -360,10 +356,11 @@ do
 	# Join reads & extract insert
 	echo "Joining $lbase reads & extracting primer..."
 	joined_fastq=$fqdir/$lbase.joined.fastq
+	extra=${extra//\"/}
 
 	"$pandatest" -f "$R1" -r "$R2" -F \
 	$pval $qval \
-	-w "$joined_fastq" $tval $extra $lval $dval 2>/dev/null
+	-w "$joined_fastq" $tval $lval $dval $extra 2>/dev/null
 
 	# Convert to fasta
 	echo "Converting joined $lbase FASTQ to FASTA..."
@@ -542,7 +539,7 @@ if [ -z $prot ];
 
 		cd ..
 
-		echo ""  >> $outdir/log.txt
+		echo ""  >> $outdir/$logfilename
 		echo "sample" "fastq_R1" "fastq_R2" "unique_nt" "total_nt" "recovered_nt(%)"| column -t > $outdir/log_temp1.txt
 
 		for R1 in *R1*
@@ -561,7 +558,7 @@ if [ -z $prot ];
 		done
 
 		awk '{ printf "%s %.2f%%\n", $0, 100*$5/$2 }' $outdir/log_temp2.txt | column -t >> $outdir/log_temp1.txt
-		awk  '{print }' $outdir/log_temp1.txt | column -t >> $outdir/log.txt
+		awk  '{print }' $outdir/log_temp1.txt | column -t >> $outdir/$logfilename
 
 		rm $outdir/log_temp1.txt
 		rm $outdir/log_temp2.txt
@@ -573,7 +570,7 @@ if [ -z $prot ];
 
 		cd ..
 
-		echo ""  >> $outdir/log.txt
+		echo ""  >> $outdir/$logfilename
 		echo "sample" "fastq_R1" "fastq_R2" "unique_nt" "total_nt" "recovered_nt(%)" "unique_aa" "total_aa" "recovered_aa(%)"| column -t > $outdir/log_temp1.txt
 
 		for R1 in *R1*
@@ -596,7 +593,7 @@ if [ -z $prot ];
 		done
 
 		awk '{ printf "%s %s %s %s %s %.2f%% %s %s %.2f%%\n", $1, $2, $3, $4, $5, 100*$5/$2, $6, $7, 100*$7/$2 }' $outdir/log_temp2.txt | column -t >> $outdir/log_temp1.txt
-		awk  '{print }' $outdir/log_temp1.txt | column -t >> $outdir/log.txt
+		awk  '{print }' $outdir/log_temp1.txt | column -t >> $outdir/$logfilename
 
 		rm $outdir/log_temp1.txt
 		rm $outdir/log_temp2.txt

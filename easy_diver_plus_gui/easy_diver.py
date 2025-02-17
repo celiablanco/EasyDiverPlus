@@ -110,6 +110,10 @@ class EasyDiver(QWidget):
         optional_label = QLabel("OPTIONAL")
         self.optional_layout.addWidget(optional_label)
 
+        self.optional_layout_top = QVBoxLayout()
+        self.optional_layout_bottom = QVBoxLayout()
+        self.optional_layout_sorter = QVBoxLayout()
+
         # Option -o
         self.output_label = QLabel("Output Directory Path:")
         self.output_dir_edit = QLineEdit()
@@ -125,7 +129,24 @@ class EasyDiver(QWidget):
         output_layout.addWidget(self.output_label)
         output_layout.addWidget(self.output_dir_edit)
         output_layout.addWidget(output_tooltip_icon)
-        self.optional_layout.addLayout(output_layout)
+        self.optional_layout_top.addLayout(output_layout)
+
+        # Option -a
+        self.skip_processing = QCheckBox("Skip Processing (enrichment analysis only)")
+        skip_processing_icon = QLabel()
+        skip_processing_icon.setPixmap(
+            QPixmap(question_path).scaled(20, 20)
+        )
+        skip_processing_icon.setToolTip(
+            "Check this box to skip processing, use this option only if you have already processed the data and want to only run enrichment analysis."
+        )
+
+        skip_processing_layout = QHBoxLayout()
+        skip_processing_layout.addWidget(self.skip_processing)
+        skip_processing_layout.addStretch()
+        skip_processing_layout.addWidget(skip_processing_icon)
+        self.optional_layout_top.addLayout(skip_processing_layout)
+        self.skip_processing.stateChanged.connect(self.toggle_only_enrichment_option)
 
         # Option -p
         self.forward_primer_label = QLabel("Forward Primer Sequence Extraction:")
@@ -142,7 +163,7 @@ class EasyDiver(QWidget):
         forward_primer_layout.addWidget(self.forward_primer_label)
         forward_primer_layout.addWidget(self.forward_primer_edit)
         forward_primer_layout.addWidget(forward_primer_tooltip_icon)
-        self.optional_layout.addLayout(forward_primer_layout)
+        self.optional_layout_bottom.addLayout(forward_primer_layout)
 
         # Option -q
         self.reverse_primer_label = QLabel("Reverse Primer Sequence Extraction:")
@@ -159,7 +180,7 @@ class EasyDiver(QWidget):
         reverse_primer_layout.addWidget(self.reverse_primer_label)
         reverse_primer_layout.addWidget(self.reverse_primer_edit)
         reverse_primer_layout.addWidget(reverse_primer_tooltip_icon)
-        self.optional_layout.addLayout(reverse_primer_layout)
+        self.optional_layout_bottom.addLayout(reverse_primer_layout)
 
         # Option -e
         self.extra_flags_label = QLabel(
@@ -178,23 +199,7 @@ class EasyDiver(QWidget):
         extra_flags_layout.addWidget(self.extra_flags_label)
         extra_flags_layout.addWidget(self.extra_flags_edit)
         extra_flags_layout.addWidget(extra_flags_tooltip_icon)
-        self.optional_layout.addLayout(extra_flags_layout)
-        
-        # Option -a
-        self.skip_processing = QCheckBox("Skip Processing (enrichment analysis only)")
-        skip_processing_icon = QLabel()
-        skip_processing_icon.setPixmap(
-            QPixmap(question_path).scaled(20, 20)
-        )
-        skip_processing_icon.setToolTip(
-            "Check this box to skip processing, use this option only if you have already processed the data and want to only run enrichment analysis."
-        )
-
-        skip_processing_layout = QHBoxLayout()
-        skip_processing_layout.addWidget(self.skip_processing)
-        skip_processing_layout.addStretch()
-        skip_processing_layout.addWidget(skip_processing_icon)
-        self.optional_layout.addLayout(skip_processing_layout)
+        self.optional_layout_bottom.addLayout(extra_flags_layout)
 
         # Option -a
         self.translate_check = QCheckBox("Translate to Amino Acids")
@@ -211,14 +216,10 @@ class EasyDiver(QWidget):
         translate_layout.addWidget(self.translate_check)
         translate_layout.addStretch()
         translate_layout.addWidget(translate_tooltip_icon)
-        self.optional_layout.addLayout(translate_layout)
-
-
-        # Get the absolute path of the script directory
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        self.optional_layout_bottom.addLayout(translate_layout)
 
         # Construct the full path to the JSON file
-        json_file_path = os.path.join(script_dir,"easy_diver_plus_gui","code_libs.json")
+        json_file_path = path_constructor("code_libs.json","easy_diver_plus_gui/")
 
         # Load JSON data
         with open(json_file_path, "r", encoding="utf-8") as file:
@@ -255,7 +256,7 @@ class EasyDiver(QWidget):
         self.gen_code_dropdown_layout.addStretch()
         self.gen_code_dropdown_layout.addWidget(self.gen_code_dropdown_tooltip_icon)
         self.translation_layout.addLayout(self.gen_code_dropdown_layout)
-        self.optional_layout.addLayout(self.translation_layout)
+        self.optional_layout_bottom.addLayout(self.translation_layout)
         self.toggle_layout(self.translation_layout, False)
 
         # Option -r
@@ -272,7 +273,7 @@ class EasyDiver(QWidget):
         retain_layout.addWidget(self.retain_check)
         retain_layout.addStretch()
         retain_layout.addWidget(retain_tooltip_icon)
-        self.optional_layout.addLayout(retain_layout)
+        self.optional_layout_bottom.addLayout(retain_layout)
 
         # Use Packaged pandaseq
         self.local_pandaseq_check = QCheckBox("Use Local PANDASeq (Verify you have working version first!)")
@@ -288,7 +289,7 @@ class EasyDiver(QWidget):
         local_pandaseq_check_layout.addWidget(self.local_pandaseq_check)
         local_pandaseq_check_layout.addStretch()
         local_pandaseq_check_layout.addWidget(local_pandaseq_check_tooltip_icon)
-        self.optional_layout.addLayout(local_pandaseq_check_layout)
+        self.optional_layout_bottom.addLayout(local_pandaseq_check_layout)
 
         # Option for enrichment_analysis
         self.run_enrichment_analysis = QCheckBox("Run Enrichment Analysis for Consecutive Rounds")
@@ -305,7 +306,7 @@ class EasyDiver(QWidget):
         enrichment_analysis_layout.addWidget(self.run_enrichment_analysis)
         enrichment_analysis_layout.addStretch()
         enrichment_analysis_layout.addWidget(enrichment_analysis_tooltip_icon)
-        self.optional_layout.addLayout(enrichment_analysis_layout)
+        self.optional_layout_sorter.addLayout(enrichment_analysis_layout)
 
         self.enrichment_layout = QVBoxLayout()
         # Additional option for precision
@@ -332,7 +333,7 @@ class EasyDiver(QWidget):
         self.interaction_button = QPushButton("REQUIRED: Sort files into rounds and types!")
         self.interaction_button.clicked.connect(self.open_sorting_window)
         self.enrichment_layout.addWidget(self.interaction_button)
-        self.optional_layout.addLayout(self.enrichment_layout)
+        self.optional_layout_sorter.addLayout(self.enrichment_layout)
         # Hide the enrichment options initially
         self.toggle_layout(self.enrichment_layout, False)
 
@@ -351,6 +352,9 @@ class EasyDiver(QWidget):
         # generate_plots_layout.addWidget(generate_plots_tooltip_icon)
         # self.optional_layout.addLayout(generate_plots_layout)
 
+        self.optional_layout.addLayout(self.optional_layout_top)
+        self.optional_layout.addLayout(self.optional_layout_bottom)
+        self.optional_layout.addLayout(self.optional_layout_sorter)
         self.optional_widget.setLayout(self.optional_layout)
         splitter.addWidget(self.optional_widget)
         self.toggle_layout(self.optional_layout, False)
@@ -402,6 +406,25 @@ class EasyDiver(QWidget):
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
 
+    def toggle_only_enrichment_option(self, state):
+        if state == Qt.Checked:
+            self.toggle_layout(self.optional_layout_bottom, False)
+            self.toggle_layout(self.optional_layout_sorter, True)
+            self.precision_label.hide()
+            self.precision_input.hide()
+            self.precision_input_tooltip_icon.hide()
+            self.interaction_button.hide()
+            self.submit_button.setDisabled(False)
+        else:
+            self.toggle_layout(self.optional_layout_bottom, True)
+            self.toggle_layout(self.translation_layout, False)
+            self.toggle_layout(self.optional_layout_sorter, True)
+            self.precision_label.hide()
+            self.precision_input.hide()
+            self.precision_input_tooltip_icon.hide()
+            self.interaction_button.hide()
+            self.submit_button.setDisabled(False)
+
     def toggle_precision_option(self, state):
         if state == Qt.Checked:
             self.precision_label.show()
@@ -419,10 +442,12 @@ class EasyDiver(QWidget):
     
     def toggle_gen_code_selection(self, state):
         if state == Qt.Checked:
+            self.toggle_layout(self.translation_layout, True)
             self.gen_code_dropdown_label.show()
             self.gen_code_dropdown.show()
             self.gen_code_dropdown_tooltip_icon.show()
         else:
+            self.toggle_layout(self.translation_layout, False)
             self.gen_code_dropdown_label.hide()
             self.gen_code_dropdown.hide()
             self.gen_code_dropdown_tooltip_icon.hide()
@@ -438,7 +463,11 @@ class EasyDiver(QWidget):
             self.input_dir_edit.setText(directory)
             self.submit_button.setDisabled(False)
             self.toggle_layout(self.optional_layout, True)
+            self.toggle_layout(self.optional_layout_top, True)
+            self.toggle_layout(self.optional_layout_bottom, True)
+            self.toggle_layout(self.optional_layout_sorter, True)
             self.toggle_layout(self.enrichment_layout, False)
+            self.toggle_layout(self.translation_layout, False)
             self.run_enrichment_analysis.setChecked(False)
 
     def submit(self):
@@ -446,51 +475,68 @@ class EasyDiver(QWidget):
             self.output_dir = f"{self.input_dir_edit.text()}/{self.output_dir_edit.text()}"
         else:
             self.output_dir = f"{self.input_dir_edit.text()}/pipeline_output"
-        log_file_path = f"{self.output_dir}/__easy_diver_plus_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
+        log_file_path = f"{self.output_dir}/log_easydiverplus_{time.strftime('%Y_%m_%d_%H_%M_%S')}.log"
+        start_time = datetime.now()
+        self.output_text.append(f"""Options selected:
+• Output Directory Name: {self.output_dir_edit.text()}
+• Resolved Output Directory Full Path: {self.output_dir}
+• Skip Processing (enrichment analysis only): {self.skip_processing.isChecked()}
+• Forward Primer: {self.forward_primer_edit.text()}
+• Reverse Primer: {self.reverse_primer_edit.text()}
+• Extra Flags for PANDASeq:  {self.extra_flags_edit.text() if self.extra_flags_edit.text() is None else "NONE"}
+• Translate to Amino Acids:  {self.translate_check.isChecked()}
+• Genetic Code for Translation: {self.gen_code_dropdown.currentText()}
+• Retain Individual Lane Outputs: {self.retain_check.isChecked()}
+• Use Local PANDASeq: {self.local_pandaseq_check.isChecked()}
+• Run Enrichment Analysis for Consecutive Rounds: {self.run_enrichment_analysis.isChecked()}
+• Enrichment Analysis Output Decimal Precision: {self.precision_input.value()}
+""")
+        self.output_text.ensureCursorVisible()
         if self.skip_processing.isChecked():
             self.run_enrichment_analysis_steps(self.output_dir, self.precision_input.value())
         else:
+            run_script = []
             easy_diver_path = path_constructor("easydiver.sh", ".")
             if os.name == 'nt':
                 os.chmod(easy_diver_path, 0o755)
                 easy_diver_path_wsl = '/mnt/' + easy_diver_path.split(':\\')[0].lower() + "/" + easy_diver_path.split(':\\')[1].replace('\\','/')
-                run_script = f"wsl --exec bash {easy_diver_path_wsl} "
+                run_script.extend(["wsl", "--exec", "bash", easy_diver_path_wsl])
             else:
-                run_script = f"bash {easy_diver_path} "
+                run_script.extend(["bash",easy_diver_path])
             if not self.input_dir_edit.text():
                 QMessageBox.critical(self, "Error", "Please enter the required input.")
                 return
             input_no_spaces = self.input_dir_edit.text().replace(' ','\\ ')
-            run_script += f"-i {input_no_spaces} "
+            run_script.extend(["-i", input_no_spaces])
 
             if self.output_dir_edit.text():
                 output_no_spaces = self.output_dir_edit.text().replace(' ','\\ ')
-                run_script += f"-o {output_no_spaces} "
+                run_script.extend(["-o", output_no_spaces])
 
             if self.forward_primer_edit.text():
-                run_script += f"-p {self.forward_primer_edit.text()} "
+                run_script.extend(["-p", self.forward_primer_edit.text()])
 
             if self.reverse_primer_edit.text():
-                run_script += f"-q {self.reverse_primer_edit.text()} "
+                run_script.extend(["-q", self.reverse_primer_edit.text()])
 
             if self.translate_check.isChecked():
-                run_script += "-a "
+                run_script.append("-a")
 
             if self.retain_check.isChecked():
-                run_script += "-r "
+                run_script.append("-r")
 
             if self.local_pandaseq_check.isChecked():
-                run_script += "-L "
+                run_script.append("-L")
 
             if self.gen_code_dropdown.currentText() != "":
-                run_script += f'-c "{self.gen_code_dropdown.currentText()}"'
+                run_script.extend(["-c", self.gen_code_dropdown.currentText()])
             if self.extra_flags_edit.text():
-                run_script += f"-e {self.extra_flags_edit.text()} "
+                run_script.extend(["-e", self.extra_flags_edit.text()])
 
-            self.output_text.append(run_script)
-            run_script = run_script if os.name == 'nt' else run_script.split(" ")
+            self.output_text.append(" ".join(run_script))
+            if os.name == 'nt':
+                run_script = " ".join(run_script)
             # Execute the script
-            start_time = datetime.now()
             try:
                 res = subprocess.Popen(
                     run_script,
@@ -516,8 +562,9 @@ class EasyDiver(QWidget):
                 self.output_text.ensureCursorVisible()
                 QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
             finally:
+                os.makedirs(self.output_dir, exist_ok = True)
                 with open(log_file_path, "w", encoding="utf-8") as log_file:
-                    log_file.write(self.output_text)
+                    log_file.write(self.output_text.toPlainText())
                     log_file.flush()
 
             if res.returncode == 0:
@@ -526,21 +573,22 @@ class EasyDiver(QWidget):
                 error_message = res.stderr.read()
                 self.output_text.append(f"Error: {error_message.strip()}")
                 self.output_text.ensureCursorVisible()
-                QMessageBox.critical(self, "Error", f"An error occurred: {error_message.strip()}")  
+                QMessageBox.critical(self, "Error", f"An error occurred: {error_message.strip()}")
 
-            self.run_ls_and_log_simple(output_directory=self.output_dir)
-            end_time = datetime.now()
-            difference = end_time - start_time   # timedelta object
+        end_time = datetime.now()
+        difference = end_time - start_time   # timedelta object
 
-            # Convert to hours, minutes, seconds
-            total_seconds = int(difference.total_seconds())
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            seconds = total_seconds % 60
-            with open(log_file_path, "w", encoding="utf-8") as log_file:
-                log_file.write(self.output_text)
-                log_file.write(f"Total Elapsed Time: {hours:02}:{minutes:02}:{seconds:02}\n")
-                log_file.flush()
+        # Convert to hours, minutes, seconds
+        total_seconds = int(difference.total_seconds())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        with open(log_file_path, "w", encoding="utf-8") as log_file:
+            log_file.write(self.output_text.toPlainText())
+            log_file.write(f"Total Elapsed Time: {hours:02}:{minutes:02}:{seconds:02}\n")
+            log_file.flush()
+
+        self.run_ls_and_log_simple(output_directory = self.output_dir, log_file = log_file_path)
 
     def run_enrichment_analysis_steps(self, output_dir, precision):
         original_stdout = sys.stdout  # Save the original stdout
@@ -556,8 +604,6 @@ class EasyDiver(QWidget):
                     self.on_calculate_finish(0, output_dir)
                 else:
                     self.on_calculate_finish(1, output_dir)
-            else:
-                self.on_calculate_finish(0, output_dir)
         finally:
             # Restore original stdout and stderr
             sys.stdout = original_stdout
@@ -584,15 +630,13 @@ class EasyDiver(QWidget):
             elif item.widget():
                 item.widget().setVisible(visible)
 
-    def run_ls_and_log_simple(self, output_directory):
-        log_file_path = f"{output_directory}/___folder_details_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
-
+    def run_ls_and_log_simple(self, output_directory, log_file):
         result = subprocess.run(["ls", "-Rlh", output_directory], capture_output=True, text=True)
 
         # Write to log file
-        with open(log_file_path, "w", encoding="utf-8") as log_file:
-            log_file.write(result.stdout)
-            log_file.write(result.stderr)
+        with open(log_file, "a", encoding="utf-8") as log_:
+            log_.write(result.stdout)
+            log_.write(result.stderr)
 
         # Show in PyQt UI
         self.output_text.append(result.stdout)

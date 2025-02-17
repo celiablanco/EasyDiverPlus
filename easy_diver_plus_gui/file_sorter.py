@@ -223,9 +223,15 @@ class SortingApp(QWidget):
             source = event.source()
             items = source.selectedItems()
 
-            for item in items:
+            # Prevent dropping if the list already has an item
+            if list_widget.count() > 0:
+                return  # Ignore the drop
+
+            # Allow only one item to be added
+            if items:
+                item = items[0]  # Take only the first selected item
                 source.takeItem(source.row(item))
-                list_widget.addItem(item.text())
+                list_widget.addItem(item.text())  # Add the first item only
 
         return drop_event
 

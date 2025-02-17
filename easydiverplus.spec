@@ -21,7 +21,8 @@ a = Analysis(
         ('easy_diver_plus_gui/directory_edit.py', 'easy_diver_plus_gui/'),
         ('easy_diver_plus_gui/file_sorter.py', 'easy_diver_plus_gui/'),
         ('easy_diver_plus_gui/graph_interface.py', 'easy_diver_plus_gui/'),
-        ('easy_diver_plus_gui/graphs_generator.py', 'easy_diver_plus_gui/')
+        ('easy_diver_plus_gui/graphs_generator.py', 'easy_diver_plus_gui/'),
+        ('easy_diver_plus_gui/code_libs.json', 'easy_diver_plus_gui/')
     ],
     hiddenimports=['plotly','plotly.graph_objs','plotly.subplots','plotly.io.orca', 'plotly.io.kaleido', 'webbrowser'],
     hookspath=[],

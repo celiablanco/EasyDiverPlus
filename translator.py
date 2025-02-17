@@ -6,74 +6,8 @@ and generates an output file containing the translated amino acid sequences, the
 relative percentages.
 """
 import sys
-
-# Dict maps each DNA codon (sequence of three nucleotides) to corresponding amino acid
-gencode = {
-    "ATA": "I",
-    "ATC": "I",
-    "ATT": "I",
-    "ATG": "M",
-    "ACA": "T",
-    "ACC": "T",
-    "ACG": "T",
-    "ACT": "T",
-    "AAC": "N",
-    "AAT": "N",
-    "AAA": "K",
-    "AAG": "K",
-    "AGC": "S",
-    "AGT": "S",
-    "AGA": "R",
-    "AGG": "R",
-    "CTA": "L",
-    "CTC": "L",
-    "CTG": "L",
-    "CTT": "L",
-    "CCA": "P",
-    "CCC": "P",
-    "CCG": "P",
-    "CCT": "P",
-    "CAC": "H",
-    "CAT": "H",
-    "CAA": "Q",
-    "CAG": "Q",
-    "CGA": "R",
-    "CGC": "R",
-    "CGG": "R",
-    "CGT": "R",
-    "GTA": "V",
-    "GTC": "V",
-    "GTG": "V",
-    "GTT": "V",
-    "GCA": "A",
-    "GCC": "A",
-    "GCG": "A",
-    "GCT": "A",
-    "GAC": "D",
-    "GAT": "D",
-    "GAA": "E",
-    "GAG": "E",
-    "GGA": "G",
-    "GGC": "G",
-    "GGG": "G",
-    "GGT": "G",
-    "TCA": "S",
-    "TCC": "S",
-    "TCG": "S",
-    "TCT": "S",
-    "TTC": "F",
-    "TTT": "F",
-    "TTA": "L",
-    "TTG": "L",
-    "TAC": "Y",
-    "TAT": "Y",
-    "TAA": "_",
-    "TAG": "_",
-    "TGC": "C",
-    "TGT": "C",
-    "TGA": "_",
-    "TGG": "W",
-}
+import json
+import os
 
 """
 This function translate_codon translates a single codon to corresponding amino acid
@@ -122,7 +56,6 @@ def translate_dna_single(dna, frame=1):
             amino_acids += translate_codon(codon)
     return amino_acids
 
-
 # input file name
 f_name_in = sys.argv[1]
 
@@ -142,6 +75,34 @@ head = []
 # unique aa seqs
 unique = 0
 
+
+# provided code lib name
+code_lib_input = sys.argv[2]
+
+# Get the absolute path of the script directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the full path to the JSON file
+json_file_path = os.path.join(script_dir,"easy_diver_plus_gui","code_libs.json")
+
+# Load JSON data
+with open(json_file_path, "r", encoding="utf-8") as file:
+    data = json.load(file)
+
+gencode = {}
+for code_lib in data:
+    if code_lib.get("name","Standard") == code_lib_input:
+        gencode = code_lib.get("codes")
+if len(gencode) == 0:
+    gencode = {
+        "ATA": "I", "ATC": "I", "ATT": "I", "ATG": "M", "ACA": "T", "ACC": "T", "ACG": "T", "ACT": "T","AAC": "N",
+        "AAT": "N", "AAA": "K", "AAG": "K", "AGC": "S", "AGT": "S", "AGA": "R","AGG": "R","CTA": "L","CTC": "L",
+        "CTG": "L","CTT": "L","CCA": "P","CCC": "P","CCG": "P","CCT": "P","CAC": "H","CAT": "H","CAA": "Q","CAG": "Q",
+        "CGA": "R","CGC": "R","CGG": "R","CGT": "R","GTA": "V","GTC": "V","GTG": "V","GTT": "V","GCA": "A","GCC": "A",
+        "GCG": "A","GCT": "A","GAC": "D","GAT": "D","GAA": "E","GAG": "E","GGA": "G","GGC": "G","GGG": "G","GGT": "G",
+        "TCA": "S","TCC": "S","TCG": "S","TCT": "S","TTC": "F","TTT": "F","TTA": "L","TTG": "L","TAC": "Y","TAT": "Y",
+        "TAA": "_","TAG": "_","TGC": "C","TGT": "C","TGA": "_","TGG": "W"
+    }
 
 with open(f_name_in, "r") as f_in:
     for line in f_in:  # for each line in input file

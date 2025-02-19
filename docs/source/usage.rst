@@ -43,14 +43,23 @@ Once the required field is filled, the optional parameters will show up.
 Optional Parameters:
 
 * **Output Directory Path**: Field for specifying where the output files should be saved. If left blank, the default is ``pipeline_output``.
-* **Forward Primer Sequence**: Input for the forward primer sequence used in extraction.
-* **Reverse Primer Sequence**: Input for the reverse primer sequence used in extraction.
-* **Extra Flags for PANDASeq**: Allows additional parameters for PANDASeq to be entered, enclosed in quotes.
 * **Skip Processing (enrichment analysis only)**: This option allows running the enrichment analysis without running the processing step first. 
   Use this option only if you have already run the processing step. 
   This option can be especially helpful in the case of many rounds of selection (processing can be run for separate batches of rounds to keep running time manageable, and the analysis can be run using the outputs from the several processing runs). 
+  If selected, the boxes for the processing parameter will hide. 
+* **Forward Primer Sequence**: Input for the forward primer sequence used in extraction.
+* **Reverse Primer Sequence**: Input for the reverse primer sequence used in extraction.
+* **Extra Flags for PANDASeq**: Allows additional parameters for PANDASeq to be entered, enclosed in quotes.
 * **Translate to Amino Acids**: Checkbox option to translate nucleotide sequences into amino acids.
+  If selected, a dropdown menu with different genetic codes will show up. 
+  Genetic codes details can be found at `NIH NCBI <https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi>`_
 * **Retain Individual Lane Outputs**: Checkbox to retain output files for each sequencing lane.
+* **Skip Processing (enrichment analysis only)**: This option allows running the enrichment analysis without running the processing step first. 
+  Use this option only if you have already run the processing step. 
+  This option can be especially helpful in the case of many rounds of selection (processing can be run for separate batches of rounds to keep running time manageable, and the analysis can be run using the outputs from the several processing runs). 
+* **Use Local PANDASeq**: Checkbox to leverage local installation of PANDASeq. 
+  Only to be used with macOS, as Windows will always leverage the local installation.
+  If selected, please verify you have PANDASeq installed and it is working.
 * **Run Enrichment Analysis for Consecutive Rounds**: Checkbox to enable enrichment analysis for consecutive rounds of selection/amplification. 
 
 .. image:: _static/images/img3.png
@@ -122,7 +131,7 @@ Upon submitting the job, the text box at the bottom will start printing real-tim
 Output files
 ------------
 
-Once data processing and analysis is over, the output directory should have seven folders, a log.txt file, and the sorting csv table. 
+Once data processing and analysis is over, the output directory should have seven folders, two log files, and the sorting csv table. 
 
 .. image:: _static/images/out1.png
    :alt: EasyDiver+
@@ -136,7 +145,8 @@ The seven folders contain the following:
 * **fastas**: Joined fasta files
 * **fastqs**: Joined fastq files
 * **histos**: DNA sequence length distributions and the peptide sequence length distribution (if translation is required)
-* **log.txt**: Log file with information on the parameters used and the outcome of each processing step
+* **log_output_[date-time].txt**: Log file with information on parameters used and outcome of each processing step
+* **log_easydiverplus_[date-time].txt**: Log file with full terminal output and output directory tree (files and sizes)
 * **analysis_output_nt**: DNA enrichment analysis output files (one per round), and frequency and enrichment output files with metric for all sequences across all rounds
 * **analysis_output_aa**: Amino acid enrichment analysis output files (one per round), and frequency and enrichment output files with metric for all sequences across all rounds
 * **individual.lanes**: all processing files (joined fasta files, joined fastq files, text counts files and text 

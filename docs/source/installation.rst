@@ -1,13 +1,13 @@
 Installation
 ============
 
-To run EasyDiver+, you should utilize the appropriate `.zip` file for your machine.
-These zip files can be found in the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.
+The Easydiver+ executable files (in `.zip` format) can be found in the `Releases section in the EasyDiverPlus repository <https://github.com/celiablanco/EasyDiverPlus/releases>`_.
+As of now, Easydiver+ is available for Windows, macOS-x86_64, and macOS-ARM64 platforms. Make sure you download the appropriate `.zip` file for your machine.
 
-Contained in the zip file is a folder called `dist` (for "distribution"). Within this folder, 
-depending on the machine you are using, you will see a folder called `EasyDiverPlus_FILES` and an executable
-with the name EasyDiverPlus OR you will see just the folder `EasyDiverPlus_FILES`. Within the `EasyDiverPlus_FILES` folder,
-you would then find the executable instead.
+In the zip file, you will find a folder named `dist` (short for "distribution"). Inside this folder, 
+depending on your machine, you might see a folder called `EasyDiverPlus_FILES` and an executable
+named EasyDiverPlus, or you may find only the `EasyDiverPlus_FILES` folder. If you see only the `EasyDiverPlus_FILES` folder, 
+the executable is located inside it.
 
 Once you extract the .zip archive into your computer, you will generally need to right-click on the executable, 
 and click **Open** from the menu. This is due to the fact that this is an 'unsigned' executable, and you will have to explicitly 
@@ -30,7 +30,9 @@ From here, you can follow the instructions detailed in the `usage` section.
 Pandaseq note
 ~~~~~~~~~~~~~
 If you encounter any issues with pandaseq not running correctly after clicking **Submit** and starting the processing, we recommend
-that you download and install `pandaseq <https://github.com/neufeld/pandaseq>`_ locally. The application will always attempt to leverage the local installation first, and this should relieve any potential issues.
+that you download and install `pandaseq <https://github.com/neufeld/pandaseq>`_ locally. 
+By default, the application will attempt to leverage the integrated installation first. However, we added a check box ('Use Local PANDASeq') 
+to force the application to use the local installation.
 
 If a problem is encountered with newer MacOS versions after installing PANDASeq, you may try the following:
 

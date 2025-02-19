@@ -488,7 +488,7 @@ class EasyDiver(QWidget):
 • Skip Processing (enrichment analysis only): {self.skip_processing.isChecked()}
 • Forward Primer: {self.forward_primer_edit.text()}
 • Reverse Primer: {self.reverse_primer_edit.text()}
-• Extra Flags for PANDASeq:  {self.extra_flags_edit.text() if self.extra_flags_edit.text() is None else "NONE"}
+• Extra Flags for PANDASeq:  {self.extra_flags_edit.text() if self.extra_flags_edit.text() is not None else "NONE"}
 • Translate to Amino Acids:  {self.translate_check.isChecked()}
 • Genetic Code for Translation: {self.gen_code_dropdown.currentText()}
 • Retain Individual Lane Outputs: {self.retain_check.isChecked()}

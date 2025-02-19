@@ -7,6 +7,7 @@ While EasyDIVER was a pipeline exclusively to process paired-end sequencing data
 The main improvements in EasyDiver+ compared to the original EasyDIVER are:
 
 * Straightforward, user-friendly GUI.
+* Option to select from multiple genetic code dictionaries for translation.
 * Option to analyze sequencing data, calculating metrics for the relative enrichment across consecutive rounds of selection.
 * Unique sequence names consistently used across rounds of selection to faciliate visual identification of variants of interest.
 * Estimation of 95% confidence intervals for sequence counts.

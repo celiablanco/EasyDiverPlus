@@ -6,11 +6,16 @@ Input requirements
 
 All input files must be:
     
-1. Located in the same directory (even reads from separate lanes).
+1. Located in the same directory (even reads from separate lanes). 
+   See the box below for important notes on directory naming conventions to prevent processing errors.
 2. In FASTQ format
 3. Named using the standard Illumina naming scheme: sample-name_S#_L00#_R#_001.fastq
 4. In either .fastq or .fastq.gz extensions.
 
+.. note::
+   Please ensure that the directory names used for input and output do not contain spaces or special characters. 
+   These can cause unexpected errors during file handling. 
+   For best results, use underscores (_) or hyphens (-) to separate words in directory names instead of spaces.
 
 How to process and analyze data
 -------------------------------

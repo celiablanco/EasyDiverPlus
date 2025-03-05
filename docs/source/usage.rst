@@ -108,7 +108,6 @@ The files can be dragged to their corresponding bucket.
 .. image:: _static/images/img7.png
     :alt: EasyDiver+
     :align: center
-    :width: 600px
 
 After saving choices, the file ``enrichment_analysis_file_sorting_logic.csv`` will be saved in the output directory. 
 

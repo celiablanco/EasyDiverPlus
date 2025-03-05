@@ -221,7 +221,7 @@ If the Graph Generator option is selected, the main interface will appear:
 .. image:: _static/images/img9.png
     :alt: EasyDiver+
     :align: center
-    :width: 350px
+    :width: 400px
 
 * **Input Directory Selection**: This field only shows up if the processing has not been run right before 
   (if processing has been run before, the interface will use the processing output directory as input here)

@@ -115,7 +115,7 @@ After saving choices, the file ``enrichment_analysis_file_sorting_logic.csv`` wi
 .. image:: _static/images/table.png
    :alt: EasyDiver+
    :align: center
-   :width: 250px
+   :width: 300px
 
 Once sorting has been completed, the app will return to the parameters interface. 
 This interface has three Control Buttons. 

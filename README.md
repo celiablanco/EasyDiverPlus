@@ -20,5 +20,5 @@ When reporting bugs, please include the full output printed in the terminal when
 
 # Citation
 
-TBD
+Blanco C, Tee A, Sharma P, et al. *[EasyDIVER + : An Advanced Tool for Analyzing High Throughput Sequencing Data from In Vitro Evolution of Nucleic Acids or Amino Acids](https://doi.org/10.1007/s00239-025-10244-w)*. J Mol Evol. 2025;93(2):229-237.
 
